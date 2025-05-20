@@ -1,5 +1,5 @@
 window.hpkg = {
-  async importScripts(name) {
+  async import(name) {
     await addLine("[bg=blue]Downloading module...[/bg]");
     try {
             await addLine(`[bg=blue]Downloading ${name}.js...[/bg]`)
@@ -27,4 +27,3 @@ window.hpkg = {
 
   }
 }
-
