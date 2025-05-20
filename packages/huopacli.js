@@ -13,7 +13,7 @@ window.huopaCLI = {
             (async function() {
                 addLine("# Welcome to [color=purple]huopaCLI![/color]");
                 addLine("What app do you want to load?");
-                addLine("\\n");
+                addLine("\n");
                 addLine("**Terminal**");
                 inputAnswerActive = true;
                 await waitUntil(() => !inputAnswerActive);
