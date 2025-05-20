@@ -8,12 +8,13 @@ window.huopaCLI = {
     inputAnswerActive = true;
     await waitUntil(() => !inputAnswerActive);
     if (inputAnswer.toLowerCase() === "y") {
-        addLine("Installing huopaCLI...")
+        addLine("[bg=purple]Installing huopaCLI...[/bg]")
+        const bootFile = `addLine("# Welcome to [color=purple]huopaCLI![/color]"); addLine("What app do you want to load?"); addLine("\n"); addLine("**Terminal**") inputAnswerActive = true; await waitUntil(() => !inputAnswerActive); if (inputAnswer === "Terminal") { addLine("[color=blue]Opening Terminal...[/color]")}`
+        localStorage.setItem("/system/env/boot.js", bootFile)
     } else {
-        addLine("huopaCLI setup cancelled!")
+        addLine("[bg=red]huopaCLI setup cancelled![/bg]")
     }
 }
 };
 
-// Immediately run the init function after registration
 window.huopaCLI.init();
