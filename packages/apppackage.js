@@ -1,4 +1,4 @@
-window.appPackage = {
+window.apppackage = {
     async app(){
         addLine("[bg=rgb(168, 168, 142)]|color=black]# Tung Tung Tung Sahur game![/color][/bg]")
         let activateSahurTimes = 0
