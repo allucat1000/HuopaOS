@@ -3,10 +3,10 @@ window.apppackage = {
         addLine("[bg=rgb(168, 168, 142)][color=black]# Tung Tung Tung Sahur game![/color][/bg]")
         let activateSahurTimes = 0
         while (activateSahurTimes < 3) {
-            addLine("Will you skip Sahur?")
+            addLine("Will you skip Sahur? [y/N]")
             inputAnswerActive = true;
             await waitUntil(() => !inputAnswerActive);
-            if (inputAnswer === false) {
+            if (inputAnswer.toLowerCase() === "y") {
                 addLine("You have skipped Sahur!!")
                 activateSahurTimes++;
                 inputAnswer = "";
