@@ -1,4 +1,4 @@
-window.huopaCLI = {
+window.huopacli = {
     async install() {
         await new Promise(resolve => setTimeout(resolve, 500));
         addLine("## [bg=blue]huopaCLI setup[/bg]")
@@ -8,7 +8,11 @@ window.huopaCLI = {
         if (inputAnswer.toLowerCase() === "y") {
             addLine("[bg=purple]Installing huopaCLI...[/bg]")
             const bootFile = `loadPackage("/system/packages/huopacli.js")`;
+            createDir("/system/env")
+            addResultToDir("/system", "/system/env")
+            addResultToDir("/system/env", "/system/env/boot.js")
             localStorage.setItem("/system/env/boot.js", bootFile);
+            await loadPackage("/system/packages/huopacli.js")
             this.boot();
         } else {
             addLine("[bg=red]huopaCLI setup cancelled![/bg]")
