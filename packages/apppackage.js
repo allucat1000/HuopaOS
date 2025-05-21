@@ -1,6 +1,6 @@
 window.apppackage = {
     async app(){
-        addLine("[bg=rgb(168, 168, 142)]|color=black]# Tung Tung Tung Sahur game![/color][/bg]")
+        addLine("[bg=rgb(168, 168, 142)][color=black]# Tung Tung Tung Sahur game![/color][/bg]")
         let activateSahurTimes = 0
         while (activateSahurTimes < 3) {
             addLine("Will you skip Sahur?")
