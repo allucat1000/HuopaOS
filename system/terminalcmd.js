@@ -1,9 +1,10 @@
 window.terminalcmd = {
-  async listpkgs(){
-    if (localStorage.getItem("/system/packageList.txt")) {
-      addLine(`[bg=palevioletred]Packages: ${localStorage.getItem("/system/packageList.txt").replace(" ",", "}[/bg]`)
+  async listpkgs() {
+    const pkgs = localStorage.getItem("/system/packageList.txt");
+    if (pkgs) {
+      addLine(`[bg=palevioletred]Packages: ${pkgs.replace(/ /g, ", ")}[/bg]`);
     } else {
-      addLine("[bg=red]No packages installed![/bg]")
+      addLine("[bg=red]No packages installed![/bg]");
     }
   }
 };
