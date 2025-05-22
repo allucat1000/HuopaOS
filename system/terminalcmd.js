@@ -8,6 +8,6 @@ window.terminalcmd = {
     }
   },
   async clear() {
-    termContent = "";
+    termContentChange("clear")
   }
 };
