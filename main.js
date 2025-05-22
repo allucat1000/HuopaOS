@@ -142,7 +142,7 @@ async function callCMD(input, params) {
 async function init() {
   let root = localStorage.getItem("/");
   const isInstalled = isSystemInstalled()
-  console.log(isSystemInstalled)
+
 
   if (!isInstalled) {
     await addLine("### System files are not installed yet. Install? [Y/n]");
@@ -189,7 +189,6 @@ async function init() {
         await addLine("[color=red]**_You will be unable to use the system, since you don't have a core system files._**[/color]")
     }
   } else {
-    console.log(isInstalled)
     const issues = checkFileSystemIntegrity();
     if (issues && issues.length > 0 || isSystemInstalled === "recovery") {
       addLine("[bg=orange]System issues detected. Attempting recovery...[/bg]");
@@ -316,7 +315,6 @@ async function loadPackage(pkgName) {
 
   if (code) {
     try {
-      console.log(code);
       eval(code);
 
     } catch (e) {
@@ -461,10 +459,6 @@ function isSystemInstalled() {
     
     if (!Array.isArray(manifest.corePaths) || typeof manifest.version !== "string") {
       return "recovery";
-    }
-    console.log("corePaths:", manifest.corePaths);
-    for (const path of manifest.corePaths) {
-      console.log(`localStorage.getItem(${path}):`, localStorage.getItem(path));
     }
     return manifest.corePaths.every(path => localStorage.getItem(path) !== null);
   } catch {
