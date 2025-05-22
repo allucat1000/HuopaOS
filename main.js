@@ -163,9 +163,7 @@ async function init() {
         version: currentVer,
         installedAt: Date.now(),
         corePaths: [
-          "/", "/home", "/system", "/user",
-          "/system/bootmgr.js", "/user/settings.json"
-        ]
+        "/", "/home", "/system"]
       }));
 
       try {
@@ -443,10 +441,8 @@ function recoveryCheck() {
     version: currentVer,
     installedAt: Date.now(),
     corePaths: [
-      "/", "/home", "/system", "/user",
-      "/system/bootmgr.js", "/user/settings.json"
-    ]
-  }));
+      "/", "/home", "/system"]
+    }));
 
   for (const issue of issues) {
     const dir = issue.split(" ")[0];
@@ -458,7 +454,7 @@ function recoveryCheck() {
 
 function isSystemInstalled() {
   const manifestStr = localStorage.getItem("/system/manifest.json");
-  if (!manifestStr) return false; // Manifest missing = system not installed
+  if (!manifestStr) return false;
 
   try {
     const manifest = JSON.parse(manifestStr);
@@ -466,7 +462,10 @@ function isSystemInstalled() {
     if (!Array.isArray(manifest.corePaths) || typeof manifest.version !== "string") {
       return "recovery";
     }
-
+    console.log("corePaths:", manifest.corePaths);
+    for (const path of manifest.corePaths) {
+      console.log(`localStorage.getItem(${path}):`, localStorage.getItem(path));
+    }
     return manifest.corePaths.every(path => localStorage.getItem(path) !== null);
   } catch {
     return "recovery";
