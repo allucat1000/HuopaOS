@@ -8,10 +8,8 @@ window.huopacli = {
         if (inputAnswer.toLowerCase() === "y") {
             addLine("[bg=purple]Installing huopaCLI...[/bg]")
             const bootFile = `loadPackage("/system/packages/huopacli.js")`;
-            createDir("/system/env")
-            addResultToDir("/system", "/system/env")
-            addResultToDir("/system/env", "/system/env/boot.js")
-            localStorage.setItem("/system/env/boot.js", bootFile);
+            createPath("/system/env")
+            createPath("/system/env/boot.js", "file", bootFile);
             await loadPackage("/system/packages/huopacli.js")
             this.boot();
         } else {
@@ -27,6 +25,19 @@ window.huopacli = {
         await waitUntil(() => !inputAnswerActive);
         if (inputAnswer.toLowerCase() === "terminal") {
             boogMGR("termBoot");
+        }
+    },
+
+    async uninstall() {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        addLine("## [bg=red]huopaCLI uninstaller[/bg]")
+        addLine("Uninstall huopaCLI? This will put you in the terminal. [y/n]")
+        inputAnswerActive = true;
+        await waitUntil(() => !inputAnswerActive);
+        if (inputAnswer.toLowerCase() === "y") {
+            addLine("[color=red]Uninstalling huopaCLI...[/color]")
+        } else {
+            addLine("## huopaCLI uninstall cancelled!")
         }
     }
 };
