@@ -6,5 +6,8 @@ window.terminalcmd = {
     } else {
       addLine("[bg=red]No packages installed![/bg]");
     }
+  },
+  async clear() {
+    termContent = "";
   }
 };
