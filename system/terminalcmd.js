@@ -1,6 +1,8 @@
 window.terminalcmd = {
   async listpkgs(args) {
-    const packages = JSON.parse(localStorage.getItem("/system/packages")).join(" ");
+    const packages = (JSON.parse(localStorage.getItem("/system/packages")) || [])
+      .join(" ")
+      .replace(/\/system\/packages\//g, "");
     if (packages) {
       addLine(`[bg=palevioletred]Packages: ${packages}[/bg]`);
     } else {
