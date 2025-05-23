@@ -1,10 +1,10 @@
 window.terminalcmd = {
   async listpkgs(args) {
-    const packagesArray = JSON.parse(internalFS.getFile("/system/packages") || [];
+    const packagesArray = JSON.parse(internalFS.getFile("/system/packages")) || [];
     const cleanedPackages = packagesArray.map(pkg => pkg.replace(/^\/system\/packages\//, ""));
     const packagesString = cleanedPackages.join(" ");
 
-    if (packages) {
+    if (packagesString) {
       addLine(`[bg=palevioletred]Packages: ${packagesString}[/bg]`);
     } else {
       addLine("[bg=red]No packages installed![/bg]");
