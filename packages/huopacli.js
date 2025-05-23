@@ -7,10 +7,10 @@ window.huopacli = {
         await waitUntil(() => !inputAnswerActive);
         if (inputAnswer.toLowerCase() === "y") {
             addLine("[bg=purple]Installing huopaCLI...[/bg]")
-            const bootFile = `loadPackage("/system/packages/huopacli.js")`;
-            createPath("/system/env")
-            createPath("/system/env/boot.js", "file", bootFile);
-            await loadPackage("/system/packages/huopacli.js")
+            const bootFile = `internalFS.loadPackage("/system/packages/huopacli.js")`;
+            internalFS.createPath("/system/env")
+            internalFS.createPath("/system/env/boot.js", "file", bootFile);
+            await internalFS.loadPackage("/system/packages/huopacli.js")
             this.boot();
         } else {
             addLine("[bg=red]huopaCLI setup cancelled![/bg]")
