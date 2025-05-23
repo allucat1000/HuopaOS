@@ -48,7 +48,7 @@ window.terminalcmd = {
         return;
       }
 
-      internalFS.deletePath(path);
+      internalFS.delDir(path);
       addLine(`[bg=green]Deleted: ${path}[/bg]`);
 
     } catch (e) {
