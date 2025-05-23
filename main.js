@@ -8,7 +8,7 @@ addLine("### Made by [color=rgb(100, 170, 255)]Allucat1000.[/color]")
 addLine("Thank you for trying this demo! If you have any suggestions or bugs, make sure to let me know!")
 addLine("[color=lime]Use the \"hpkg install\" to install a package.[/color]")
 addLine("[color=lime]Make sure to update your packages often using \"hpkg update\".[/color]")
-const currentVer = "0.1.4"
+const currentVer = "0.2.0"
 
 const textInput = document.getElementById("textInput");
 textInput.focus()
@@ -129,20 +129,22 @@ const internalFS = {
     if (visited.has(dir)) return;
     visited.add(dir);
 
-    const contentsRaw = localStorage.getItem(dir);
-    const contents = JSON.parse(contentsRaw || "[]");
-
-    for (const item of contents) {
-      const itemValue = localStorage.getItem(item);
-
-      if (itemValue && itemValue.startsWith("[")) {
-        await internalFS.delDir(item, visited);
-      } else {
-        localStorage.removeItem(item);
+    if (isDirectory(dir)) {
+      const keysToDelete = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key === dir || key.startsWith(dir + "/")) {
+          keysToDelete.push(key);
+        }
       }
+      for (const key of keysToDelete) {
+        localStorage.removeItem(key);
+      }
+      addLine(`[bg=green]Deleted directory: ${dir}[/bg]`);
+    } else {
+      localStorage.removeItem(dir);
+      addLine(`[bg=green]Deleted file: ${dir}[/bg]`);
     }
-
-    localStorage.removeItem(dir);
 
     if (dir !== "/") {
       const dirParts = dir.split("/");
@@ -161,6 +163,7 @@ const internalFS = {
     }
   },
 
+
   async removeFromDir(dir, target) {
     const data = JSON.parse(localStorage.getItem(dir) || "[]");
     const newData = data.filter(item => item !== target);
@@ -177,9 +180,7 @@ const internalFS = {
         await addLine("Package downloaded! Installing...")
         const packageData = await response.text();
         await internalFS.createPath(`/system/packages/${pkgName}.js`, "file", packageData);
-        const currentList = localStorage.getItem("/system/packageList.txt") || "";
-        if (!currentList.split(" ").includes(pkgName)) {
-          internalFS.createPath("/system/packageList.txt", "file", currentList + pkgName + " ");
+        if (internalFS.getFile("/system/packages").includes(`system/packages/${pkgName}.js`)) {
         } else {
           addLine("[bg=green]Package updated.[/bg]")
         }
@@ -508,4 +509,16 @@ function sandboxEval(code, context = {}) {
 
   const sandboxFunction = new Function(...contextKeys, `"use strict";\n${code}`);
   return sandboxFunction(...contextValues);
+}
+
+function isDirectory(path) {
+  const normalizedPath = path.endsWith("/") ? path.slice(0, -1) : path;
+
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith(normalizedPath + "/")) {
+      return true;
+    }
+  }
+  return false;
 }
