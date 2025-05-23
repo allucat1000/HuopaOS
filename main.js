@@ -85,7 +85,6 @@ window.sys = {
 }
 
 async function callCMD(input, params) {
-  try {
     
   if (input.length > 0) {
     if (input.toLowerCase() === "hpkg") {
@@ -118,24 +117,35 @@ async function callCMD(input, params) {
       }
       return;
     } else {
-        const rawList = localStorage.getItem("/system/packageList.txt") || "";
-        const packageList = rawList.split(" ");
-        for (let i = 0; i < packageList.length; i++) {
-          if (input.toLowerCase() === packageList[i].toLowerCase()) {
-            await loadPackage(`/system/packages/${input.toLowerCase()}.js`)
-            await new Promise(resolve => setTimeout(resolve, 500));
-            await window[input.toLowerCase()][params[0].toLowerCase()]()
-            return;
-        }
+      const rawList = localStorage.getItem("/system/packageList.txt") || "";
+      const packageList = rawList.split(" ");
 
+      for (let i = 0; i < packageList.length; i++) {
+        if (input.toLowerCase() === packageList[i].toLowerCase()) {
+          if (Array.isArray(params) && params.length > 0) {
+            const method = params[0];
+            const args = params.slice(1);
+
+            await loadPackage(`/system/packages/${input.toLowerCase()}.js`);
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            const pkg = window[input.toLowerCase()];
+            if (pkg && typeof pkg[method] === "function") {
+              await pkg[method](...args);
+            } else {
+              console.warn("Invalid package or method:", input.toLowerCase(), method);
+            }
+          } else {
+            console.warn("Params are undefined!");
+          }
+          return;
+        }
       }
+
     }
   sys.runCMD(input, params)
   }
 
-  } catch (error) {
-    addLine("Failed to run command! Error: " + error)
-  }
 }
 // Bootloader / Installer
 
@@ -191,7 +201,7 @@ async function init() {
   } else {
     const issues = checkFileSystemIntegrity();
     if (issues && issues.length > 0 || isSystemInstalled === "recovery") {
-      addLine("[bg=orange]System issues detected. Attempting recovery...[/bg]");
+      addLine("[bg=orange][color=black]System issues detected. Attempting recovery...[/color][/bg]");
       recoveryCheck(issues);
     }
 
@@ -433,8 +443,6 @@ function recoveryCheck() {
   const issues = checkFileSystemIntegrity();
   if (!issues) return;
 
-  addLine("### [bg=orange]System issues detected! Trying to repair...[/bg]");
-
   localStorage.setItem("/system/manifest.json", JSON.stringify({
     version: currentVer,
     installedAt: Date.now(),
@@ -451,17 +459,15 @@ function recoveryCheck() {
 }
 
 function isSystemInstalled() {
-  const manifestStr = localStorage.getItem("/system/manifest.json");
-  if (!manifestStr) return false;
-
-  try {
-    const manifest = JSON.parse(manifestStr);
-    
-    if (!Array.isArray(manifest.corePaths) || typeof manifest.version !== "string") {
+  const rootDir = JSON.parse(localStorage.getItem("/"));
+  if (!rootDir) { return false };
+  if (rootDir.includes("/home") || rootDir.includes("/system")) {
+    if (rootDir.includes("/home") && rootDir.includes("/system")) {
+      return true;
+    } else {
       return "recovery";
     }
-    return manifest.corePaths.every(path => localStorage.getItem(path) !== null);
-  } catch {
-    return "recovery";
+  } else {
+    return false;
   }
 }
