@@ -13,34 +13,48 @@ window.terminalcmd = {
   },
 
   async rm(args) {
-    if (!args.length) {
-      addLine("[bg=red]Usage: rm [-rf] <path>[/bg]");
+    if (!args || args.length === 0) {
+      addLine("Usage: rm [-rf] <path>");
       return;
     }
 
     let recursive = false;
     let force = false;
-    const targets = [];
+    let path = null;
 
     for (const arg of args) {
       if (arg.startsWith("-")) {
-        if (arg.includes("r")) { recursive = true; }
-        if (arg.includes("f")) { force = true; }
+        if (arg.includes("r")) recursive = true;
+        if (arg.includes("f")) force = true;
       } else {
-        targets.push(arg);
+        path = arg;
       }
     }
 
-    for (const path of targets) {
-      const file = localStorage.getItem(path);
-      if (!file && !force) {
-        addLine(`[bg=red]rm: cannot remove "${path}". File not found.[/bg]`);
-        continue;
+    if (!path) {
+      addLine("Usage: rm [-rf] <path>");
+      return;
+    }
+
+    try {
+      const meta = internalFS.getMeta(path);
+      if (!meta) {
+        if (!force) addLine(`[bg=red]File not found: ${path}[/bg]`);
+        return;
       }
 
-      if (file || force) {
-        localStorage.removeItem(path);
-        addLine(`[bg=limegreen]Removed ${path}[/bg]`);
+      if (meta.type === "dir" && !recursive) {
+        addLine(`[bg=red]Cannot remove directory without -r: ${path}[/bg]`);
+        return;
+      }
+
+      internalFS.deletePath(path);
+      addLine(`[bg=green]Deleted: ${path}[/bg]`);
+
+    } catch (e) {
+      if (!force) {
+        addLine(`[bg=red]Failed to delete ${path}[/bg]`);
+        console.error(e);
       }
     }
   }
