@@ -28,7 +28,6 @@ window.terminalcmd = {
     }
 
     await internalFS.delDir(path);
-    addLine(`[bg=green]Deleted: ${path}[/bg]`);
 
   } catch (e) {
     addLine(`[bg=red]Failed to delete ${path}[/bg]`);
