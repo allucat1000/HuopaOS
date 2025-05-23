@@ -19,8 +19,7 @@ textInput.addEventListener('keydown', function(event) {
     const cmd = textInput.value.split(' ')[0]
     const params = textInput.value
         .split(' ')
-        .slice(1)
-        .map(p => p.replace(/^-/, ''));
+        .slice(1);
 
     addLine("$ " + textInput.value)
     if (!inputAnswerActive) {
@@ -40,7 +39,7 @@ window.sys = {
     await addLine("[bg=blue]Downloading module...[/bg]");
     try {
             await addLine(`[bg=blue]Downloading ${name}...[/bg]`)
-            const url = `https://raw.githubusercontent.com/allucat1000/HuopaOS/main/modules/${name}?v=${Date.now()}`;
+            const url = `https://raw.githubusercontent.com/allucat1000/HuopaOS/main/modules/${name}.js?v=${Date.now()}`;
             const response = await fetch(url);
     
             if (response.ok) {
@@ -63,28 +62,35 @@ window.sys = {
         }
 
   },
-  async runCMD(input, params) {
-          if (input.length > 0) {
-            await internalFS.loadPackage(`/system/terminalcmd.js`, "silent")
-            await new Promise(resolve => setTimeout(resolve, 500));
-            try {
-              await window["terminalcmd"][input.toLowerCase()]()
-            } catch (e) {
-              if (e.message.includes("is not a function")) {
-                addLine(`[bg=red]${input.toLowerCase()} is not a command, package or app.[/bg]`)
-              } else {
-                addLine("[bg=red]Failed to run command[/bg]")
-                console.error("Failed to run command. \n Error: \n\n" + e)
-              }
-              
-            }
-          }
-          
+  async runCMD(input, params = []) {
+  if (!input) return;
 
+  await internalFS.loadPackage(`/system/terminalcmd.js`, "silent");
+  await new Promise(resolve => setTimeout(resolve, 500));
+
+  const command = input.toLowerCase();
+  const args = params;
+
+  try {
+    const cmd = window.terminalcmd[command];
+    if (typeof cmd === "function") {
+      console.log(args)
+      await cmd(args);
+    } else {
+      addLine(`[bg=red]${command} is not a command, package or app.[/bg]`);
+    }
+  } catch (e) {
+    addLine("[bg=red]Failed to run command[/bg]");
+    console.error(`Failed to run command "${command}".\nError:\n\n`, e);
   }
 }
 
+}
+
 const internalFS = {
+    getFile(path) {
+        return localStorage.getItem(path);
+    },
     async createPath(path, type = "dir", content = "") {
       const parts = path.split("/");
       for (let i = 1; i < parts.length - 1; i++) {
@@ -197,7 +203,8 @@ const internalFS = {
         sandboxEval(code, {
           console,
           fs: internalFS,
-          sys
+          sys,
+          fetch: window.fetch
         });
 
 
@@ -211,8 +218,18 @@ const internalFS = {
       
       await addLine(`[color=red]Package "${pkgName}" not found in file system.[/color]`);
     }
+  },
+  async getMeta(path) {
+  const entry = internalFS.getFile(path);
+  if (!entry) {
+    return { exists: false };
   }
-
+  return {
+    exists: true,
+    type: entry.type || 'file', 
+    size: entry.size || 0,
+  };
+  }
 }
 
 function checkFileSystemIntegrity() {
@@ -321,7 +338,7 @@ async function init() {
       await internalFS.createPath("/system/modules");
       await internalFS.createPath("/system/packages");
       await addLine("Fetching required modules...");
-      await window.sys["import"]("examplemodule.js");
+      await window.sys["import"]("examplemodule");
       await internalFS.createPath("/home");
       await internalFS.createPath("/home/applications");
 
@@ -483,4 +500,12 @@ function isSystemInstalled() {
   } else {
     return false;
   }
+}
+
+function sandboxEval(code, context = {}) {
+  const contextKeys = Object.keys(context);
+  const contextValues = Object.values(context);
+
+  const sandboxFunction = new Function(...contextKeys, `"use strict";\n${code}`);
+  return sandboxFunction(...contextValues);
 }
