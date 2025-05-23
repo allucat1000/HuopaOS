@@ -1,10 +1,11 @@
 window.terminalcmd = {
   async listpkgs(args) {
-    const packages = (JSON.parse(localStorage.getItem("/system/packages")) || [])
-      .join(" ")
-      .replace(/\/system\/packages\//g, "");
+    const packagesArray = JSON.parse(localStorage.getItem("/system/packages")) || [];
+    const cleanedPackages = packagesArray.map(pkg => pkg.replace(/^\/system\/packages\//, ""));
+    const packagesString = cleanedPackages.join(" ");
+
     if (packages) {
-      addLine(`[bg=palevioletred]Packages: ${packages}[/bg]`);
+      addLine(`[bg=palevioletred]Packages: ${packagesString}[/bg]`);
     } else {
       addLine("[bg=red]No packages installed![/bg]");
     }
