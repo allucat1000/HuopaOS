@@ -46,13 +46,13 @@ window.sys = {
             if (response.ok) {
                 await addLine("Module downloaded! Installing...")
                 const moduleData = await response.text();
-                createPath(`/system/modules/${name}.js`, "file", moduleData);
+                internalFS.createPath(`/system/modules/${name}.js`, "file", moduleData);
   
                 const currentList = localStorage.getItem("/system/moduleList.txt") || "";
                 
-                createPath("/system/moduleList.txt", "file", currentList + name + " ");
+                internalFS.createPath("/system/moduleList.txt", "file", currentList + name + " ");
                 await addLine("Module installed.")
-                await loadPackage(`/system/modules/${name}.js`);
+                await internalFS.loadPackage(`/system/modules/${name}.js`);
             } else {
                 await addLine(`[bg=red]Failed to fetch module, response: ${response.status}[/bg]`);
             }
@@ -65,7 +65,7 @@ window.sys = {
   },
   async runCMD(input, params) {
           if (input.length > 0) {
-            await loadPackage(`/system/terminalcmd.js`, "silent")
+            await internalFS.loadPackage(`/system/terminalcmd.js`, "silent")
             await new Promise(resolve => setTimeout(resolve, 500));
             try {
               await window["terminalcmd"][input.toLowerCase()]()
@@ -84,16 +84,172 @@ window.sys = {
   }
 }
 
+const internalFS = {
+    async createPath(path, type = "dir", content = "") {
+      const parts = path.split("/");
+      for (let i = 1; i < parts.length - 1; i++) {
+        const parentPath = "/" + parts.slice(1, i + 1).join("/");
+        if (!localStorage.getItem(parentPath)) {
+          await internalFS.createPath(parentPath, "dir");
+        }
+      }
+
+      if (type === "dir") {
+        localStorage.setItem(path, content === "" ? "[]" : content);
+      } else if (type === "file") {
+        localStorage.setItem(path, content);
+      } else {
+        throw new Error("Unknown path type: " + type);
+      }
+
+      const parentPath = parts.slice(0, -1).join("/") || "/";
+      const parentData = localStorage.getItem(parentPath) || "[]";
+      if (parentPath === "/" && path === parentPath) {
+        return;
+      }
+      try {
+        const parentList = JSON.parse(parentData);
+        if (!parentList.includes(path)) {
+          parentList.push(path);
+          localStorage.setItem(parentPath, JSON.stringify(parentList));
+        }
+      } catch (e) {
+        console.error(`Failed to update parent directory "${parentPath}":`, e);
+      }
+    },
+
+
+  async delDir(dir, visited = new Set()) {
+    if (visited.has(dir)) return;
+    visited.add(dir);
+
+    const contentsRaw = localStorage.getItem(dir);
+    const contents = JSON.parse(contentsRaw || "[]");
+
+    for (const item of contents) {
+      const itemValue = localStorage.getItem(item);
+
+      if (itemValue && itemValue.startsWith("[")) {
+        await internalFS.delDir(item, visited);
+      } else {
+        localStorage.removeItem(item);
+      }
+    }
+
+    localStorage.removeItem(dir);
+
+    if (dir !== "/") {
+      const dirParts = dir.split("/");
+      const parentPath = dirParts.slice(0, -1).join("/") || "/";
+      const parentContentsRaw = localStorage.getItem(parentPath);
+
+      if (parentContentsRaw) {
+        try {
+          const parentContents = JSON.parse(parentContentsRaw);
+          const updated = parentContents.filter(item => item !== dir);
+          internalFS.createPath(parentPath, "dir", JSON.stringify(updated));
+        } catch (e) {
+          console.error(`Failed to update parent dir: ${parentPath}`, e);
+        }
+      }
+    }
+  },
+
+  async removeFromDir(dir, target) {
+    const data = JSON.parse(localStorage.getItem(dir) || "[]");
+    const newData = data.filter(item => item !== target);
+    await internalFS.createPath(dir, "file", JSON.stringify(newData));
+  },
+
+  async downloadPackage(pkgName){
+    try {
+      await addLine(`[bg=blue]Downloading ${pkgName}...[/bg]`)
+      const url = `https://raw.githubusercontent.com/allucat1000/HuopaOS/main/packages/${pkgName}.js?v=${Date.now()}`;
+      const response = await fetch(url);
+      
+      if (response.ok) {
+        await addLine("Package downloaded! Installing...")
+        const packageData = await response.text();
+        await internalFS.createPath(`/system/packages/${pkgName}.js`, "file", packageData);
+        const currentList = localStorage.getItem("/system/packageList.txt") || "";
+        if (!currentList.split(" ").includes(pkgName)) {
+          internalFS.createPath("/system/packageList.txt", "file", currentList + pkgName + " ");
+        } else {
+          addLine("[bg=green]Package updated.[/bg]")
+        }
+
+        await addLine("Package installed.")
+      } else {
+        await addLine(`[bg=red]Failed to fetch package, response: ${response.status}[/bg]`);
+      }
+
+    } catch (e) {
+      await addLine(`[bg=red]Failed to fetch package: ${pkgName}.[/bg]`);
+      await addLine(`Error: ${e}`);
+    }
+  },
+
+  async loadPackage(pkgName) {
+    const code = localStorage.getItem(`${pkgName}`);
+
+    if (code) {
+      try {
+        sandboxEval(code, {
+          console,
+          fs: internalFS,
+          sys
+        });
+
+
+      } catch (e) {
+        
+        await addLine(`[color=red]Failed to execute package '${pkgName}'.[/color]`);
+        await addLine(`[color=red]Error: ${e}[/color]`)
+        console.error(e);
+      }
+    } else {
+      
+      await addLine(`[color=red]Package "${pkgName}" not found in file system.[/color]`);
+    }
+  }
+
+}
+
+function checkFileSystemIntegrity() {
+  const requiredDirs = ["/system", "/home",  "/system/packages"];
+  const issues = [];
+
+  for (const dir of requiredDirs) {
+    const raw = localStorage.getItem(dir);
+    if (!raw) {
+      issues.push(`${dir} doesn't exist`);
+      continue;
+    }
+
+    try {
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) {
+        issues.push(`${dir} isn't a valid dir`);
+      }
+    } catch {
+      issues.push(`${dir} is corrupted (invalid JSON)`);
+    }
+  }
+
+  return issues.length > 0 ? issues : null;
+}
+
 async function callCMD(input, params) {
     
   if (input.length > 0) {
     if (input.toLowerCase() === "hpkg") {
       if (params[0].toLowerCase() === "install") {
-        await downloadPKG(params[1].toLowerCase())
+        if (params[1].toLowerCase())
+        await internalFS.downloadPackage(params[1].toLowerCase())
       } else if (params[0].toLowerCase() === "update") {
         const packageList = JSON.parse(localStorage.getItem("/system/packages"));
         for (let i = 0; i < packageList.length; i++) {
-          downloadPKG(packageList[i].replace("/system/packages/","").replace(".js",""));
+          await internalFS.downloadPackage(packageList[i].replace("/system/packages/","").replace(".js",""));
         }
         try {
             const url = `https://raw.githubusercontent.com/allucat1000/HuopaOS/main/system/terminalcmd.js?v=${Date.now()}`;
@@ -102,7 +258,7 @@ async function callCMD(input, params) {
             if (response.ok) {
                 await addLine("Terminal CmdList downloaded! Installing...")
                 const fetchData = await response.text();
-                createPath(`/system/terminalcmd.js`, "file", fetchData);
+                internalFS.createPath(`/system/terminalcmd.js`, "file", fetchData);
                 addLine("[bg=green]Terminal commands succesfully installed![/bg]")
             } else {
                 await addLine(`[bg=red]Failed to fetch terminal commands, response: ${response.status}[/bg]`);
@@ -122,11 +278,11 @@ async function callCMD(input, params) {
 
       for (let i = 0; i < packageList.length; i++) {
         if (input.toLowerCase() === packageList[i].toLowerCase()) {
-          if (Array.isArray(params) && params.length > 0) {
+          if (params && Array.isArray(params) && params.length > 0) {
             const method = params[0];
             const args = params.slice(1);
 
-            await loadPackage(`/system/packages/${input.toLowerCase()}.js`);
+            await internalFS.loadPackage(`/system/packages/${input.toLowerCase()}.js`);
             await new Promise(resolve => setTimeout(resolve, 500));
 
             const pkg = window[input.toLowerCase()];
@@ -160,14 +316,14 @@ async function init() {
     await waitUntil(() => !inputAnswerActive);
     if (inputAnswer.toLowerCase() === "y") {
       await addLine("Creating system directories and files...")
-      await createPath("/");
-      await createPath("/system");
-      await createPath("/system/modules");
-      await createPath("/system/packages");
+      await internalFS.createPath("/");
+      await internalFS.createPath("/system");
+      await internalFS.createPath("/system/modules");
+      await internalFS.createPath("/system/packages");
       await addLine("Fetching required modules...");
       await window.sys["import"]("examplemodule.js");
-      await createPath("/home");
-      await createPath("/home/applications");
+      await internalFS.createPath("/home");
+      await internalFS.createPath("/home/applications");
 
       localStorage.setItem("/system/manifest.json", JSON.stringify({
         version: currentVer,
@@ -183,7 +339,7 @@ async function init() {
             if (response.ok) {
                 await addLine("Terminal CmdList downloaded! Installing...")
                 const fetchData = await response.text();
-                createPath(`/system/terminalcmd.js`, "file", fetchData);
+                internalFS.createPath(`/system/terminalcmd.js`, "file", fetchData);
             } else {
                 await addLine(`[bg=red]Failed to fetch terminal commands, response: ${response.status}[/bg]`);
             }
@@ -201,7 +357,7 @@ async function init() {
   } else {
     const issues = checkFileSystemIntegrity();
     if (issues && issues.length > 0 || isSystemInstalled === "recovery") {
-      addLine("[bg=orange][color=black]System issues detected. Attempting recovery...[/color][/bg]");
+      addLine("[bg=orange]System issues detected. Attempting recovery...[/bg]");
       recoveryCheck(issues);
     }
 
@@ -225,7 +381,7 @@ async function bootMGR(extraParams) {
       bootType = "envBoot";
       addLine("[bg=purple]Environment boot directory found (/system/env/boot.js).[/bg]");
       addLine("Attempting to boot...");
-      loadPackage("/system/env/boot.js");
+      internalFS.loadPackage("/system/env/boot.js");
     }
     
   }
@@ -292,156 +448,13 @@ function escapeWithBackslashes(str) {
             .replace(/'/g, "&#39;");
 }
 
-async function downloadPKG(pkgName){
-  try {
-    await addLine(`[bg=blue]Downloading ${pkgName}...[/bg]`)
-    const url = `https://raw.githubusercontent.com/allucat1000/HuopaOS/main/packages/${pkgName}.js?v=${Date.now()}`;
-    const response = await fetch(url);
-    
-    if (response.ok) {
-      await addLine("Package downloaded! Installing...")
-      const packageData = await response.text();
-      createPath(`/system/packages/${pkgName}.js`, "file", packageData);
-      const currentList = localStorage.getItem("/system/packageList.txt") || "";
-      if (!currentList.split(" ").includes(pkgName)) {
-        createPath("/system/packageList.txt", "file", currentList + pkgName + " ");
-      } else {
-        addLine("[bg=green]Package updated.[/bg]")
-      }
 
-      await addLine("Package installed.")
-    } else {
-      await addLine(`[bg=red]Failed to fetch package, response: ${response.status}[/bg]`);
-    }
-
-  } catch (e) {
-    await addLine(`[bg=red]Failed to fetch package: ${pkgName}.[/bg]`);
-    await addLine(`Error: ${e}`);
-  }
-}
-
-async function loadPackage(pkgName) {
-  const code = localStorage.getItem(`${pkgName}`);
-
-  if (code) {
-    try {
-      eval(code);
-
-    } catch (e) {
-      
-      await addLine(`[color=red]Failed to execute package '${pkgName}'.[/color]`);
-      await addLine(`[color=red]Error: ${e}[/color]`)
-      console.error(e);
-    }
-  } else {
-    
-    await addLine(`[color=red]Package "${pkgName}" not found in file system.[/color]`);
-  }
-}
-
-async function createPath(path, type = "dir", content = "") {
-  const parts = path.split("/");
-  for (let i = 1; i < parts.length - 1; i++) {
-    const parentPath = "/" + parts.slice(1, i + 1).join("/");
-    if (!localStorage.getItem(parentPath)) {
-      await createPath(parentPath, "dir");
-    }
-  }
-
-  if (type === "dir") {
-    localStorage.setItem(path, content === "" ? "[]" : content);
-  } else if (type === "file") {
-    localStorage.setItem(path, content);
-  } else {
-    throw new Error("Unknown path type: " + type);
-  }
-
-  const parentPath = parts.slice(0, -1).join("/") || "/";
-  const parentData = localStorage.getItem(parentPath) || "[]";
-  if (parentPath === "/" && path === parentPath) {
-    return;
-  }
-  try {
-    const parentList = JSON.parse(parentData);
-    if (!parentList.includes(path)) {
-      parentList.push(path);
-      localStorage.setItem(parentPath, JSON.stringify(parentList));
-    }
-  } catch (e) {
-    console.error(`Failed to update parent directory "${parentPath}":`, e);
-  }
-}
-
-
-async function delDir(dir, visited = new Set()) {
-  if (visited.has(dir)) return;
-  visited.add(dir);
-
-  const contentsRaw = localStorage.getItem(dir);
-  const contents = JSON.parse(contentsRaw || "[]");
-
-  for (const item of contents) {
-    const itemValue = localStorage.getItem(item);
-
-    if (itemValue && itemValue.startsWith("[")) {
-      await delDir(item, visited);
-    } else {
-      localStorage.removeItem(item);
-    }
-  }
-
-  localStorage.removeItem(dir);
-
-  if (dir !== "/") {
-    const dirParts = dir.split("/");
-    const parentPath = dirParts.slice(0, -1).join("/") || "/";
-    const parentContentsRaw = localStorage.getItem(parentPath);
-
-    if (parentContentsRaw) {
-      try {
-        const parentContents = JSON.parse(parentContentsRaw);
-        const updated = parentContents.filter(item => item !== dir);
-        createPath(parentPath, "file", JSON.stringify(updated));
-      } catch (e) {
-        console.error(`Failed to update parent dir: ${parentPath}`, e);
-      }
-    }
-  }
-}
-
-async function removeFromDir(dir, target) {
-  const data = JSON.parse(localStorage.getItem(dir) || "[]");
-  const newData = data.filter(item => item !== target);
-  createPath(dir, "file", JSON.stringify(newData));
-}
-
-function checkFileSystemIntegrity() {
-  const requiredDirs = ["/system", "/home",  "/system/packages"];
-  const issues = [];
-
-  for (const dir of requiredDirs) {
-    const raw = localStorage.getItem(dir);
-    if (!raw) {
-      issues.push(`${dir} doesn't exist`);
-      continue;
-    }
-
-    try {
-      const parsed = JSON.parse(raw);
-      if (!Array.isArray(parsed)) {
-        issues.push(`${dir} isn't a valid dir`);
-      }
-    } catch {
-      issues.push(`${dir} is corrupted (invalid JSON)`);
-    }
-  }
-
-  return issues.length > 0 ? issues : null;
-}
 
 function recoveryCheck() {
   const issues = checkFileSystemIntegrity();
   if (!issues) return;
+
+  addLine("### [bg=orange]System issues detected! Trying to repair...[/bg]");
 
   localStorage.setItem("/system/manifest.json", JSON.stringify({
     version: currentVer,
@@ -461,8 +474,8 @@ function recoveryCheck() {
 function isSystemInstalled() {
   const rootDir = JSON.parse(localStorage.getItem("/"));
   if (!rootDir) { return false };
-  if (rootDir.includes("/home") || rootDir.includes("/system")) {
-    if (rootDir.includes("/home") && rootDir.includes("/system")) {
+  if (rootDir.includes("/home") || rootDir.includes("/manifest.json") || rootDir.includes("/system")) {
+    if (rootDir.includes("/home") && rootDir.includes("/manifest.json") && rootDir.includes("/system")) {
       return true;
     } else {
       return "recovery";
