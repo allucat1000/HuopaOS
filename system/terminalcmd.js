@@ -85,14 +85,12 @@ async ls(args) {
       return;
     }
 
-    if (meta.type === "dir") {
+
       const fileArray = JSON.parse(internalFS.getFile(path) || "[]");
       const fileList = fileArray.map(f => f.replace(`${path}/`, "")).join('\n');
       addLine(`All files in directory: ${path}`);
       addLine(fileList);
-    } else {
-      addLine(`[bg=red]Cannot run ls on file: ${path}[/bg]`);
-    }
+    
   } catch (e) {
     addLine(`[bg=red]Failed to fetch path. Error: ${e}[/bg]`);
   }
