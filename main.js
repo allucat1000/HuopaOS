@@ -8,7 +8,12 @@ addLine("### Made by [color=rgb(100, 170, 255)]Allucat1000.[/color]")
 addLine("Thank you for trying this demo! If you have any suggestions or bugs, make sure to let me know!")
 addLine("[color=lime]Use the \"hpkg install\" to install a package.[/color]")
 addLine("[color=lime]Make sure to update your packages often using \"hpkg update\".[/color]")
-const currentVer = "0.2.0"
+const currentVer = "0.3.0"
+
+if (typeof window === "undefined" || typeof localStorage === "undefined") {
+  console.error("HuopaOS requires a browser with localStorage capabilities.");
+  throw new Error("HuopaOS requires a browser environment.");
+}
 
 const textInput = document.getElementById("textInput");
 textInput.focus()
@@ -47,9 +52,6 @@ window.sys = {
                 const moduleData = await response.text();
                 internalFS.createPath(`/system/modules/${name}.js`, "file", moduleData);
   
-                const currentList = localStorage.getItem("/system/moduleList.txt") || "";
-                
-                internalFS.createPath("/system/moduleList.txt", "file", currentList + name + " ");
                 await addLine("Module installed.")
                 await internalFS.loadPackage(`/system/modules/${name}.js`);
             } else {
@@ -95,7 +97,7 @@ const internalFS = {
       const parts = path.split("/");
       for (let i = 1; i < parts.length - 1; i++) {
         const parentPath = "/" + parts.slice(1, i + 1).join("/");
-        if (!localStorage.getItem(parentPath)) {
+        if (!internalFS.getFile(parentPath)) {
           await internalFS.createPath(parentPath, "dir");
         }
       }
@@ -109,7 +111,7 @@ const internalFS = {
       }
 
       const parentPath = parts.slice(0, -1).join("/") || "/";
-      const parentData = localStorage.getItem(parentPath) || "[]";
+      const parentData = internalFS.getFile(parentPath) || "[]";
       if (parentPath === "/" && path === parentPath) {
         return;
       }
@@ -125,47 +127,57 @@ const internalFS = {
     },
 
 
-  async delDir(dir, visited = new Set()) {
-    if (visited.has(dir)) return;
-    visited.add(dir);
+    async delDir(dir, visited = new Set(), recursive = false, force = false) {
+      if (visited.has(dir)) return;
+      visited.add(dir);
 
-    if (isDirectory(dir)) {
-      const keysToDelete = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key === dir || key.startsWith(dir + "/")) {
-          keysToDelete.push(key);
+      const contentsRaw = internalFS.getFile(dir);
+      let contents = [];
+
+      try {
+        contents = JSON.parse(contentsRaw || "[]");
+      } catch (e) {
+        if (!force === true) console.warn(`Failed to parse contents of ${dir}`, e);
+        return;
+      }
+
+      for (const item of contents) {
+        const itemData = internalFS.getFile(item);
+        const isDir = itemData && itemData.trim().startsWith("[");
+
+        if (isDir) {
+          if (recursive === true) {
+            await internalFS.delDir(item, visited, recursive, force);
+          } else {
+            if (!force === true) addLine(`[bg=red]Cannot delete directory ${item} without recursive flag[/bg]`);
+            return;
+          }
+        } else {
+          localStorage.removeItem(item);
         }
       }
-      for (const key of keysToDelete) {
-        localStorage.removeItem(key);
-      }
-      addLine(`[bg=green]Deleted directory: ${dir}[/bg]`);
-    } else {
+
       localStorage.removeItem(dir);
-      addLine(`[bg=green]Deleted file: ${dir}[/bg]`);
-    }
 
-    if (dir !== "/") {
-      const dirParts = dir.split("/");
-      const parentPath = dirParts.slice(0, -1).join("/") || "/";
-      const parentContentsRaw = localStorage.getItem(parentPath);
-
-      if (parentContentsRaw) {
-        try {
-          const parentContents = JSON.parse(parentContentsRaw);
-          const updated = parentContents.filter(item => item !== dir);
-          internalFS.createPath(parentPath, "dir", JSON.stringify(updated));
-        } catch (e) {
-          console.error(`Failed to update parent dir: ${parentPath}`, e);
+      if (dir !== "/") {
+        const parts = dir.split("/");
+        const parent = parts.slice(0, -1).join("/") || "/";
+        const parentRaw = internalFS.getFile(parent);
+        if (parentRaw) {
+          try {
+            const parentItems = JSON.parse(parentRaw);
+            const updated = parentItems.filter(i => i !== dir);
+            internalFS.createPath(parent, "dir", JSON.stringify(updated));
+          } catch (e) {
+            if (!force === true) console.error(`Error updating parent ${parent}`, e);
+          }
         }
       }
-    }
-  },
+    },
 
 
   async removeFromDir(dir, target) {
-    const data = JSON.parse(localStorage.getItem(dir) || "[]");
+    const data = JSON.parse(internalFS.getFile(dir) || "[]");
     const newData = data.filter(item => item !== target);
     await internalFS.createPath(dir, "file", JSON.stringify(newData));
   },
@@ -197,7 +209,7 @@ const internalFS = {
   },
 
   async loadPackage(pkgName) {
-    const code = localStorage.getItem(`${pkgName}`);
+    const code = internalFS.getFile(`${pkgName}`);
 
     if (code) {
       try {
@@ -210,10 +222,8 @@ const internalFS = {
 
 
       } catch (e) {
-        
-        await addLine(`[color=red]Failed to execute package '${pkgName}'.[/color]`);
-        await addLine(`[color=red]Error: ${e}[/color]`)
-        console.error(e);
+        console.error(`Failed to execute package '${pkgName}'.`);
+        console.error(`Error: ${e}`);
       }
     } else {
       
@@ -238,7 +248,7 @@ function checkFileSystemIntegrity() {
   const issues = [];
 
   for (const dir of requiredDirs) {
-    const raw = localStorage.getItem(dir);
+    const raw = internalFS.getFile(dir);
     if (!raw) {
       issues.push(`${dir} doesn't exist`);
       continue;
@@ -265,7 +275,7 @@ async function callCMD(input, params) {
         if (params[1].toLowerCase())
         await internalFS.downloadPackage(params[1].toLowerCase())
       } else if (params[0].toLowerCase() === "update") {
-        const packageList = JSON.parse(localStorage.getItem("/system/packages"));
+        const packageList = JSON.parse(internalFS.getFile("/system/packages"));
         for (let i = 0; i < packageList.length; i++) {
           await internalFS.downloadPackage(packageList[i].replace("/system/packages/","").replace(".js",""));
         }
@@ -291,7 +301,7 @@ async function callCMD(input, params) {
       }
       return;
     } else {
-      const rawList = localStorage.getItem("/system/packageList.txt") || "";
+      const rawList = internalFS.getFile("/system/packages") || "";
       const packageList = rawList.split(" ");
 
       for (let i = 0; i < packageList.length; i++) {
@@ -324,7 +334,7 @@ async function callCMD(input, params) {
 // Bootloader / Installer
 
 async function init() {
-  let root = localStorage.getItem("/");
+  let root = internalFS.getFile("/");
   const isInstalled = isSystemInstalled()
 
 
@@ -395,7 +405,7 @@ async function bootMGR(extraParams) {
   }
 
   if (!bootType) {
-    if (localStorage.getItem("/system/env/boot.js")) {
+    if (internalFS.getFile("/system/env/boot.js")) {
       bootType = "envBoot";
       addLine("[bg=purple]Environment boot directory found (/system/env/boot.js).[/bg]");
       addLine("Attempting to boot...");
@@ -405,7 +415,7 @@ async function bootMGR(extraParams) {
   }
   if (!bootType) {
     addLine("[bg=blue]Loading packages...[/bg]")
-    const packageAmount = JSON.parse(localStorage.getItem("/system/packages") || []).length;
+    const packageAmount = JSON.parse(internalFS.getFile("/system/packages") || []).length;
           
     await addLine(`[bg=green]${packageAmount} packages found[/bg]`)
     if (packageAmount > 0) {
@@ -472,7 +482,6 @@ function recoveryCheck() {
   const issues = checkFileSystemIntegrity();
   if (!issues) return;
 
-  addLine("### [bg=orange]System issues detected! Trying to repair...[/bg]");
 
   localStorage.setItem("/system/manifest.json", JSON.stringify({
     version: currentVer,
@@ -490,7 +499,7 @@ function recoveryCheck() {
 }
 
 function isSystemInstalled() {
-  const rootDir = JSON.parse(localStorage.getItem("/"));
+  const rootDir = JSON.parse(internalFS.getFile("/"));
   if (!rootDir) { return false };
   if (rootDir.includes("/home") || rootDir.includes("/manifest.json") || rootDir.includes("/system")) {
     if (rootDir.includes("/home") && rootDir.includes("/manifest.json") && rootDir.includes("/system")) {
