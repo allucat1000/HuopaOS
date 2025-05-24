@@ -69,39 +69,32 @@ window.terminalcmd = {
 
 async ls(args) {
   let path = "/system";
-  let invalidFlags = false;
 
   for (const arg of args || []) {
     if (arg.startsWith("-")) {
-      addLine("No flags supported in ls yet, sorry!");
-      invalidFlags = true;
+      addLine("No args available for ls currently, sorry!");
     } else {
       path = arg;
     }
   }
 
-  if (invalidFlags) return;
-
   try {
     const meta = internalFS.getMeta(path);
     if (!meta) {
-      addLine(`[bg=red]Path not found: ${path}[/bg]`);
+      addLine(`[bg=red]File not found: ${path}[/bg]`);
       return;
     }
 
-    if (meta.type !== "dir") {
-      addLine(`[bg=red]Cannot run ls on a file: ${path}[/bg]`);
-      return;
+    if (meta.type === "dir") {
+      const fileArray = JSON.parse(internalFS.getFile(path) || "[]");
+      const fileList = fileArray.map(f => f.replace(`${path}/`, "")).join('\n');
+      addLine(`All files in directory: ${path}`);
+      addLine(fileList);
+    } else {
+      addLine(`[bg=red]Cannot run ls on file: ${path}[/bg]`);
     }
-
-    const fileArray = JSON.parse(internalFS.getFile(path) || "[]");
-    const fileList = fileArray.map(file => file.replace(`${path}/`, "")).join("\n");
-    addLine(`[bg=gray]Contents of ${path}:[/bg]`);
-    addLine(fileList || "(empty)");
-
   } catch (e) {
-    addLine(`[bg=red]Failed to list directory: ${e}[/bg]`);
-    console.error(e);
+    addLine(`[bg=red]Failed to fetch path. Error: ${e}[/bg]`);
   }
 }
 
