@@ -15,6 +15,13 @@ addLine("Thank you for trying this demo! If you have any suggestions or bugs, ma
 addLine("[color=lime]Use the \"hpkg install\" to install a package.[/color]")
 addLine("[color=lime]Make sure to update your packages often using \"hpkg update\".[/color]")
 const currentVer = "0.3.1"
+const verBranch = "dev";
+if (verBranch === "dev") {
+  addLine("## [bg=purple]Hold up![/bg]")
+  addLine("### [bg=purple]The dev branch is in use currently![/bg]")
+  addLine("### [bg=purple]Be ready for bugs![/bg]")
+}
+
 
 const textInput = document.getElementById("textInput");
 textInput.focus()
@@ -45,7 +52,7 @@ window.sys = {
     await addLine("[bg=blue]Downloading module...[/bg]");
     try {
             await addLine(`[bg=blue]Downloading ${name}...[/bg]`)
-            const url = `https://raw.githubusercontent.com/allucat1000/HuopaOS/main/modules/${name}.js?v=${Date.now()}`;
+            const url = `https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/modules/${name}.js?v=${Date.now()}`;
             const response = await fetch(url);
     
             if (response.ok) {
@@ -186,7 +193,7 @@ const internalFS = {
   async downloadPackage(pkgName){
     try {
       await addLine(`[bg=blue]Downloading ${pkgName}...[/bg]`)
-      const url = `https://raw.githubusercontent.com/allucat1000/HuopaOS/main/packages/${pkgName}.js?v=${Date.now()}`;
+      const url = `https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/packages/${pkgName}.js?v=${Date.now()}`;
       const response = await fetch(url);
       
       if (response.ok) {
@@ -282,7 +289,7 @@ async function callCMD(input, params) {
           await internalFS.downloadPackage(packageList[i].replace("/system/packages/","").replace(".js",""));
         }
         try {
-            const url = `https://raw.githubusercontent.com/allucat1000/HuopaOS/main/system/terminalcmd.js?v=${Date.now()}`;
+            const url = `https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/system/terminalcmd.js?v=${Date.now()}`;
             const response = await fetch(url);
     
             if (response.ok) {
@@ -364,7 +371,7 @@ async function init() {
       }));
 
       try {
-            const url = `https://raw.githubusercontent.com/allucat1000/HuopaOS/main/system/terminalcmd.js?v=${Date.now()}`;
+            const url = `https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/system/terminalcmd.js?v=${Date.now()}`;
             const response = await fetch(url);
     
             if (response.ok) {
