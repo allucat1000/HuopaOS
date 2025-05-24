@@ -100,7 +100,7 @@ async ls(args) {
     }
   },
   
-  async function help() {
+  async help() {
     addLine("# Terminal commands");
     
     addLine("* rm");
