@@ -47,4 +47,18 @@ window.terminalcmd = {
       }
 
       if (meta.type === "dir" && !recursive) {
-        addLine(`[bg=red]Cannot delete directory without -r: $
+        addLine(`[bg=red]Cannot delete directory without -r: ${path}[/bg]`);
+        return;
+      }
+
+      await internalFS.delDir(path);
+      addLine(`[bg=green]Deleted: ${path}[/bg]`);
+
+    } catch (e) {
+      if (!force) {
+        addLine(`[bg=red]Error deleting ${path}[/bg]`);
+        console.error(e);
+      }
+    }
+  }
+};
