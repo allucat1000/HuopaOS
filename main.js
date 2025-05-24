@@ -9,17 +9,17 @@ const termDiv = document.getElementById("termDiv");
 let inputAnswerActive = false;
 let inputAnswer = undefined;
 addLine("## Booting system...")
-addLine("### [color=rgb(185, 15, 185)]HuopaOS [/color] [color=lime]beta build.[/color]")
-addLine("### Made by [color=rgb(100, 170, 255)]Allucat1000.[/color]")
+addLine("### [color=rgb(100, 175, 255)]HuopaOS [/color] beta build.")
+addLine("### Made by [color=rgb(100, 175, 255)]Allucat1000.[/color]")
 addLine("Thank you for trying this demo! If you have any suggestions or bugs, make sure to let me know!")
 addLine("[color=lime]Use the \"hpkg install\" to install a package.[/color]")
 addLine("[color=lime]Make sure to update your packages often using \"hpkg update\".[/color]")
 const currentVer = "0.3.1"
-const verBranch = "dev";
+const verBranch = "main";
 if (verBranch === "dev") {
-  addLine("## [bg=purple]Hold up![/bg]")
-  addLine("### [bg=purple]The dev branch is in use currently![/bg]")
-  addLine("### [bg=purple]Be ready for bugs![/bg]")
+  addLine("## Hold up!")
+  addLine("### The dev branch is in use currently!")
+  addLine("### Be ready for bugs!")
 }
 
 
@@ -34,7 +34,7 @@ textInput.addEventListener('keydown', function(event) {
         .split(' ')
         .slice(1);
 
-    addLine("$ " + textInput.value)
+    addLine("$" + textInput.value)
     if (!inputAnswerActive) {
         callCMD(cmd, params)
     } else {
@@ -395,7 +395,7 @@ async function init() {
   } else {
     const issues = checkFileSystemIntegrity();
     if (issues && issues.length > 0 || isSystemInstalled === "recovery") {
-      addLine("[bg=orange]System issues detected. Attempting recovery...[/bg]");
+      addLine("[bg=red][color=black]System issues detected. Attempting recovery...[/color][/bg]");
       recoveryCheck(issues);
     }
 
@@ -417,7 +417,7 @@ async function bootMGR(extraParams) {
   if (!bootType) {
     if (internalFS.getFile("/system/env/boot.js")) {
       bootType = "envBoot";
-      addLine("[bg=purple]Environment boot directory found (/system/env/boot.js).[/bg]");
+      addLine("[bg=green]Environment boot directory found (/system/env/boot.js).[/bg]");
       addLine("Attempting to boot...");
       internalFS.loadPackage("/system/env/boot.js");
     }
@@ -504,7 +504,7 @@ function recoveryCheck() {
     const dir = issue.split(" ")[0];
     localStorage.setItem(dir, JSON.stringify([]));
     console.warn(`Recovered: ${dir}`);
-    addLine(`[bg=yellow][color=black]Recovered directory: ${dir}[/color][/bg]`);
+    addLine(`[bg=green][color=black]Recovered directory: ${dir}[/color][/bg]`);
   }
 }
 
