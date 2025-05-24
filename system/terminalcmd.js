@@ -15,56 +15,53 @@ window.terminalcmd = {
     termContentChange("clear");
   },
 
-  async rm(args) {
-    if (!args || args.length === 0) {
-      addLine("Usage: rm [-rf] <path>");
-      return;
-    }
-  
-    let path = null;
-    let recursive = false;
-    let force = false;
-  
-    for (const arg of args) {
-      if (arg.startsWith("-")) {
-        if (arg.includes("r")) recursive = true;
-        if (arg.includes("f")) force = true;
-      } else {
-        path = arg;
+  async delDir(dir, visited = new Set(), recursive = false, force = false) {
+  if (visited.has(dir)) return;
+  visited.add(dir);
+
+  const contentsRaw = internalFS.getFile(dir);
+  let contents = [];
+
+  try {
+    contents = JSON.parse(contentsRaw || "[]");
+  } catch (e) {
+    if (!force) console.error(`Failed to parse contents of ${dir}`, e);
+    return;
+  }
+
+  for (const item of contents) {
+    const value = internalFS.getFile(item);
+    const isDir = value && value.startsWith("[");
+
+    if (isDir) {
+      if (recursive) {
+        await internalFS.delDir(item, visited, recursive, force);
+      } else if (!force) {
+        addLine(`[bg=red]Cannot delete directory ${item} without -r[/bg]`);
+        continue;
       }
+    } else {
+      internalFS.delDir(item);
     }
-  
-    if (!path) {
-      addLine("Usage: rm [-rf] <path>");
-      return;
-    }
-  
-    if (path === "/" && !force) {
-      addLine("[bg=red]Refusing to delete / unless -f is provided.[/bg]");
-      return;
-    }
-  
-    try {
-      const meta = internalFS.getMeta(path);
-      if (!meta) {
-        if (!force) addLine(`[bg=red]File not found: ${path}[/bg]`);
-        return;
-      }
-  
-      if (meta.type === "dir" && !recursive) {
-        addLine(`[bg=red]Cannot delete directory without -r: ${path}[/bg]`);
-        return;
-      }
-  
-      await internalFS.delDir(path, new Set(), recursive, force);
-      addLine(`[bg=green]Deleted: ${path}[/bg]`);
-  
-    } catch (e) {
-      if (!force) {
-        addLine(`[bg=red]Error deleting ${path}[/bg]`);
-        console.error(e);
+  }
+
+  internalFS.delDir(dir);
+
+  if (dir !== "/") {
+    const dirParts = dir.split("/");
+    const parentPath = dirParts.slice(0, -1).join("/") || "/";
+    const parentContentsRaw = internalFS.getFile(parentPath);
+
+    if (parentContentsRaw) {
+      try {
+        const parentContents = JSON.parse(parentContentsRaw);
+        const updated = parentContents.filter(item => item !== dir);
+        internalFS.createPath(parentPath, "dir", JSON.stringify(updated));
+      } catch (e) {
+        if (!force) console.error(`Failed to update parent dir: ${parentPath}`, e);
       }
     }
   }
+}
 
 };
