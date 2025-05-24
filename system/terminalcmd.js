@@ -1,7 +1,7 @@
 window.terminalcmd = {
   async listpkgs(args) {
     const packagesArray = JSON.parse(internalFS.getFile("/system/packages") || "[]");
-    const cleanedPackages = packagesArray.map(pkg => pkg.replace(/^\/system\/packages\//, ""));
+    const cleanedPackages = packagesArray.map(pkg => pkg.replaceAll(/^\/system\/packages\//, ""));
     const packagesString = cleanedPackages.join(" ");
 
     if (packagesString) {
@@ -15,49 +15,50 @@ window.terminalcmd = {
     termContentChange("clear");
   },
 
-  async rm(args) {
-  if (!args || args.length === 0) {
-    addLine("Usage: rm [-rf] <path>");
-    return;
-  }
-
-  let path = null;
-  let recursive = false;
-  let force = false;
-
-  for (const arg of args) {
-    if (arg.startsWith("-")) {
-      if (arg.includes("r")) recursive = true;
-      if (arg.includes("f")) force = true;
-    } else {
-      path = arg;
-    }
-  }
-
-  if (!path) {
-    addLine("Usage: rm [-rf] <path>");
-    return;
-  }
-
-  try {
-    const meta = internalFS.getMeta(path);
-    if (!meta) {
-      if (!force) addLine(`[bg=red]File not found: ${path}[/bg]`);
+   async rm(args) {
+    if (!args || args.length === 0) {
+      addLine("Usage: rm [-rf] <path>");
       return;
     }
-
-    if (meta.type === "dir" && !recursive) {
-      addLine(`[bg=red]Cannot delete directory without -r: ${path}[/bg]`);
+  
+    let path = null;
+    let recursive = false;
+    let force = false;
+  
+    for (const arg of args) {
+      if (arg.startsWith("-")) {
+        if (arg.includes("r")) recursive = true;
+        if (arg.includes("f")) force = true;
+      } else {
+        path = arg;
+      }
+    }
+  
+    if (!path) {
+      addLine("Usage: rm [-rf] <path>");
       return;
     }
-
-    await internalFS.delDir(path);
-    addLine(`[bg=green]Deleted: ${path}[/bg]`);
-
-  } catch (e) {
-    if (!force) {
-      addLine(`[bg=red]Error deleting ${path}[/bg]`);
-      console.error(e);
+  
+    try {
+      const meta = internalFS.getMeta(path);
+      if (!meta) {
+        if (!force) addLine(`[bg=red]File not found: ${path}[/bg]`);
+        return;
+      }
+  
+      if (meta.type === "dir" && !recursive) {
+        addLine(`[bg=red]Cannot delete directory without -r: ${path}[/bg]`);
+        return;
+      }
+  
+      await internalFS.delDir(path, new Set(), recursive, force);
+      addLine(`[bg=green]Deleted: ${path}[/bg]`);
+    } catch (e) {
+      if (!force) {
+        addLine(`[bg=red]Error deleting ${path}[/bg]`);
+        console.error(e);
+      }
     }
   }
+
 }
