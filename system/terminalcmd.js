@@ -56,7 +56,7 @@ window.terminalcmd = {
         return;
       }
   
-      await internalFS.delDir(path, new Set(), recursive, force); // ✅ fixed this line
+      await internalFS.delDir(path, new Set(), recursive, force);
       addLine(`[bg=green]Deleted: ${path}[/bg]`);
   
     } catch (e) {
