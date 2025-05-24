@@ -20,11 +20,11 @@ window.terminalcmd = {
       addLine("Usage: rm [-rf] <path>");
       return;
     }
-
+  
     let path = null;
     let recursive = false;
     let force = false;
-
+  
     for (const arg of args) {
       if (arg.startsWith("-")) {
         if (arg.includes("r")) recursive = true;
@@ -33,27 +33,32 @@ window.terminalcmd = {
         path = arg;
       }
     }
-
+  
     if (!path) {
       addLine("Usage: rm [-rf] <path>");
       return;
     }
-
+  
+    if (path === "/" && !force) {
+      addLine("[bg=red]Refusing to delete / unless -f is provided.[/bg]");
+      return;
+    }
+  
     try {
       const meta = internalFS.getMeta(path);
       if (!meta) {
         if (!force) addLine(`[bg=red]File not found: ${path}[/bg]`);
         return;
       }
-
+  
       if (meta.type === "dir" && !recursive) {
         addLine(`[bg=red]Cannot delete directory without -r: ${path}[/bg]`);
         return;
       }
-
-      await internalFS.delDir(path);
+  
+      await internalFS.delDir(path, new Set(), recursive, force); // ✅ fixed this line
       addLine(`[bg=green]Deleted: ${path}[/bg]`);
-
+  
     } catch (e) {
       if (!force) {
         addLine(`[bg=red]Error deleting ${path}[/bg]`);
@@ -61,4 +66,5 @@ window.terminalcmd = {
       }
     }
   }
+
 };
