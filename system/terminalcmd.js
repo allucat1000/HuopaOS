@@ -92,7 +92,11 @@ async ls(args) {
       addLine(fileList);
     
   } catch (e) {
-    addLine(`[bg=red]Failed to fetch path. Error: ${e}[/bg]`);
+    if (e.message.includes("is not valid JSON")) {
+      addLine(`[bg=red]You cannot run ls on a file![/bg]`);
+    } else {
+      addLine(`[bg=red]Unknown error occurred: ${e}[/bg]`);
+    }
   }
 }
 
