@@ -1,3 +1,9 @@
+if (typeof window === "undefined" || typeof localStorage === "undefined") {
+  console.error("HuopaOS requires a browser with localStorage capabilities.");
+  throw new Error("HuopaOS requires a browser environment.");
+}
+
+
 let termInput = "";
 const termDiv = document.getElementById("termDiv");
 let inputAnswerActive = false;
@@ -9,11 +15,6 @@ addLine("Thank you for trying this demo! If you have any suggestions or bugs, ma
 addLine("[color=lime]Use the \"hpkg install\" to install a package.[/color]")
 addLine("[color=lime]Make sure to update your packages often using \"hpkg update\".[/color]")
 const currentVer = "0.3.0"
-
-if (typeof window === "undefined" || typeof localStorage === "undefined") {
-  console.error("HuopaOS requires a browser with localStorage capabilities.");
-  throw new Error("HuopaOS requires a browser environment.");
-}
 
 const textInput = document.getElementById("textInput");
 textInput.focus()
