@@ -86,19 +86,35 @@ async ls(args) {
     }
 
 
-      const fileArray = JSON.parse(internalFS.getFile(path) || "[]");
-      const fileList = fileArray.map(f => f.replace(`${path}/`, "")).join('\n');
-      addLine(`All files in directory: ${path}`);
-      addLine(fileList);
+    const fileArray = JSON.parse(internalFS.getFile(path) || "[]");
+    const fileList = fileArray.map(f => f.replace(`${path}/`, "")).join('\n');
+    addLine(`All files in directory: ${path}`);
+    addLine(fileList);
     
-  } catch (e) {
-    if (e.message.includes("is not valid JSON")) {
-      addLine(`[bg=red]You cannot run ls on a file![/bg]`);
-    } else {
-      addLine(`[bg=red]Unknown error occurred: ${e}[/bg]`);
+    } catch (e) {
+      if (e.message.includes("is not valid JSON")) {
+        addLine(`[bg=red]You cannot run ls on a file![/bg]`);
+      } else {
+        addLine(`[bg=red]Unknown error occurred: ${e}[/bg]`);
+      }
     }
+  },
+  
+  async function help() {
+    addLine("# Terminal commands");
+    
+    addLine("* rm");
+    addLine("> Delete a directory / file. Usage: rm [options] <path>");
+    addLine("> Options: -r (recursive), -f (force)");
+    
+    addLine("* listpkgs");
+    addLine("> View your installed packages.");
+    
+    addLine("* clear");
+    addLine("> Clear the terminal.");
+    
+    addLine("* ls");
+    addLine('> List files and directories in the specified path (default: "/system"). Usage: ls <path>');
   }
-}
-
 
 };
