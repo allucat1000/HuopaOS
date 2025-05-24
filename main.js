@@ -14,7 +14,7 @@ addLine("### Made by [color=rgb(100, 170, 255)]Allucat1000.[/color]")
 addLine("Thank you for trying this demo! If you have any suggestions or bugs, make sure to let me know!")
 addLine("[color=lime]Use the \"hpkg install\" to install a package.[/color]")
 addLine("[color=lime]Make sure to update your packages often using \"hpkg update\".[/color]")
-const currentVer = "0.3.0"
+const currentVer = "0.3.1"
 
 const textInput = document.getElementById("textInput");
 textInput.focus()
@@ -193,7 +193,7 @@ const internalFS = {
         await addLine("Package downloaded! Installing...")
         const packageData = await response.text();
         await internalFS.createPath(`/system/packages/${pkgName}.js`, "file", packageData);
-        if (internalFS.getFile("/system/packages").includes(`system/packages/${pkgName}.js`)) {
+        if (internalFS.getFile("/system/packages").includes(`/system/packages/${pkgName}.js`)) {
         } else {
           addLine("[bg=green]Package updated.[/bg]")
         }
@@ -215,8 +215,9 @@ const internalFS = {
     if (code) {
       try {
         sandboxEval(code, {
+          window,
           console,
-          fs: internalFS,
+          internalFS,
           sys,
           fetch: window.fetch
         });
@@ -302,11 +303,12 @@ async function callCMD(input, params) {
       }
       return;
     } else {
-      const rawList = internalFS.getFile("/system/packages") || "";
-      const packageList = rawList.split(" ");
+      const rawList = internalFS.getFile("/system/packages") || "[]";
+      const packageList = JSON.parse(rawList);
 
       for (let i = 0; i < packageList.length; i++) {
-        if (input.toLowerCase() === packageList[i].toLowerCase()) {
+        const pkgName = packageList[i].replace("/system/packages/", "").replace(".js", "");
+        if (input.toLowerCase() === pkgName.toLowerCase()) {
           if (params && Array.isArray(params) && params.length > 0) {
             const method = params[0];
             const args = params.slice(1);
