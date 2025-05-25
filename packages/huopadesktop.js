@@ -8,12 +8,16 @@ window.huopadesktop = {
         await waitUntil(() => !inputAnswerActive);
         if (inputAnswer.toLowerCase() === "y") {
             addLine("[line=blue]Installing HuopaDesktop...[/line]")
-            internalFS.downloadPackage("huopadesktop/quantum")
+            try {
+                internalFS.downloadPackage("huopadesktop/quantum");
+            } catch (error) {
+                addLine(`Failed to fetch Quantum package! Error: ${error}`);
+            }
             const bootConfig = {
-                "path":"/system/env/quantum.js",
+                "path":"/system/packages/huopadesktop/quantum.js",
             }
             internalFS.createPath("/system/env/config.json", "file", bootConfig);
-            internalFS.loadPackage("/system/packages/huopadesktop/quantum.js")
+            internalFS.loadPackage("/system/packages/huopadesktop/quantum")
         } else {
             addLine("[line=red]HuopaDesktop installation has been cancelled.[/line]")
         }
