@@ -8,7 +8,7 @@ window.huopadesktop = {
         await waitUntil(() => !inputAnswerActive);
         if (inputAnswer.toLowerCase() === "y") {
             addLine("[line=blue]Installing HuopaDesktop...[/line]")
-            internalFS.downloadPackage("huopadesktop/quantum.js")
+            internalFS.downloadPackage("huopadesktop/quantum")
             const bootConfig = {
                 "path":"/system/env/quantum.js",
             }
