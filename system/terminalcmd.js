@@ -5,9 +5,9 @@ window.terminalcmd = {
     const packagesString = cleanedPackages.join(" ");
 
     if (packagesString) {
-      addLine(`[bg=palevioletred]Packages: ${packagesString}[/bg]`);
+      addLine(`[line=palevioletred]Packages: ${packagesString}[/line]`);
     } else {
-      addLine("[bg=red]No packages installed![/bg]");
+      addLine("[line=red]No packages installed![/line]");
     }
   },
 
@@ -40,28 +40,28 @@ window.terminalcmd = {
     }
   
     if (path === "/" && !force) {
-      addLine("[bg=red]Refusing to delete / unless -f is provided.[/bg]");
+      addLine("[line=red]Refusing to delete / unless -f is provided.[/line]");
       return;
     }
   
     try {
       const meta = internalFS.getMeta(path);
       if (!meta) {
-        if (!force) addLine(`[bg=red]File not found: ${path}[/bg]`);
+        if (!force) addLine(`[line=red]File not found: ${path}[/line]`);
         return;
       }
   
       if (meta.type === "dir" && !recursive) {
-        addLine(`[bg=red]Cannot delete directory without -r: ${path}[/bg]`);
+        addLine(`[line=red]Cannot delete directory without -r: ${path}[/line]`);
         return;
       }
   
       await internalFS.delDir(path, new Set(), recursive, force)
-      addLine(`[bg=green]Deleted: ${path}[/bg]`);
+      addLine(`[line=green]Deleted: ${path}[/line]`);
   
     } catch (e) {
       if (!force) {
-        addLine(`[bg=red]Error deleting ${path}[/bg]`);
+        addLine(`[line=red]Error deleting ${path}[/line]`);
         console.error(e);
       }
     }
@@ -81,7 +81,7 @@ async ls(args) {
   try {
     const meta = internalFS.getMeta(path);
     if (!meta) {
-      addLine(`[bg=red]File not found: ${path}[/bg]`);
+      addLine(`[line=red]File not found: ${path}[/line]`);
       return;
     }
 
@@ -93,9 +93,9 @@ async ls(args) {
     
     } catch (e) {
       if (e.message.includes("is not valid JSON")) {
-        addLine(`[bg=red]You cannot run ls on a file![/bg]`);
+        addLine(`[line=red]You cannot run ls on a file![/line]`);
       } else {
-        addLine(`[bg=red]Unknown error occurred: ${e}[/bg]`);
+        addLine(`[line=red]Unknown error occurred: ${e}[/line]`);
       }
     }
   },
