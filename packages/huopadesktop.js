@@ -9,32 +9,39 @@ window.huopadesktop = {
         if (inputAnswer.toLowerCase() === "y") {
             addLine("[line=blue]Installing HuopaDesktop...[/line]")
             try {
-                internalFS.downloadPackage("quantum");
+                sys.import("quantum")
             } catch (error) {
-                addLine(`Failed to fetch Quantum package! Error: ${error}`);
+                addLine(`Failed to fetch Quantum module! Error: ${error}`);
             }
             const bootConfig = {
-                "path":"/system/packages/quantum.js",
+                "path":"/system/modules/quantum.js",
             }
-            internalFS.createPath("/system/env/config.json", "file", bootConfig);
-            internalFS.loadPackage("/system/packages/quantum.js");
+            await internalFS.createPath("/system/env/config.json", "file", bootConfig);
+            await this.boot()
         } else {
             addLine("[line=red]HuopaDesktop installation has been cancelled.[/line]");
         }
     },
     async boot() {
         const bootConfig = internalFS.getFile("/system/env/config.json");
+        console.log(JSON.stringify(bootConfig))
         if (bootConfig) {
             addLine("Boot config found! Attempting to boot from specified path.");
             if (!bootConfig.path) {
                 addLine("Incorrect boot config!");
                 addLine("Please reinstall HuopaDesktop!");
                 await new Promise(resolve => setTimeout(resolve, 2000));
-                this.install();
+                await this.install();
             } else {
                 loadPackage(bootConfig.path);
                 await new Promise(resolve => setTimeout(resolve, 50));
-                quantum.init()
+                try {
+                    quantum.init();
+                } catch (e) {
+                    addLine("Failed to initialize Quantum. Reinstall HuopaDesktop.");
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    await this.install();
+                }
             }
 
         } else {
