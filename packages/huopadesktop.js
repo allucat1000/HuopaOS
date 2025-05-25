@@ -16,15 +16,14 @@ window.huopadesktop = {
             const bootConfig = {
                 "path":"/system/modules/quantum.js",
             }
-            await internalFS.createPath("/system/env/config.json", "file", bootConfig);
+            await internalFS.createPath("/system/env/config.json", "file", JSON.stringify(bootConfig));
             await this.boot()
         } else {
             addLine("[line=red]HuopaDesktop installation has been cancelled.[/line]");
         }
     },
     async boot() {
-        const bootConfig = internalFS.getFile("/system/env/config.json");
-        console.log(JSON.stringify(bootConfig))
+        const bootConfig = JSON.parse(internalFS.getFile("/system/env/config.json"));
         if (bootConfig) {
             addLine("Boot config found! Attempting to boot from specified path.");
             if (!bootConfig.path) {
