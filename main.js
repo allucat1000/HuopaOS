@@ -3,6 +3,11 @@ if (typeof window === "undefined" || typeof localStorage === "undefined") {
   throw new Error("HuopaOS requires a browser environment.");
 }
 
+const customColors = {
+  red: "#ff5454", 
+  green: "#4eff33",
+  blue: "#338fff", 
+};
 
 let termInput = "";
 const termDiv = document.getElementById("termDiv");
@@ -12,16 +17,13 @@ addLine("## Booting system...")
 addLine("### [color=rgb(100, 175, 255)]HuopaOS [/color] beta build.")
 addLine("### Made by [color=rgb(100, 175, 255)]Allucat1000.[/color]")
 addLine("Thank you for trying this demo! If you have any suggestions or bugs, make sure to let me know!")
-addLine("[color=lime]Use the \"hpkg install\" to install a package.[/color]")
-addLine("[color=lime]Make sure to update your packages often using \"hpkg update\".[/color]")
+addLine("Use the \"hpkg install\" to install a package. \n Make sure to update your packages often using \"hpkg update\".")
 const currentVer = "0.3.1"
 const verBranch = "main";
 if (verBranch === "dev") {
-  addLine("## Hold up!")
-  addLine("### The dev branch is in use currently!")
-  addLine("### Be ready for bugs!")
+  addLine("## [line=red]Hold up![/line]")
+  addLine("### [line=red]The dev branch is in use currently! Be ready for bugs![/line]")
 }
-
 
 const textInput = document.getElementById("textInput");
 textInput.focus()
@@ -34,7 +36,7 @@ textInput.addEventListener('keydown', function(event) {
         .split(' ')
         .slice(1);
 
-    addLine("$" + textInput.value)
+    addLine("$ " + textInput.value)
     if (!inputAnswerActive) {
         callCMD(cmd, params)
     } else {
@@ -49,9 +51,8 @@ textInput.addEventListener('keydown', function(event) {
 
 window.sys = {
   async import(name) {
-    await addLine("[bg=blue]Downloading module...[/bg]");
     try {
-            await addLine(`[bg=blue]Downloading ${name}...[/bg]`)
+            await addLine(`[line=blue]Downloading ${name}...[/line]`)
             const url = `https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/modules/${name}.js?v=${Date.now()}`;
             const response = await fetch(url);
     
@@ -63,11 +64,11 @@ window.sys = {
                 await addLine("Module installed.")
                 await internalFS.loadPackage(`/system/modules/${name}.js`);
             } else {
-                await addLine(`[bg=red]Failed to fetch module, response: ${response.status}[/bg]`);
+                await addLine(`[line=red]Failed to fetch module, response: ${response.status}[/line]`);
             }
 
         } catch (e) {
-            await addLine(`[bg=red]Failed to fetch module: ${name}.[/bg]`);
+            await addLine(`[line=red]Failed to fetch module: ${name}.[/line]`);
             await addLine(`Error: ${e}`);
         }
 
@@ -84,13 +85,12 @@ window.sys = {
   try {
     const cmd = window.terminalcmd[command];
     if (typeof cmd === "function") {
-      console.log(args)
       await cmd(args);
     } else {
-      addLine(`[bg=red]${command} is not a command, package or app.[/bg]`);
+      addLine(`[line=red]${command} is not a command, package or app.[/line]`);
     }
   } catch (e) {
-    addLine("[bg=red]Failed to run command[/bg]");
+    addLine("[line=red]Failed to run command[/line]");
     console.error(`Failed to run command "${command}".\nError:\n\n`, e);
   }
 }
@@ -157,7 +157,7 @@ const internalFS = {
           if (recursive === true) {
             await internalFS.delDir(item, visited, recursive, force);
           } else {
-            if (!force === true) addLine(`[bg=red]Cannot delete directory ${item} without recursive flag[/bg]`);
+            if (!force === true) addLine(`[line=red]Cannot delete directory ${item} without recursive flag[/line]`);
             return;
           }
         } else {
@@ -192,7 +192,7 @@ const internalFS = {
 
   async downloadPackage(pkgName){
     try {
-      await addLine(`[bg=blue]Downloading ${pkgName}...[/bg]`)
+      await addLine(`[line=blue]Downloading ${pkgName}...[/line]`)
       const url = `https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/packages/${pkgName}.js?v=${Date.now()}`;
       const response = await fetch(url);
       
@@ -202,16 +202,16 @@ const internalFS = {
         await internalFS.createPath(`/system/packages/${pkgName}.js`, "file", packageData);
         if (internalFS.getFile("/system/packages").includes(`/system/packages/${pkgName}.js`)) {
         } else {
-          addLine("[bg=green]Package updated.[/bg]")
+          addLine("[line=green] [/line] Package updated.")
         }
 
         await addLine("Package installed.")
       } else {
-        await addLine(`[bg=red]Failed to fetch package, response: ${response.status}[/bg]`);
+        await addLine(`[line=red]Failed to fetch package, response: ${response.status}[/line]`);
       }
 
     } catch (e) {
-      await addLine(`[bg=red]Failed to fetch package: ${pkgName}.[/bg]`);
+      await addLine(`[line=red]Failed to fetch package: ${pkgName}.[/line]`);
       await addLine(`Error: ${e}`);
     }
   },
@@ -236,7 +236,7 @@ const internalFS = {
       }
     } else {
       
-      await addLine(`[color=red]Package "${pkgName}" not found in file system.[/color]`);
+      await addLine(`[line=red]Package "${pkgName}" not found in file system.[/line]`);
     }
   },
   async getMeta(path) {
@@ -280,7 +280,15 @@ async function callCMD(input, params) {
     
   if (input.length > 0) {
     if (input.toLowerCase() === "hpkg") {
+      if (params.length < 1) {
+        addLine("[line=red]You need at least 1 argument for this command.[/line]")
+        return;
+      }
       if (params[0].toLowerCase() === "install") {
+        if (params.length < 2 || !params[1]) {
+          addLine("[line=red]You need at least 2 arguments for this command.[/line]")
+          return;
+        }
         if (params[1].toLowerCase())
         await internalFS.downloadPackage(params[1].toLowerCase())
       } else if (params[0].toLowerCase() === "update") {
@@ -296,19 +304,22 @@ async function callCMD(input, params) {
                 await addLine("Terminal CmdList downloaded! Installing...")
                 const fetchData = await response.text();
                 internalFS.createPath(`/system/terminalcmd.js`, "file", fetchData);
-                addLine("[bg=green]Terminal commands succesfully installed![/bg]")
+                addLine("[line=green]Terminal commands succesfully installed![/line]")
             } else {
-                await addLine(`[bg=red]Failed to fetch terminal commands, response: ${response.status}[/bg]`);
+                await addLine(`[line=red]Failed to fetch terminal commands, response: ${response.status}[/line]`);
             }
 
         } catch (e) {
-            await addLine(`[bg=red]Failed to fetch terminal commands.[/bg]`);
+            await addLine(`[line=red]Failed to fetch terminal commands.[/line]`);
             await addLine(`Error: ${e}`);
         }
       } else {
-        addLine(`[bg=red]Unknown hPKG command: ${params[0]}[/bg]`)
+        addLine(`[line=red]Unknown hPKG command: ${params[0]}[/line]`)
       }
       return;
+
+
+    
     } else {
       const rawList = internalFS.getFile("/system/packages") || "[]";
       const packageList = JSON.parse(rawList);
@@ -379,23 +390,23 @@ async function init() {
                 const fetchData = await response.text();
                 internalFS.createPath(`/system/terminalcmd.js`, "file", fetchData);
             } else {
-                await addLine(`[bg=red]Failed to fetch terminal commands, response: ${response.status}[/bg]`);
+                await addLine(`[line=red]Failed to fetch terminal commands, response: ${response.status}[/line]`);
             }
 
         } catch (e) {
-            await addLine(`[bg=red]Failed to fetch terminal commands.[/bg]`);
+            await addLine(`[line=red]Failed to fetch terminal commands.[/line]`);
             await addLine(`Error: ${e}`);
         }
-      addLine("[bg=green]Terminal commands installed[/bg]")
+      addLine("[line=green]Terminal commands installed[/line]")
       
     } else {
         await addLine("**System file creation cancelled.**")
-        await addLine("[color=red]**_You will be unable to use the system, since you don't have a core system files._**[/color]")
+        await addLine("[line=red]**_You will be unable to use the system, since you don't have a core system files._**[/line]")
     }
   } else {
     const issues = checkFileSystemIntegrity();
     if (issues && issues.length > 0 || isSystemInstalled === "recovery") {
-      addLine("[bg=red][color=black]System issues detected. Attempting recovery...[/color][/bg]");
+      addLine("[line=red]System issues detected. Attempting recovery...[/line]");
       recoveryCheck(issues);
     }
 
@@ -417,19 +428,19 @@ async function bootMGR(extraParams) {
   if (!bootType) {
     if (internalFS.getFile("/system/env/boot.js")) {
       bootType = "envBoot";
-      addLine("[bg=green]Environment boot directory found (/system/env/boot.js).[/bg]");
+      addLine("[line=green]Environment boot directory found (/system/env/boot.js).[/line]");
       addLine("Attempting to boot...");
       internalFS.loadPackage("/system/env/boot.js");
     }
     
   }
   if (!bootType) {
-    addLine("[bg=blue]Loading packages...[/bg]")
+    addLine("Loading packages...")
     const packageAmount = JSON.parse(internalFS.getFile("/system/packages") || []).length;
           
-    await addLine(`[bg=green]${packageAmount} packages found[/bg]`)
+    await addLine(`[line=green]${packageAmount} package(s) found[/line]`)
     if (packageAmount > 0) {
-      await addLine("### Package loading available. Use the command \"[color=palevioletred]listpkgs[/color]\" to view your packages.")
+      await addLine("### Package loading available. Use the command \"listpkgs\" to view your packages.")
     }
   }
     
@@ -456,21 +467,39 @@ function waitUntil(conditionFn, checkInterval = 50) {
 });
 }
 
+function getColor(colorName) {
+  return customColors[colorName.toLowerCase()] || colorName;
+}
+
+function preprocessLineTag(text) {
+  return text.replace(/\[line=(.+?)\]([\s\S]*?)\[\/line\]/g, (match, color, content) => {
+    const actualColor = getColor(color);
+    return `[color=${actualColor}]┃ [/color]${content}`;
+  });
+}
+
+
 function parseColorsAndBackgrounds(text) {
-  text = text.replace(/\[color=(.+?)\](.+?)\[\/color\]/g, (m, color, content) =>
-    `<span style="color:${color};">${content}</span>`);
-  text = text.replace(/\[bg=(.+?)\](.+?)\[\/bg\]/g, (m, color, content) =>
-    `<span style="background-color:${color};">${content}</span>`);
+  text = text.replace(/\[color=(.+?)\](.+?)\[\/color\]/g, (m, color, content) => {
+    const actualColor = getColor(color);
+    return `<span style="color:${actualColor};">${content}</span>`;
+  });
+
+  text = text.replace(/\[bg=(.+?)\](.+?)\[\/bg\]/g, (m, color, content) => {
+    const actualColor = getColor(color);
+    return `<span style="background-color:${actualColor};">${content}</span>`;
+  });
+
   return text;
 }
 
 
+
 async function addLine(text) {
-  const escapedText = escapeWithBackslashes(text);
-
-  const coloredText = parseColorsAndBackgrounds(escapedText);
-
-  const html = marked.parse(coloredText);
+const newText = preprocessLineTag(text);
+const escapedText = escapeWithBackslashes(newText);
+const coloredText = parseColorsAndBackgrounds(escapedText);
+const html = marked.parse(coloredText);
 
   const termContentDiv = document.createElement('div');
   termContentDiv.innerHTML = html;
@@ -504,7 +533,7 @@ function recoveryCheck() {
     const dir = issue.split(" ")[0];
     localStorage.setItem(dir, JSON.stringify([]));
     console.warn(`Recovered: ${dir}`);
-    addLine(`[bg=green][color=black]Recovered directory: ${dir}[/color][/bg]`);
+    addLine(`[line=green]Recovered directory: ${dir}[/line]`);
   }
 }
 
@@ -541,3 +570,5 @@ function isDirectory(path) {
   }
   return false;
 }
+
+
