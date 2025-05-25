@@ -1,6 +1,6 @@
 window.apppackage = {
     async app(){
-        addLine("[bg=rgb(168, 168, 142)][color=black]# Tung Tung Tung Sahur game![/color][/bg]")
+        addLine("# [line=rgb(168, 168, 142)]Tung Tung Tung Sahur game![/line]")
         let activateSahurTimes = 0
         while (activateSahurTimes < 3) {
             addLine("Will you skip Sahur? [y/N]")
@@ -12,8 +12,8 @@ window.apppackage = {
                 inputAnswer = "";
             }
         }
-        addLine("[color=red] # You have skipped Sahur 3 times! Tung Tung Tung Sahur will enter your house now![/color]");
+        addLine("# [line=red]You have skipped Sahur 3 times! Tung Tung Tung Sahur will enter your house now![/line]");
         await new Promise(resolve => setTimeout(resolve, 5000));
-        window.location.href = "https://example.com";
+        addLine("# Boo! Spookylicious");
     }
 };
