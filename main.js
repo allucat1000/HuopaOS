@@ -1,5 +1,5 @@
 /*
- * HuopaOS - Terminal-style OS environment in the browser
+ * HuopaOS - Operating system environment in the browser
  * Copyright (C) 2025 Allucat1000
  *
  * This program is free software: you can redistribute it and/or modify
