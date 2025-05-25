@@ -9,7 +9,8 @@ window.huopadesktop = {
         if (inputAnswer.toLowerCase() === "y") {
             await addLine("[line=blue]Installing HuopaDesktop...[/line]")
             try {
-                sys.import("quantum")
+                await sys.import("quantum")
+                await new Promise(resolve => setTimeout(resolve, 100));
             } catch (error) {
                 addLine(`Failed to fetch Quantum module! Error: ${error}`);
             }
@@ -20,6 +21,7 @@ window.huopadesktop = {
             
             await internalFS.createPath("/system/env/config.json", "file", JSON.stringify(bootConfig));
             await addLine("Boot config created!")
+            await new Promise(resolve => setTimeout(resolve, 100));
             await this.boot()
         } else {
             addLine("[line=red]HuopaDesktop installation has been cancelled.[/line]");
