@@ -7,16 +7,19 @@ window.huopadesktop = {
         inputAnswerActive = true;
         await waitUntil(() => !inputAnswerActive);
         if (inputAnswer.toLowerCase() === "y") {
-            addLine("[line=blue]Installing HuopaDesktop...[/line]")
+            await addLine("[line=blue]Installing HuopaDesktop...[/line]")
             try {
                 sys.import("quantum")
             } catch (error) {
                 addLine(`Failed to fetch Quantum module! Error: ${error}`);
             }
+            await addLine("Quantum installed!")
             const bootConfig = {
                 "path":"/system/modules/quantum.js",
             }
+            
             await internalFS.createPath("/system/env/config.json", "file", JSON.stringify(bootConfig));
+            await addLine("Boot config created!")
             await this.boot()
         } else {
             addLine("[line=red]HuopaDesktop installation has been cancelled.[/line]");
