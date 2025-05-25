@@ -1,24 +1,24 @@
 window.huopacli = {
     async install() {
         await new Promise(resolve => setTimeout(resolve, 500));
-        addLine("## [bg=blue]huopaCLI setup[/bg]")
+        addLine("## [line=blue]huopaCLI setup[/line]")
         addLine("Do you want to install huopaCLI as your system environment? [Y/n]")
         inputAnswerActive = true;
         await waitUntil(() => !inputAnswerActive);
         if (inputAnswer.toLowerCase() === "y") {
-            addLine("[bg=purple]Installing huopaCLI...[/bg]")
+            addLine("[line=blue]Installing huopaCLI...[/line]")
             const bootFile = `internalFS.loadPackage("/system/packages/huopacli.js")`;
             internalFS.createPath("/system/env")
             internalFS.createPath("/system/env/boot.js", "file", bootFile);
             await internalFS.loadPackage("/system/packages/huopacli.js")
             this.boot();
         } else {
-            addLine("[bg=red]huopaCLI setup cancelled![/bg]")
+            addLine("[line=red]huopaCLI setup cancelled![/line]")
         }
     },
     
     async boot() {
-        addLine("[bg=green]# HuopaCLI booting…[/bg]");
+        addLine("[line=green]# HuopaCLI booting…[/line]");
         addLine("### What app do you want to open?")
         addLine("Terminal")
         inputAnswerActive = true;
@@ -30,7 +30,7 @@ window.huopacli = {
 
     async uninstall() {
         await new Promise(resolve => setTimeout(resolve, 500));
-        addLine("## [bg=red]huopaCLI uninstaller[/bg]")
+        addLine("## [line=red]huopaCLI uninstaller[/line]")
         addLine("Uninstall huopaCLI? This will put you in the terminal. [y/n]")
         inputAnswerActive = true;
         await waitUntil(() => !inputAnswerActive);
