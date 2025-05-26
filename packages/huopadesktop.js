@@ -17,6 +17,9 @@ window.huopadesktop = {
             await addLine("Quantum installed!")
             const bootConfig = {
                 "path":"/system/modules/quantum.js",
+                "bootpath":"/system/packages/huopadesktop.js",
+                "bootname":"huopadesktop",
+                "bootcmd":"boot"
             }
             
             await internalFS.createPath("/system/env/config.json", "file", JSON.stringify(bootConfig));
