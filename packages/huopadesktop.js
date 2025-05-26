@@ -6,7 +6,7 @@ window.huopadesktop = {
         await addLine("HuopaDesktop uses the Quantum display manager.");
         inputAnswerActive = true;
         await waitUntil(() => !inputAnswerActive);
-        if (inputAnswer.toLowerCase() === "y") {
+        if (inputAnswer.toLowerCase() === "y" || inputAnswer.toLowerCase() === "") {
             await addLine("[line=blue]Installing HuopaDesktop...[/line]")
             try {
                 await sys.import("quantum")
@@ -21,6 +21,20 @@ window.huopadesktop = {
             
             await internalFS.createPath("/system/env/config.json", "file", JSON.stringify(bootConfig));
             await addLine("Boot config created!")
+            const response = await fetch(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/DefaultBG.png`);
+            if (response.ok) {
+                const blob = await response.blob();
+                const reader = new FileReader();
+                reader.onloadend = async () => {
+                    const base64data = reader.result;
+                    await internalFS.createPath("/system/env/wallpapers/default.png", "file", base64data);
+                };
+
+                await addLine("Wallpaper fetched and installed!")
+            } else {
+                await addLine("Failed to fetch wallpaper!")
+                return;
+            }
             await new Promise(resolve => setTimeout(resolve, 100));
             await this.boot()
         } else {
@@ -54,7 +68,8 @@ window.huopadesktop = {
                 mainDiv.innerHTML = "";
                 const desktop = quantum.document.createElement("div");
                 const appBar = quantum.document.createElement("div");
-                appBar.style = "position: absolute; bottom: 20px; width: 96%; height: 5em; background-color:rgba(75, 75, 75, 0.7); border-radius: 4em; left: 50%; transform: translateX(-50%); display: block;";
+                const imageData = internalFS.getFile("/system/env/wallpapers/default.png");
+                appBar.style = `position: absolute; bottom: 20px; width: 96%; height: 5em;   background-image: url('${imageData}'); background-size: cover; background-position: center; border-radius: 4em; left: 50%; transform: translateX(-50%); display: block;`;
                 desktop.style = "width: 100%; height: 100%; background-color:rgb(0, 0, 0);";
                 mainDiv.style = "position: relative; width: 100vw; height: 100vh; overflow: hidden;";
                 quantum.document.body.style.margin = "0";
