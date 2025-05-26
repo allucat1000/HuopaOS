@@ -43,6 +43,8 @@ window.huopadesktop = {
                     await quantum.init();
                 } catch (e) {
                     await addLine("Failed to initialize Quantum. Reinstall HuopaDesktop.");
+                    await addLine(`Error: ${e}`);
+                    console.error(`Error: ${e}`);
                     await new Promise(resolve => setTimeout(resolve, 2000));
                     await this.install();
                 }
