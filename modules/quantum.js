@@ -6,6 +6,7 @@ window.quantum = {
     get document() {
         return new Proxy(document, {
             get(target, prop) {
+                // Intercept certain methods
                 if (prop === "createElement") {
                     return (tag) => {
                         const restrictedTags = ["script", "iframe", "object"];
@@ -16,13 +17,8 @@ window.quantum = {
                     };
                 }
 
-                const value = target[prop];
-
-                if (typeof value === "function") {
-                    return value.bind(target);
-                }
-
-                return value;
+                // You can add more overrides here if needed
+                return target[prop];
             },
             set(target, prop, value) {
                 target[prop] = value;
@@ -31,12 +27,10 @@ window.quantum = {
         });
     },
 
-
     init() {
         if (this.initialized) return "Quantum initialized already!";
         this.initialized = true;
         this.bootTime = Date.now();
         addLine("[line=cyan]Loading Quantum Display Manager...[/line]");
-        addLine(`Version: ${this.version}`)
     }
 };
