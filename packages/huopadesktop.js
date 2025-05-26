@@ -1,9 +1,9 @@
 window.huopadesktop = {
     async install() {
         await new Promise(resolve => setTimeout(resolve, 100));
-        addLine("## [line=blue]HuopaDesktop setup[/line]");
-        addLine("Do you want to install HuopaDesktop? [Y/n]");
-        addLine("HuopaDesktop uses the Quantum display manager.");
+        await addLine("## [line=blue]HuopaDesktop setup[/line]");
+        await addLine("Do you want to install HuopaDesktop? [Y/n]");
+        await addLine("HuopaDesktop uses the Quantum display manager.");
         inputAnswerActive = true;
         await waitUntil(() => !inputAnswerActive);
         if (inputAnswer.toLowerCase() === "y") {
@@ -12,7 +12,7 @@ window.huopadesktop = {
                 await sys.import("quantum")
                 await new Promise(resolve => setTimeout(resolve, 100));
             } catch (error) {
-                addLine(`Failed to fetch Quantum module! Error: ${error}`);
+                await addLine(`Failed to fetch Quantum module! Error: ${error}`);
             }
             await addLine("Quantum installed!")
             const bootConfig = {
@@ -37,7 +37,7 @@ window.huopadesktop = {
                 await new Promise(resolve => setTimeout(resolve, 2000));
                 await this.install();
             } else {
-                internalFS.loadPackage(bootConfig.path);
+                internalFS.runUnsandboxed(bootConfig.path);
                 await new Promise(resolve => setTimeout(resolve, 50));
                 try {
                     quantum.init();
