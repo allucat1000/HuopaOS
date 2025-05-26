@@ -16,7 +16,13 @@ window.quantum = {
                     };
                 }
 
-                return target[prop];
+                const value = target[prop];
+
+                if (typeof value === "function") {
+                    return value.bind(target);
+                }
+
+                return value;
             },
             set(target, prop, value) {
                 target[prop] = value;
@@ -24,6 +30,7 @@ window.quantum = {
             }
         });
     },
+
 
     init() {
         if (this.initialized) return "Quantum initialized already!";
