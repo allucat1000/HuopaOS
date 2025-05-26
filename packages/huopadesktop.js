@@ -24,15 +24,16 @@ window.huopadesktop = {
             const response = await fetch(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/DefaultBG.png`);
             if (response.ok) {
                 const blob = await response.blob();
-                const reader = new FileReader();
-                reader.onloadend = async () => {
-                    const base64data = reader.result;
-                    await internalFS.createPath("/system/env/wallpapers/default.png", "file", base64data);
-                };
-
-                await addLine("Wallpaper fetched and installed!")
+                const base64data = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blob);
+                });
+                await internalFS.createPath("/system/env/wallpapers/default.png", "file", base64data);
+                await addLine("Wallpaper fetched and installed!");
             } else {
-                await addLine("Failed to fetch wallpaper!")
+                await addLine("Failed to fetch wallpaper!");
                 return;
             }
             await new Promise(resolve => setTimeout(resolve, 100));
