@@ -70,8 +70,8 @@ window.huopadesktop = {
                 const desktop = quantum.document.createElement("div");
                 const appBar = quantum.document.createElement("div");
                 const imageData = internalFS.getFile("/system/env/wallpapers/default.png");
-                appBar.style = `position: absolute; bottom: 20px; width: 96%; height: 5em;   background-image: url('${imageData}'); background-size: cover; background-position: center; border-radius: 4em; left: 50%; transform: translateX(-50%); display: block;`;
-                desktop.style = "width: 100%; height: 100%; background-color:rgb(0, 0, 0);";
+                appBar.style = `position: absolute; bottom: 20px; width: 96%; height: 5em; background-color:rgba(45, 45, 45, 0.7); border-radius: 4em; left: 50%; transform: translateX(-50%); display: block;`;
+                desktop.style = "width: 100%; height: 100%; background-image: url('${imageData}'); background-size: cover; background-position: center;";
                 mainDiv.style = "position: relative; width: 100vw; height: 100vh; overflow: hidden;";
                 quantum.document.body.style.margin = "0";
                 await mainDiv.append(desktop);
