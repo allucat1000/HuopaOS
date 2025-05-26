@@ -6,7 +6,6 @@ window.quantum = {
     get document() {
         return new Proxy(document, {
             get(target, prop) {
-                // Intercept certain methods
                 if (prop === "createElement") {
                     return (tag) => {
                         const restrictedTags = ["script", "iframe", "object"];
@@ -17,15 +16,21 @@ window.quantum = {
                     };
                 }
 
-                // You can add more overrides here if needed
-                return target[prop];
+                const value = target[prop];
+                if (typeof value === "function") {
+                    return value.bind(target);
+                }
+
+                return value;
             },
+
             set(target, prop, value) {
                 target[prop] = value;
                 return true;
             }
         });
     },
+
 
     init() {
         if (this.initialized) return "Quantum initialized already!";
