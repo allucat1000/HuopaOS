@@ -1,5 +1,5 @@
 /*
- * HuopaOS - Terminal-style OS environment in the browser
+ * HuopaOS - Operating system environment in the browser
  * Copyright (C) 2025 Allucat1000
  *
  * This program is free software: you can redistribute it and/or modify
@@ -38,10 +38,10 @@ addLine("### Made by [color=rgb(100, 175, 255)]Allucat1000.[/color]")
 addLine("Thank you for trying this demo! If you have any suggestions or bugs, make sure to let me know!")
 addLine("Use the \"hpkg install\" to install a package. \n Make sure to update your packages often using \"hpkg update\".")
 const currentVer = "0.3.1"
-const verBranch = "main";
+const verBranch = "dev";
 if (verBranch === "dev") {
-  addLine("## [line=red]Hold up![/line]")
-  addLine("### [line=red]The dev branch is in use currently! Be ready for bugs![/line]")
+  addLine("## [line=yellow]Hold up![/line]")
+  addLine("### [line=yellow]The dev branch is in use currently! Be ready for bugs![/line]")
 }
 
 const textInput = document.getElementById("textInput");
@@ -268,8 +268,20 @@ const internalFS = {
     type: entry.type || 'file', 
     size: entry.size || 0,
   };
-  }
+  },
+  async runUnsandboxed(path) {
+    await addLine(`Do you want to run a script from the path: ${path} unsandboxed? Only do this if this script is trusted. [Y/n]`);
+    inputAnswerActive = true;
+    await waitUntil(() => !inputAnswerActive);
+
+    if (inputAnswer.toLowerCase() === "y" || inputAnswer.toLowerCase() === "") {
+        const code = internalFS.getFile(path);
+        const unsandboxedFunction = new Function(code);
+        return unsandboxedFunction();
+    }
 }
+}
+
 
 function checkFileSystemIntegrity() {
   const requiredDirs = ["/system", "/home",  "/system/packages"];
@@ -357,6 +369,7 @@ async function callCMD(input, params) {
             if (pkg && typeof pkg[method] === "function") {
               await pkg[method](...args);
             } else {
+              addLine("[line=red]Invalid method[/line]")
               console.warn("Invalid package or method:", input.toLowerCase(), method);
             }
           } else {
@@ -382,7 +395,7 @@ async function init() {
     await addLine("### System files are not installed yet. Install? [Y/n]");
     inputAnswerActive = true;
     await waitUntil(() => !inputAnswerActive);
-    if (inputAnswer.toLowerCase() === "y") {
+    if (inputAnswer.toLowerCase() === "y" || inputAnswer.toLowerCase() === "") {
       await addLine("Creating system directories and files...")
       await internalFS.createPath("/");
       await internalFS.createPath("/system");
@@ -589,5 +602,3 @@ function isDirectory(path) {
   }
   return false;
 }
-
-
