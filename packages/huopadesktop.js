@@ -81,26 +81,31 @@ window.huopadesktop = {
                     await new Promise(resolve => setTimeout(resolve, 2000));
                     await this.install();
                 }
-                await addLine("Loading HuopaDesktop...")
-                await new Promise(resolve => setTimeout(resolve, 500));
-                const mainDiv = quantum.document.getElementById("termDiv");
-                mainDiv.innerHTML = "";
-                const desktop = quantum.document.createElement("div");
-                const appBar = quantum.document.createElement("div");
-                const imageData = internalFS.getFile("/system/env/wallpapers/default.png");
-                appBar.style = `position: absolute; bottom: 20px; width: 96%; height: 5em; background-color:rgba(45, 45, 45, 0.7); border-radius: 4em; left: 50%; transform: translateX(-50%); display: block;`;
-                desktop.style = `width: 100%; height: 100%; background-image: url(${imageData}); background-size: cover; background-position: center;`;
-                mainDiv.style = "position: relative; width: 100vw; height: 100vh; overflow: hidden;";
-                quantum.document.body.style.margin = "0";
-                await mainDiv.append(desktop);
-                await desktop.append(appBar);
-                const inputLabel = quantum.document.getElementById("inputLabel")
-                inputLabel.remove()
-                const huopalogo = internalFS.getFile("/system/env/assets/huopalogo.png");
-                const startMenuButton = quantum.document.createElement("button");
-                startMenuButton.style = `background-image: url(${huopalogo}); background-size: contain; background-repeat: no-repeat; background-position: center; width: 3em; height: 3em; border: none; background-color: transparent; border-radius: 50%;`;
-                appBar.id = "appBar";
-                appBar.append(startMenuButton);
+                try {
+                    await addLine("Loading HuopaDesktop...")
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    const mainDiv = quantum.document.getElementById("termDiv");
+                    mainDiv.innerHTML = "";
+                    const desktop = quantum.document.createElement("div");
+                    const appBar = quantum.document.createElement("div");
+                    const imageData = internalFS.getFile("/system/env/wallpapers/default.png");
+                    appBar.style = `position: absolute; bottom: 20px; width: 96%; height: 5em; background-color:rgba(45, 45, 45, 0.7); border-radius: 4em; left: 50%; transform: translateX(-50%); display: flex; align-items: center;`;
+                    desktop.style = `width: 100%; height: 100%; background-image: url(${imageData}); background-size: cover; background-position: center;`;
+                    mainDiv.style = "position: relative; width: 100vw; height: 100vh; overflow: hidden;";
+                    quantum.document.body.style.margin = "0";
+                    await mainDiv.append(desktop);
+                    await desktop.append(appBar);
+                    const inputLabel = quantum.document.getElementById("inputLabel")
+                    inputLabel.remove()
+                    const huopalogo = internalFS.getFile("/system/env/assets/huopalogo.png");
+                    const startMenuButton = quantum.document.createElement("button");
+                    startMenuButton.style = `background-image: url(${huopalogo}); background-size: contain; background-repeat: no-repeat; background-position: center; width: 3.5em; height: 3.5em; border: none; background-color: transparent; border-radius: 50%; margin: 1em;`;
+                    appBar.id = "appBar";
+                    appBar.append(startMenuButton);
+                } catch (error) {
+                    addLine("HuopaDesktop loading failed! Error: " + error);
+                }
+                
                                     
             }   
 
