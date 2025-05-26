@@ -39,6 +39,21 @@ window.huopadesktop = {
                 await addLine("Failed to fetch wallpaper!");
                 return;
             }
+            const response2 = await fetch("https://raw.githubusercontent.com/allucat1000/HuopaOS/dev/HuopaLogo.png")
+            if (response2.ok) {
+                const blob = await response2.blob();
+                const base64data = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blob);
+                });
+                await internalFS.createPath("/system/env/assets/huopalogo.png", "file", base64data);
+                await addLine("Wallpaper fetched and installed!");
+            } else {
+                await addLine("Failed to fetch wallpaper!");
+                return;
+            }
             await new Promise(resolve => setTimeout(resolve, 100));
             await this.boot()
         } else {
@@ -81,7 +96,12 @@ window.huopadesktop = {
                 await desktop.append(appBar);
                 const inputLabel = quantum.document.getElementById("inputLabel")
                 inputLabel.remove()
-                
+                const huopalogo = internalFS.getFile("/system/env/assets/huopalogo.png");
+                const startMenuButton = quantum.document.createElement("button");
+                startMenuButton.style = `background-image: url(${huopalogo}); background-size: contain; background-repeat: no-repeat; background-position: center; width: 3em; height: 3em; border: none; background-color: transparent; border-radius: 50%;`;
+                appBar.id = "appBar";
+                appBar.append(startMenuButton);
+                                    
             }   
 
         } else {
