@@ -37,8 +37,8 @@ window.huopadesktop = {
                 await new Promise(resolve => setTimeout(resolve, 2000));
                 await this.install();
             } else {
-                internalFS.runUnsandboxed(bootConfig.path);
-                await new Promise(resolve => setTimeout(resolve, 50));
+                await internalFS.runUnsandboxed(bootConfig.path);
+                await new Promise(resolve => setTimeout(resolve, 500));
                 try {
                     quantum.init();
                 } catch (e) {
