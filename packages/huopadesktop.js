@@ -30,28 +30,28 @@ window.huopadesktop = {
     async boot() {
         const bootConfig = JSON.parse(internalFS.getFile("/system/env/config.json"));
         if (bootConfig) {
-            addLine("Boot config found! Attempting to boot from specified path.");
+            await addLine("Boot config found! Attempting to boot from specified path.");
             if (!bootConfig.path) {
-                addLine("Incorrect boot config!");
-                addLine("Please reinstall HuopaDesktop!");
+                await addLine("Incorrect boot config!");
+                await addLine("Please reinstall HuopaDesktop!");
                 await new Promise(resolve => setTimeout(resolve, 2000));
                 await this.install();
             } else {
                 await internalFS.runUnsandboxed(bootConfig.path);
                 await new Promise(resolve => setTimeout(resolve, 500));
                 try {
-                    quantum.init();
+                    await quantum.init();
                 } catch (e) {
-                    addLine("Failed to initialize Quantum. Reinstall HuopaDesktop.");
+                    await addLine("Failed to initialize Quantum. Reinstall HuopaDesktop.");
                     await new Promise(resolve => setTimeout(resolve, 2000));
                     await this.install();
                 }
             }
 
         } else {
-            addLine("HuopaDesktop isn't installed yet!");
+            await addLine("HuopaDesktop isn't installed yet!");
             await new Promise(resolve => setTimeout(resolve, 2000));
-            this.install();
+            await this.install();
         }
     }
 };
