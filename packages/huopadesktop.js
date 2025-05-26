@@ -76,6 +76,8 @@ window.huopadesktop = {
                 quantum.document.body.style.margin = "0";
                 await mainDiv.append(desktop);
                 await desktop.append(appBar);
+                const inputLabel = quantum.document.getElementById("inputLabel")
+                inputLabel.remove()
                 
             }   
 
