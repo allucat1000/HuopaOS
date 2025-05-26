@@ -48,7 +48,18 @@ window.huopadesktop = {
                     await new Promise(resolve => setTimeout(resolve, 2000));
                     await this.install();
                 }
-            }
+                await addLine("Loading HuopaDesktop...")
+                await new Promise(resolve => setTimeout(resolve, 500));
+                const mainDiv = quantum.document.getElementById("termDiv");
+                mainDiv.innerHTML = "";
+                const desktop = quantum.document.createElement("div");
+                const appBar = quantum.document.createElement("div");
+                appBar.style = "position: absolute; bottom: 20px; width: 95%; background-color:rgb(45, 45, 45); border-radius: 0.5em;";
+                desktop.style = "width: 100%; height: 100%; background-color:rgb(6, 108, 121);";
+                mainDiv.append(desktop);
+                desktop.append(appBar);
+                
+            }   
 
         } else {
             await addLine("HuopaDesktop isn't installed yet!");
