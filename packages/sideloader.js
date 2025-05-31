@@ -58,7 +58,7 @@ window.sideloader = (() => {
             try {
                 await internalFS.createPath(`/system/packages/${inputAnswer}.js`, "file", appCode);
                 await addLine("Successfully sideloaded package!");
-                await addLine("You can view your package at: ", `/system/packages/${inputAnswer}.js`);
+                await addLine(`You can view your package at: /system/packages/${inputAnswer}.js`);
             } catch (error) {
                 await addLine("Failed to sideload package. Error: " + error);
             }
