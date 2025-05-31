@@ -57,7 +57,7 @@ window.huopadesktop = (() => {
             try {
                 await quantum.init();
             } catch (e) {
-                if (e.message.contains("quantum is not defined")) return; 
+                if (e.message.includes("quantum is not defined")) return; 
                 await sys.addLine("Failed to initialize Quantum. Reinstall HuopaDesktop.");
                 await sys.addLine(`Error: ${e}`);
                 console.error(`Error: ${e}`);
