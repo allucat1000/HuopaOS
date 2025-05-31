@@ -22,12 +22,12 @@ window.sideloader = (() => {
 
     return {
         async load() {
-            await addLine("We are not responsible for any loss, due to malicious packages.");
+            await sys.addLine("We are not responsible for any loss, due to malicious packages.");
 
             try {
                 const sandboxCheck = window;
             } catch (error) {
-                await addLine("To sideload a package, run unsandboxed! (sideloader -unsx)");
+                await sys.addLine("To sideload a package, run unsandboxed! (sideloader -unsx)");
                 return;
             }
 
@@ -35,7 +35,7 @@ window.sideloader = (() => {
             try {
                 file = await loadFile(".js");
             } catch (e) {
-                await addLine("No file selected.");
+                await sys.addLine("No file selected.");
                 return;
             }
 
@@ -47,20 +47,20 @@ window.sideloader = (() => {
             });
 
             inputAnswerActive = true;
-            await addLine("What name do you want to give for the sideloaded package? If the name is the same as another package, the old package will get overwritten.");
+            await sys.addLine("What name do you want to give for the sideloaded package? If the name is the same as another package, the old package will get overwritten.");
             await waitUntil(() => !inputAnswerActive);
 
             if (!inputAnswer) {
-                await addLine("Give a name for the package!");
+                await sys.addLine("Give a name for the package!");
                 return;
             }
 
             try {
                 await internalFS.createPath(`/system/packages/${inputAnswer}.js`, "file", appCode);
-                await addLine("Successfully sideloaded package!");
-                await addLine(`You can view your package at: /system/packages/${inputAnswer}.js`);
+                await sys.addLine("Successfully sideloaded package!");
+                await sys.addLine(`You can view your package at: /system/packages/${inputAnswer}.js`);
             } catch (error) {
-                await addLine("Failed to sideload package. Error: " + error);
+                await sys.addLine("Failed to sideload package. Error: " + error);
             }
         }
     };

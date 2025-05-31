@@ -1,8 +1,12 @@
 window.huopadesktop = (() => {
+    let sysTempInfo = {
+        "startMenuOpen":false
+    }
+    // Priv Sys Funcs
     const fetchAndStoreImage = async (url, path) => {
         const response = await fetch(url);
         if (!response.ok) {
-            await addLine(`Failed to fetch image: ${url}`);
+            await sys.addLine(`Failed to fetch image: ${url}`);
             return false;
         }
         const blob = await response.blob();
@@ -14,61 +18,35 @@ window.huopadesktop = (() => {
         });
         await internalFS.createPath(path, "file", base64data);
         return true;
+    }
+
+    const openStartMenu = async () => {
+        if (!sysTempInfo.startMenuOpen) {
+            sysTempInfo.startMenuOpen = true;
+            const startMenuDiv = quantum.document.createElement("div")
+            startMenuDiv.style = "width: 40em; height: 55%; background-color: rgba(45, 45, 45, 0.85); position: absolute; border-radius: 1em; left: 3%; bottom: 8.5em;"
+            const mainDiv = quantum.document.getElementById("termDiv");
+            const desktop = quantum.document.getElementById("desktop");
+            desktop.append(startMenuDiv)
+        }
     };
+
     
     return {
-        async install() {
-            await new Promise(resolve => setTimeout(resolve, 100));
-            await addLine("## [line=blue]HuopaDesktop setup[/line]");
-            await addLine("Do you want to install HuopaDesktop? [Y/n]");
-            await addLine("HuopaDesktop uses the Quantum display manager.");
-            inputAnswerActive = true;
-            await waitUntil(() => !inputAnswerActive);
-            if (inputAnswer.toLowerCase() === "y" || inputAnswer.toLowerCase() === "") {
-                await addLine("[line=blue]Installing HuopaDesktop...[/line]");
-                try {
-                    await sys.import("quantum");
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                } catch (error) {
-                    await addLine(`Failed to fetch Quantum module! Error: ${error}`);
-                    return;
-                }
-                await addLine("Quantum installed!");
-                const bootConfig = {
-                    path: "/system/modules/quantum.js",
-                    bootpath: "/system/packages/huopadesktop.js",
-                    bootname: "huopadesktop",
-                    bootcmd: "boot"
-                };
-                await internalFS.createPath("/system/env/config.json", "file", JSON.stringify(bootConfig));
-                await addLine("Boot config created!");
-
-                const wallpaperSuccess = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/DefaultBG.png`, "/system/env/wallpapers/default.png");
-
-                const logoSuccess = await fetchAndStoreImage("https://raw.githubusercontent.com/allucat1000/HuopaOS/dev/HuopaLogo.png", "/system/env/assets/huopalogo.png");
-
-                if (wallpaperSuccess && logoSuccess) {
-                    await addLine("Wallpaper and logo fetched and installed!");
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                    await this.boot();
-                }
-            } else {
-                await addLine("[line=red]HuopaDesktop installation has been cancelled.[/line]");
-            }
-        },
+        // Main Sys
 
         async boot() {
             const bootConfig = JSON.parse(internalFS.getFile("/system/env/config.json"));
             if (!bootConfig) {
-                await addLine("HuopaDesktop isn't installed yet!");
+                await sys.addLine("HuopaDesktop isn't installed yet!");
                 await new Promise(resolve => setTimeout(resolve, 2000));
                 return this.install();
             }
 
-            await addLine("Boot config found! Attempting to boot from specified path.");
+            await sys.addLine("Boot config found! Attempting to boot from specified path.");
             if (!bootConfig.path) {
-                await addLine("Incorrect boot config!");
-                await addLine("Please reinstall HuopaDesktop!");
+                await sys.addLine("Incorrect boot config!");
+                await sys.addLine("Please reinstall HuopaDesktop!");
                 await new Promise(resolve => setTimeout(resolve, 2000));
                 return this.install();
             }
@@ -80,14 +58,14 @@ window.huopadesktop = (() => {
                 await quantum.init();
             } catch (e) {
                 if (e.message.contains("quantum is not defined")) return; 
-                await addLine("Failed to initialize Quantum. Reinstall HuopaDesktop.");
-                await addLine(`Error: ${e}`);
+                await sys.addLine("Failed to initialize Quantum. Reinstall HuopaDesktop.");
+                await sys.addLine(`Error: ${e}`);
                 console.error(`Error: ${e}`);
 
             }
 
             try {
-                await addLine("Loading HuopaDesktop...");
+                await sys.addLine("Loading HuopaDesktop...");
                 await new Promise(resolve => setTimeout(resolve, 500));
 
                 const mainDiv = quantum.document.getElementById("termDiv");
@@ -98,7 +76,9 @@ window.huopadesktop = (() => {
                 const imageData = internalFS.getFile("/system/env/wallpapers/default.png");
 
                 desktop.style = `width: 100%; height: 100%; background-image: url(${imageData}); background-size: cover; background-position: center;`;
-                appBar.style = `position: absolute; bottom: 20px; width: 96%; height: 5em; background-color: rgba(45, 45, 45, 0.7); border-radius: 4em; left: 50%; transform: translateX(-50%); display: flex; align-items: center;`;
+                desktop.id = "desktop";
+                appBar.id = "appBar";
+                appBar.style = `position: absolute; bottom: 20px; width: 96%; height: 5em; background-color: rgba(45, 45, 45, 0.85); border-radius: 1em; left: 50%; transform: translateX(-50%); display: flex; align-items: center;`;
                 mainDiv.style = "position: relative; width: 100vw; height: 100vh; overflow: hidden;";
                 quantum.document.body.style.margin = "0";
 
@@ -114,9 +94,57 @@ window.huopadesktop = (() => {
 
                 appBar.id = "appBar";
                 appBar.append(startMenuButton);
+                startMenuButton.onclick = async function() {
+                    openStartMenu();
+                }
             } catch (error) {
-                await addLine("HuopaDesktop loading failed! Error: " + error);
+                await sys.addLine("HuopaDesktop loading failed! Error: " + error);
             }
-        }
+        },
+
+
+        // Installer (ignore)
+
+
+        async install() {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            await sys.addLine("## [line=blue]HuopaDesktop setup[/line]");
+            await sys.addLine("Do you want to install HuopaDesktop? [Y/n]");
+            await sys.addLine("HuopaDesktop uses the Quantum display manager.");
+            inputAnswerActive = true;
+            await waitUntil(() => !inputAnswerActive);
+            if (inputAnswer.toLowerCase() === "y" || inputAnswer.toLowerCase() === "") {
+                await sys.addLine("[line=blue]Installing HuopaDesktop...[/line]");
+                try {
+                    await sys.import("quantum");
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                } catch (error) {
+                    await sys.addLine(`Failed to fetch Quantum module! Error: ${error}`);
+                    return;
+                }
+                await sys.addLine("Quantum installed!");
+                const bootConfig = {
+                    path: "/system/modules/quantum.js",
+                    bootpath: "/system/packages/huopadesktop.js",
+                    bootname: "huopadesktop",
+                    bootcmd: "boot"
+                };
+                await internalFS.createPath("/system/env/config.json", "file", JSON.stringify(bootConfig));
+                await sys.addLine("Boot config created!");
+
+                const wallpaperSuccess = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/DefaultBG.png`, "/system/env/wallpapers/default.png");
+
+                const logoSuccess = await fetchAndStoreImage("https://raw.githubusercontent.com/allucat1000/HuopaOS/dev/HuopaLogo.png", "/system/env/assets/huopalogo.png");
+
+                if (wallpaperSuccess && logoSuccess) {
+                    await sys.addLine("Wallpaper and logo fetched and installed!");
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    await this.boot();
+                }
+            } else {
+                await sys.addLine("[line=red]HuopaDesktop installation has been cancelled.[/line]");
+            }
+        },
+        
     };
 })();
