@@ -28,21 +28,81 @@ const customColors = {
   blue: "#338fff", 
 };
 
+window.sys = {
+  async import(name) {
+    try {
+            await sys.addLine(`[line=blue]Downloading ${name}...[/line]`)
+            const url = `https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/modules/${name}.js?v=${Date.now()}`;
+            const response = await fetch(url);
+    
+            if (response.ok) {
+                await sys.addLine("Module downloaded! Installing...")
+                const moduleData = await response.text();
+                internalFS.createPath(`/system/modules/${name}.js`, "file", moduleData);
+  
+                await sys.addLine("Module installed.")
+                await internalFS.loadPackage(`/system/modules/${name}.js`);
+            } else {
+                await sys.addLine(`[line=red]Failed to fetch module, response: ${response.status}[/line]`);
+            }
+
+        } catch (e) {
+            await sys.addLine(`[line=red]Failed to fetch module: ${name}.[/line]`);
+            await sys.addLine(`Error: ${e}`);
+        }
+
+  },
+  async runCMD(input, params = []) {
+    if (!input) return;
+
+    await internalFS.loadPackage(`/system/terminalcmd.js`, "silent");
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    const command = input.toLowerCase();
+    const args = params;
+
+    try {
+      const cmd = window.terminalcmd[command];
+      if (typeof cmd === "function") {
+        await cmd(args);
+      } else {
+       sys.addLine(`[line=red]${command} is not a command, package or app.[/line]`);
+      }
+    } catch (e) {
+     sys.addLine("[line=red]Failed to run command[/line]");
+      console.error(`Failed to run command "${command}".\nError:\n\n`, e);
+    }
+  },
+
+  async addLine(text) {
+    const newText = preprocessLineTag(text);
+    const escapedText = escapeWithBackslashes(newText);
+    const coloredText = parseColorsAndBackgrounds(escapedText);
+    const html = marked.parse(coloredText);
+
+    const termContentDiv = document.createElement('div');
+    termContentDiv.innerHTML = html;
+    termDiv.appendChild(termContentDiv);
+    termDiv.scrollTop = termDiv.scrollHeight;
+  }
+}
+
+
 let termInput = "";
 const termDiv = document.getElementById("termDiv");
 let inputAnswerActive = false;
 let keysLocked = false;
 let inputAnswer = undefined;
-addLine("## Booting system...")
-addLine("### [color=rgb(100, 175, 255)]HuopaOS [/color] beta build.")
-addLine("### Made by [color=rgb(100, 175, 255)]Allucat1000.[/color]")
-addLine("Thank you for trying this demo! If you have any suggestions or bugs, make sure to let me know!")
-addLine("Use the \"hpkg install\" to install a package. \n Make sure to update your packages often using \"hpkg update\".")
+sys.addLine("## Booting system...")
+sys.addLine("### [color=rgb(100, 175, 255)]HuopaOS [/color] beta build.")
+sys.addLine("### Made by [color=rgb(100, 175, 255)]Allucat1000.[/color]")
+sys.addLine("Thank you for trying this demo! If you have any suggestions or bugs, make sure to let me know!")
+sys.addLine("Use the \"hpkg install\" to install a package. \n Make sure to update your packages often using \"hpkg update\".")
 const currentVer = "0.3.1"
 const verBranch = "dev";
 if (verBranch === "dev") {
-  addLine("### [line=yellow]Hold up![/line]")
-  addLine("### [line=yellow]The dev branch is in use currently! Be ready for bugs![/line]")
+  sys.addLine("### [line=yellow]Hold up![/line]")
+  sys.addLine("### [line=yellow]The dev branch is in use currently! Be ready for bugs![/line]")
 }
 
 const textInput = document.getElementById("textInput");
@@ -70,7 +130,7 @@ textInput.addEventListener('keydown', function(event) {
         .split(' ')
         .slice(1);
 
-    addLine("$ " + textInput.value)
+    sys.addLine("$ " + textInput.value)
     if (!inputAnswerActive) {
         callCMD(cmd, params)
     } else {
@@ -83,53 +143,7 @@ textInput.addEventListener('keydown', function(event) {
 });
 
 
-window.sys = {
-  async import(name) {
-    try {
-            await addLine(`[line=blue]Downloading ${name}...[/line]`)
-            const url = `https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/modules/${name}.js?v=${Date.now()}`;
-            const response = await fetch(url);
-    
-            if (response.ok) {
-                await addLine("Module downloaded! Installing...")
-                const moduleData = await response.text();
-                internalFS.createPath(`/system/modules/${name}.js`, "file", moduleData);
-  
-                await addLine("Module installed.")
-                await internalFS.loadPackage(`/system/modules/${name}.js`);
-            } else {
-                await addLine(`[line=red]Failed to fetch module, response: ${response.status}[/line]`);
-            }
 
-        } catch (e) {
-            await addLine(`[line=red]Failed to fetch module: ${name}.[/line]`);
-            await addLine(`Error: ${e}`);
-        }
-
-  },
-  async runCMD(input, params = []) {
-  if (!input) return;
-
-  await internalFS.loadPackage(`/system/terminalcmd.js`, "silent");
-  await new Promise(resolve => setTimeout(resolve, 500));
-
-  const command = input.toLowerCase();
-  const args = params;
-
-  try {
-    const cmd = window.terminalcmd[command];
-    if (typeof cmd === "function") {
-      await cmd(args);
-    } else {
-      addLine(`[line=red]${command} is not a command, package or app.[/line]`);
-    }
-  } catch (e) {
-    addLine("[line=red]Failed to run command[/line]");
-    console.error(`Failed to run command "${command}".\nError:\n\n`, e);
-  }
-}
-
-}
 
 const internalFS = {
     getFile(path) {
@@ -191,7 +205,7 @@ const internalFS = {
           if (recursive === true) {
             await internalFS.delDir(item, visited, recursive, force);
           } else {
-            if (!force === true) addLine(`[line=red]Cannot delete directory ${item} without recursive flag[/line]`);
+            if (!force === true) sys.addLine(`[line=red]Cannot delete directory ${item} without recursive flag[/line]`);
             return;
           }
         } else {
@@ -226,27 +240,27 @@ const internalFS = {
 
   async downloadPackage(pkgName){
     try {
-      await addLine(`[line=blue]Downloading ${pkgName}...[/line]`)
+      await sys.addLine(`[line=blue]Downloading ${pkgName}...[/line]`)
       const url = `https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/packages/${pkgName}.js?v=${Date.now()}`;
       const response = await fetch(url);
       
       if (response.ok) {
-        await addLine("Package downloaded! Installing...")
+        await sys.addLine("Package downloaded! Installing...")
         const packageData = await response.text();
         await internalFS.createPath(`/system/packages/${pkgName}.js`, "file", packageData);
         if (internalFS.getFile("/system/packages").includes(`/system/packages/${pkgName}.js`)) {
         } else {
-          addLine("[line=green] [/line] Package updated.")
+          sys.addLine("[line=green] [/line] Package updated.")
         }
 
-        await addLine("Package installed.")
+        await sys.addLine("Package installed.")
       } else {
-        await addLine(`[line=red]Failed to fetch package, response: ${response.status}[/line]`);
+        await sys.addLine(`[line=red]Failed to fetch package, response: ${response.status}[/line]`);
       }
 
     } catch (e) {
-      await addLine(`[line=red]Failed to fetch package: ${pkgName}.[/line]`);
-      await addLine(`Error: ${e}`);
+      await sys.addLine(`[line=red]Failed to fetch package: ${pkgName}.[/line]`);
+      await sys.addLine(`Error: ${e}`);
     }
   },
 
@@ -270,7 +284,7 @@ const internalFS = {
       }
     } else {
       
-      await addLine(`[line=red]Package "${pkgName}" not found in file system.[/line]`);
+      await sys.addLine(`[line=red]Package "${pkgName}" not found in file system.[/line]`);
     }
   },
   async getMeta(path) {
@@ -285,7 +299,7 @@ const internalFS = {
   };
   },
   async runUnsandboxed(path) {
-    await addLine(`Do you want to run a script from the path: ${path} unsandboxed? Only do this if this script is trusted. [Y/n]`);
+    await sys.addLine(`Do you want to run a script from the path: ${path} unsandboxed? Only do this if this script is trusted. [Y/n]`);
     inputAnswerActive = true;
     await waitUntil(() => !inputAnswerActive);
 
@@ -340,12 +354,12 @@ async function callCMD(input, params) {
   if (input.length > 0) {
     if (input.toLowerCase() === "hpkg") {
       if (params.length < 1) {
-        addLine("[line=red]You need at least 1 argument for this command.[/line]")
+        sys.addLine("[line=red]You need at least 1 argument for this command.[/line]")
         return;
       }
       if (params[0].toLowerCase() === "install") {
         if (params.length < 2 || !params[1]) {
-          addLine("[line=red]You need at least 2 arguments for this command.[/line]")
+          sys.addLine("[line=red]You need at least 2 arguments for this command.[/line]")
           return;
         }
         if (params[1].toLowerCase())
@@ -360,20 +374,20 @@ async function callCMD(input, params) {
             const response = await fetch(url);
     
             if (response.ok) {
-                await addLine("Terminal CmdList downloaded! Installing...")
+                await sys.addLine("Terminal CmdList downloaded! Installing...")
                 const fetchData = await response.text();
                 internalFS.createPath(`/system/terminalcmd.js`, "file", fetchData);
-                addLine("[line=green]Terminal commands succesfully installed![/line]")
+                sys.addLine("[line=green]Terminal commands succesfully installed![/line]")
             } else {
-                await addLine(`[line=red]Failed to fetch terminal commands, response: ${response.status}[/line]`);
+                await sys.addLine(`[line=red]Failed to fetch terminal commands, response: ${response.status}[/line]`);
             }
 
         } catch (e) {
-            await addLine(`[line=red]Failed to fetch terminal commands.[/line]`);
-            await addLine(`Error: ${e}`);
+            await sys.addLine(`[line=red]Failed to fetch terminal commands.[/line]`);
+            await sys.addLine(`Error: ${e}`);
         }
       } else {
-        addLine(`[line=red]Unknown hPKG command: ${params[0]}[/line]`)
+        sys.addLine(`[line=red]Unknown hPKG command: ${params[0]}[/line]`)
       }
       return;
 
@@ -397,7 +411,7 @@ async function callCMD(input, params) {
             if (pkg && typeof pkg[method] === "function") {
               await pkg[method](...args);
             } else {
-              addLine("[line=red]Invalid method[/line]")
+              sys.addLine("[line=red]Invalid method[/line]")
               console.warn("Invalid package or method:", input.toLowerCase(), method);
             }
           } else {
@@ -420,16 +434,16 @@ async function init() {
 
 
   if (!isInstalled) {
-    await addLine("### System files are not installed yet. Install? [Y/n]");
+    await sys.addLine("### System files are not installed yet. Install? [Y/n]");
     inputAnswerActive = true;
     await waitUntil(() => !inputAnswerActive);
     if (inputAnswer.toLowerCase() === "y" || inputAnswer.toLowerCase() === "") {
-      await addLine("Creating system directories and files...")
+      await sys.addLine("Creating system directories and files...")
       await internalFS.createPath("/");
       await internalFS.createPath("/system");
       await internalFS.createPath("/system/modules");
       await internalFS.createPath("/system/packages");
-      await addLine("Fetching required modules...");
+      await sys.addLine("Fetching required modules...");
       await window.sys["import"]("examplemodule");
       await internalFS.createPath("/home");
       await internalFS.createPath("/home/applications");
@@ -446,27 +460,27 @@ async function init() {
             const response = await fetch(url);
     
             if (response.ok) {
-                await addLine("Terminal CmdList downloaded! Installing...")
+                await sys.addLine("Terminal CmdList downloaded! Installing...")
                 const fetchData = await response.text();
                 internalFS.createPath(`/system/terminalcmd.js`, "file", fetchData);
             } else {
-                await addLine(`[line=red]Failed to fetch terminal commands, response: ${response.status}[/line]`);
+                await sys.addLine(`[line=red]Failed to fetch terminal commands, response: ${response.status}[/line]`);
             }
 
         } catch (e) {
-            await addLine(`[line=red]Failed to fetch terminal commands.[/line]`);
-            await addLine(`Error: ${e}`);
+            await sys.addLine(`[line=red]Failed to fetch terminal commands.[/line]`);
+            await sys.addLine(`Error: ${e}`);
         }
-      addLine("[line=green]Terminal commands installed[/line]")
+      sys.addLine("[line=green]Terminal commands installed[/line]")
       
     } else {
-        await addLine("**System file creation cancelled.**")
-        await addLine("[line=red]**_You will be unable to use the system, since you don't have a core system files._**[/line]")
+        await sys.addLine("**System file creation cancelled.**")
+        await sys.addLine("[line=red]**_You will be unable to use the system, since you don't have a core system files._**[/line]")
     }
   } else {
     const issues = checkFileSystemIntegrity();
     if (issues && issues.length > 0 || isSystemInstalled === "recovery") {
-      addLine("[line=red]System issues detected. Attempting recovery...[/line]");
+      sys.addLine("[line=red]System issues detected. Attempting recovery...[/line]");
       recoveryCheck(issues);
     }
 
@@ -477,20 +491,20 @@ async function init() {
 }
 
 async function bootMGR() {
-  addLine("Root directory detected.");
+  sys.addLine("Root directory detected.");
   if (internalFS.getFile("/system/env/config.json")) {
-    addLine("Hold down enter to boot into the Terminal")
+    sys.addLine("Hold down enter to boot into the Terminal")
   }
   keysLocked = true;
   await new Promise(resolve => setTimeout(resolve, 500));
   if (internalFS.getFile("/system/env/config.json") && !isKeyDown("enter")) {
       keysLocked = false;
-      addLine("[line=green]Environment boot config found (/system/env/config.json).[/line]");
+      sys.addLine("[line=green]Environment boot config found (/system/env/config.json).[/line]");
 
       const config = JSON.parse(internalFS.getFile("/system/env/config.json"));
 
       if (!config.bootpath || !config.bootname || !config.bootcmd) {
-          addLine("[line=red]Corrupted config! Missing bootpath, bootname, or bootcmd.[/line]");
+          sys.addLine("[line=red]Corrupted config! Missing bootpath, bootname, or bootcmd.[/line]");
           return;
       }
 
@@ -502,21 +516,21 @@ async function bootMGR() {
           if (typeof cmd === "function") {
               await cmd();
           } else {
-              addLine(`[line=red]Boot command "${config.bootcmd}" not found in "${config.bootname}".[/line]`);
+              sys.addLine(`[line=red]Boot command "${config.bootcmd}" not found in "${config.bootname}".[/line]`);
           }
       } catch (e) {
-          addLine(`[line=red]Boot failed: ${e}[/line]`);
+          sys.addLine(`[line=red]Boot failed: ${e}[/line]`);
           console.error("BootMGR error:", e);
       }
       return;
   }
 
-    addLine("Loading packages...")
+    sys.addLine("Loading packages...")
     const packageAmount = JSON.parse(internalFS.getFile("/system/packages") || []).length;
           
-    await addLine(`[line=green]${packageAmount} package(s) found[/line]`)
+    await sys.addLine(`[line=green]${packageAmount} package(s) found[/line]`)
     if (packageAmount > 0) {
-      await addLine("### Package loading available. Use the command \"listpkgs\" to view your packages.")
+      await sys.addLine("### Package loading available. Use the command \"listpkgs\" to view your packages.")
     }
     await new Promise(resolve => setTimeout(resolve, 500));
     keysLocked = false;
@@ -573,18 +587,6 @@ function parseColorsAndBackgrounds(text) {
 
 
 
-async function addLine(text) {
-const newText = preprocessLineTag(text);
-const escapedText = escapeWithBackslashes(newText);
-const coloredText = parseColorsAndBackgrounds(escapedText);
-const html = marked.parse(coloredText);
-
-  const termContentDiv = document.createElement('div');
-  termContentDiv.innerHTML = html;
-  termDiv.appendChild(termContentDiv);
-  termDiv.scrollTop = termDiv.scrollHeight;
-}
-
 function escapeWithBackslashes(str) {
   return str.replace(/&/g, "&amp;")
             .replace(/</g, "&lt;")
@@ -611,7 +613,7 @@ function recoveryCheck() {
     const dir = issue.split(" ")[0];
     localStorage.setItem(dir, JSON.stringify([]));
     console.warn(`Recovered: ${dir}`);
-    addLine(`[line=green]Recovered directory: ${dir}[/line]`);
+    sys.addLine(`[line=green]Recovered directory: ${dir}[/line]`);
   }
 }
 
@@ -629,10 +631,72 @@ function isSystemInstalled() {
   }
 }
 
-function sandboxEval(code, context = {}) {
-  const contextKeys = Object.keys(context);
-  const contextValues = Object.values(context);
+function createSafeWindow() {
+  const allowedProps = ['setTimeout', 'clearTimeout', 'fetch', 'console', 'Math', 'Date'];
 
-  const sandboxFunction = new Function(...contextKeys, `"use strict";\n${code}`);
+  const customProps = {};
+
+  return new Proxy({}, {
+    get(target, prop) {
+      if (prop in customProps) {
+        return customProps[prop];
+      }
+      if (allowedProps.includes(prop)) {
+        return window[prop];
+      }
+      throw new Error(`Access to window.${prop} is forbidden`);
+    },
+    set(target, prop, value) {
+      if (allowedProps.includes(prop)) {
+        throw new Error(`Modification of window.${prop} is forbidden`);
+      }
+      customProps[prop] = value;
+      return true;
+    },
+    has(target, prop) {
+      return allowedProps.includes(prop) || (prop in customProps);
+    },
+    ownKeys(target) {
+      return allowedProps.concat(Object.keys(customProps));
+    },
+    getOwnPropertyDescriptor(target, prop) {
+      if (allowedProps.includes(prop) || (prop in customProps)) {
+        return {
+          configurable: true,
+          enumerable: true,
+          writable: true,
+          value: this.get(target, prop)
+        };
+      }
+      return undefined;
+    }
+  });
+}
+
+const safeConsole = {
+  log: (...args) => console.log(...args),
+  warn: (...args) => console.warn(...args),
+  error: (...args) => console.error(...args),
+};
+
+
+function sandboxEval(code, context = {}) {
+  const safeContext = {
+    window: createSafeWindow(),
+    console: safeConsole,
+    fetch: window.fetch.bind(window),
+    internalFS: context.internalFS,
+    sys: context.sys,
+    ...context,
+  };
+
+  const contextKeys = Object.keys(safeContext);
+  const contextValues = Object.values(safeContext);
+
+  const sandboxFunction = new Function(
+    ...contextKeys,
+    `"use strict";\n${code}`
+  );
+
   return sandboxFunction(...contextValues);
 }
