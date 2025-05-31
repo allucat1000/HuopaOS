@@ -36,6 +36,6 @@ window.quantum = {
         if (this.initialized) return "Quantum initialized already!";
         this.initialized = true;
         this.bootTime = Date.now();
-       sys.addLine("[line=cyan]Loading Quantum Display Manager...[/line]");
+        sys.addLine("[line=cyan]Loading Quantum Display Manager...[/line]");
     }
 };
