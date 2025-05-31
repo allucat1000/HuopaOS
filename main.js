@@ -31,6 +31,7 @@ const customColors = {
 let termInput = "";
 const termDiv = document.getElementById("termDiv");
 let inputAnswerActive = false;
+let keysLocked = false;
 let inputAnswer = undefined;
 addLine("## Booting system...")
 addLine("### [color=rgb(100, 175, 255)]HuopaOS [/color] beta build.")
@@ -40,15 +41,29 @@ addLine("Use the \"hpkg install\" to install a package. \n Make sure to update y
 const currentVer = "0.3.1"
 const verBranch = "dev";
 if (verBranch === "dev") {
-  addLine("## [line=yellow]Hold up![/line]")
+  addLine("### [line=yellow]Hold up![/line]")
   addLine("### [line=yellow]The dev branch is in use currently! Be ready for bugs![/line]")
 }
 
 const textInput = document.getElementById("textInput");
 textInput.focus()
 
-  
+const keysDown = {};
+
+document.addEventListener("keydown", (event) => {
+    keysDown[event.key.toLowerCase()] = true;
+});
+
+document.addEventListener("keyup", (event) => {
+    keysDown[event.key.toLowerCase()] = false;
+});
+
+function isKeyDown(key) {
+    return !!keysDown[key.toLowerCase()];
+}
+
 textInput.addEventListener('keydown', function(event) {
+  if (keysLocked) return;
   if (event.key === 'Enter') {
     const cmd = textInput.value.split(' ')[0]
     const params = textInput.value
@@ -279,7 +294,20 @@ const internalFS = {
         const unsandboxedFunction = new Function(code);
         return unsandboxedFunction();
     }
+},
+
+isDirectory(path) {
+  const normalizedPath = path.endsWith("/") ? path.slice(0, -1) : path;
+
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith(normalizedPath + "/")) {
+      return true;
+    }
+  }
+  return false;
 }
+
 }
 
 
@@ -308,7 +336,7 @@ function checkFileSystemIntegrity() {
 }
 
 async function callCMD(input, params) {
-    
+  if (keysLocked) return;
   if (input.length > 0) {
     if (input.toLowerCase() === "hpkg") {
       if (params.length < 1) {
@@ -448,25 +476,41 @@ async function init() {
   }
 }
 
-async function bootMGR(extraParams) {
-  addLine("Root directory detected.")
-  let bootType = null
-  if (extraParams) {
-    if (extraParams === "termBoot") {
-      addLine("Terminal environment booted!")
-    }
+async function bootMGR() {
+  addLine("Root directory detected.");
+  if (internalFS.getFile("/system/env/config.json")) {
+    addLine("Hold down enter to boot into the Terminal")
+  }
+  keysLocked = true;
+  await new Promise(resolve => setTimeout(resolve, 500));
+  if (internalFS.getFile("/system/env/config.json") && !isKeyDown("enter")) {
+      keysLocked = false;
+      addLine("[line=green]Environment boot config found (/system/env/config.json).[/line]");
+
+      const config = JSON.parse(internalFS.getFile("/system/env/config.json"));
+
+      if (!config.bootpath || !config.bootname || !config.bootcmd) {
+          addLine("[line=red]Corrupted config! Missing bootpath, bootname, or bootcmd.[/line]");
+          return;
+      }
+
+      try {
+          await internalFS.loadPackage(config.bootpath);
+
+          const cmd = window[config.bootname]?.[config.bootcmd];
+
+          if (typeof cmd === "function") {
+              await cmd();
+          } else {
+              addLine(`[line=red]Boot command "${config.bootcmd}" not found in "${config.bootname}".[/line]`);
+          }
+      } catch (e) {
+          addLine(`[line=red]Boot failed: ${e}[/line]`);
+          console.error("BootMGR error:", e);
+      }
+      return;
   }
 
-  if (!bootType) {
-    if (internalFS.getFile("/system/env/boot.js")) {
-      bootType = "envBoot";
-      addLine("[line=green]Environment boot directory found (/system/env/boot.js).[/line]");
-      addLine("Attempting to boot...");
-      internalFS.loadPackage("/system/env/boot.js");
-    }
-    
-  }
-  if (!bootType) {
     addLine("Loading packages...")
     const packageAmount = JSON.parse(internalFS.getFile("/system/packages") || []).length;
           
@@ -474,7 +518,9 @@ async function bootMGR(extraParams) {
     if (packageAmount > 0) {
       await addLine("### Package loading available. Use the command \"listpkgs\" to view your packages.")
     }
-  }
+    await new Promise(resolve => setTimeout(resolve, 500));
+    keysLocked = false;
+
     
 
     
@@ -589,16 +635,4 @@ function sandboxEval(code, context = {}) {
 
   const sandboxFunction = new Function(...contextKeys, `"use strict";\n${code}`);
   return sandboxFunction(...contextValues);
-}
-
-function isDirectory(path) {
-  const normalizedPath = path.endsWith("/") ? path.slice(0, -1) : path;
-
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key.startsWith(normalizedPath + "/")) {
-      return true;
-    }
-  }
-  return false;
 }
