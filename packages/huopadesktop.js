@@ -22,12 +22,46 @@ window.huopadesktop = (() => {
 
     const openStartMenu = async () => {
         if (!sysTempInfo.startMenuOpen) {
-            sysTempInfo.startMenuOpen = true;
-            const startMenuDiv = quantum.document.createElement("div")
-            startMenuDiv.style = "width: 40em; height: 55%; background-color: rgba(45, 45, 45, 0.85); position: absolute; border-radius: 1em; left: 3%; bottom: 8.5em;"
-            const mainDiv = quantum.document.getElementById("termDiv");
+
+            let startMenuDiv = quantum.document.getElementById("startMenuDiv");
             const desktop = quantum.document.getElementById("desktop");
-            desktop.append(startMenuDiv)
+
+            sysTempInfo.startMenuOpen = true;
+
+            if (!startMenuDiv) {
+                startMenuDiv = quantum.document.createElement("div");
+                startMenuDiv.id = "startMenuDiv";
+                startMenuDiv.style.cssText = `
+                    width: 40em;
+                    height: 55%;
+                    background-color: rgba(45, 45, 45, 0.75);
+                    position: absolute;
+                    border-radius: 1em;
+                    left: 3%;
+                    bottom: 8.5em;
+                    opacity: 0;
+                    transform: translateY(20px);
+                    transition: opacity 0.3s ease, transform 0.3s ease;
+                `;
+
+
+                desktop.append(startMenuDiv);
+            }
+
+
+            requestAnimationFrame(() => {
+                startMenuDiv.style.opacity = "1";
+                startMenuDiv.style.transform = "translateY(0)";
+            });
+
+        } else {
+            sysTempInfo.startMenuOpen = false;
+            const startMenuDiv = quantum.document.getElementById("startMenuDiv");
+
+            requestAnimationFrame(() => {
+                startMenuDiv.style.opacity = "0";
+                startMenuDiv.style.transform = "translateY(20px)";
+            });
         }
     };
 
@@ -78,7 +112,7 @@ window.huopadesktop = (() => {
                 desktop.style = `width: 100%; height: 100%; background-image: url(${imageData}); background-size: cover; background-position: center;`;
                 desktop.id = "desktop";
                 appBar.id = "appBar";
-                appBar.style = `position: absolute; bottom: 20px; width: 96%; height: 5em; background-color: rgba(45, 45, 45, 0.85); border-radius: 1em; left: 50%; transform: translateX(-50%); display: flex; align-items: center;`;
+                appBar.style = `position: absolute; bottom: 20px; width: 96%; height: 5em; background-color: rgba(45, 45, 45, 0.75); border-radius: 1em; left: 50%; transform: translateX(-50%); display: flex; align-items: center;`;
                 mainDiv.style = "position: relative; width: 100vw; height: 100vh; overflow: hidden;";
                 quantum.document.body.style.margin = "0";
 
