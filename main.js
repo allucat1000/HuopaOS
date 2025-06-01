@@ -399,20 +399,33 @@ async function callCMD(input, params) {
 
       for (let i = 0; i < packageList.length; i++) {
         const pkgName = packageList[i].replace("/system/packages/", "").replace(".js", "");
-        if (input.toLowerCase() === pkgName.toLowerCase()) {
-          if (params && Array.isArray(params) && params.length > 0) {
-            const method = params[0];
-            const args = params.slice(1);
+        const inputName = input.toLowerCase();
+        const pkgNameLower = pkgName.toLowerCase();
+        let unsandboxed = params[0] === "-nsbx" ? 1 : 0;
 
-            await internalFS.loadPackage(`/system/packages/${input.toLowerCase()}.js`);
+        if (inputName === pkgNameLower) {
+          if (params && Array.isArray(params) && params.length > 0) {
+            let method = params[0 + unsandboxed] || "init";
+            const args = params.slice(1 + unsandboxed);
+
+            if (unsandboxed === 1) {
+              await internalFS.runUnsandboxed(`/system/packages/${pkgName}.js`);
+            } else {
+              await internalFS.loadPackage(`/system/packages/${pkgName}.js`);
+            }
+
             await new Promise(resolve => setTimeout(resolve, 500));
 
-            const pkg = window[input.toLowerCase()];
+            const pkg = window[pkgNameLower];
             if (pkg && typeof pkg[method] === "function") {
-              await pkg[method](...args);
+              try {
+                await pkg[method](...args);
+              } catch (error) {
+                sys.addLine(`Error: ${error}`);
+              }
             } else {
-              sys.addLine("[line=red]Invalid method[/line]")
-              console.warn("Invalid package or method:", input.toLowerCase(), method);
+              await sys.addLine("[line=red]Invalid method[/line]");
+              console.warn("Invalid package or method:", inputName, method);
             }
           } else {
             console.warn("Params are undefined!");
@@ -420,6 +433,7 @@ async function callCMD(input, params) {
           return;
         }
       }
+
 
     }
   sys.runCMD(input, params)
@@ -633,7 +647,6 @@ function isSystemInstalled() {
 
 function createSafeWindow() {
   const allowedProps = ['setTimeout', 'clearTimeout', 'fetch', 'console', 'Math', 'Date'];
-
   const customProps = {};
 
   return new Proxy({}, {
@@ -644,27 +657,40 @@ function createSafeWindow() {
       if (allowedProps.includes(prop)) {
         return window[prop];
       }
-      throw new Error(`Access to window.${prop} is forbidden`);
+      if (prop in window) {
+        throw new Error(`Access to window.${prop} is forbidden`);
+      }
+      throw new Error(`window.${prop} is not defined`);
     },
+
     set(target, prop, value) {
       if (allowedProps.includes(prop)) {
         throw new Error(`Modification of window.${prop} is forbidden`);
       }
+      if (prop in window) {
+        throw new Error(`Cannot overwrite existing window.${prop}`);
+      }
+      if (prop in customProps) {
+        throw new Error(`window.${prop} has already been defined and cannot be changed`);
+      }
       customProps[prop] = value;
       return true;
     },
+
     has(target, prop) {
       return allowedProps.includes(prop) || (prop in customProps);
     },
+
     ownKeys(target) {
       return allowedProps.concat(Object.keys(customProps));
     },
+
     getOwnPropertyDescriptor(target, prop) {
       if (allowedProps.includes(prop) || (prop in customProps)) {
         return {
           configurable: true,
           enumerable: true,
-          writable: true,
+          writable: false,
           value: this.get(target, prop)
         };
       }
@@ -673,16 +699,27 @@ function createSafeWindow() {
   });
 }
 
-const safeConsole = {
+const safeConsole = Object.freeze({
   log: (...args) => console.log(...args),
   warn: (...args) => console.warn(...args),
   error: (...args) => console.error(...args),
-};
+});
 
+function createSafeDocument() {
+  return new Proxy({}, {
+    get(target, prop) {
+      throw new Error(`Access to document.${prop} is forbidden in sandbox.`);
+    },
+    set() {
+      throw new Error("Modification of document is forbidden in sandbox.");
+    }
+  });
+}
 
 function sandboxEval(code, context = {}) {
   const safeContext = {
     window: createSafeWindow(),
+    document: createSafeDocument(),
     console: safeConsole,
     fetch: window.fetch.bind(window),
     internalFS: context.internalFS,
