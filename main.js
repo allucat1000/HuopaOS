@@ -404,7 +404,6 @@ async function callCMD(input, params) {
         let unsandboxed = params[0] === "-nsbx" ? 1 : 0;
 
         if (inputName === pkgNameLower) {
-          if (params && Array.isArray(params) && params.length > 0) {
             let method = params[0 + unsandboxed] || "init";
             const args = params.slice(1 + unsandboxed);
 
@@ -427,9 +426,6 @@ async function callCMD(input, params) {
               await sys.addLine("[line=red]Invalid method[/line]");
               console.warn("Invalid package or method:", inputName, method);
             }
-          } else {
-            console.warn("Params are undefined!");
-          }
           return;
         }
       }
