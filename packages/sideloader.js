@@ -25,7 +25,7 @@ window.sideloader = (() => {
             await sys.addLine("We are not responsible for any loss, due to malicious packages.");
 
             try {
-                const sandboxCheck = window;
+                const sandboxCheck = document;
             } catch (error) {
                 await sys.addLine("To sideload a package, run unsandboxed! (sideloader -unsx)");
                 return;
