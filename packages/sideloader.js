@@ -21,13 +21,14 @@ window.sideloader = (() => {
     };
 
     return {
-        async load() {
+        async init() {
             await sys.addLine("We are not responsible for any loss, due to malicious packages.");
 
             try {
-                const sandboxCheck = document;
+                const sandboxCheck = document.createElement("div");
+                sandboxCheck.remove();
             } catch (error) {
-                await sys.addLine("To sideload a package, run unsandboxed! (sideloader -unsx)");
+                await sys.addLine("To sideload a package, run unsandboxed! (sideloader -nsbx)");
                 return;
             }
 
