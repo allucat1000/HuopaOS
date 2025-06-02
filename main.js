@@ -87,6 +87,191 @@ window.sys = {
   }
 }
 
+function createSafeWindow() {
+  const allowedProps = ['setTimeout', 'clearTimeout', 'fetch', 'console', 'Math', 'Date'];
+  const customProps = {};
+
+  return new Proxy({}, {
+    get(target, prop) {
+      if (prop in customProps) {
+        return customProps[prop];
+      }
+      if (allowedProps.includes(prop)) {
+        return window[prop];
+      }
+      if (prop in window) {
+        throw new Error(`Access to window.${prop} is forbidden`);
+      }
+      throw new Error(`window.${prop} is not defined`);
+    },
+
+    set(target, prop, value) {
+      if (allowedProps.includes(prop)) {
+        throw new Error(`Modification of window.${prop} is forbidden`);
+      }
+      if (prop in window) {
+        throw new Error(`Cannot overwrite existing window.${prop}`);
+      }
+      if (prop in customProps) {
+        throw new Error(`window.${prop} has already been defined and cannot be changed`);
+      }
+      customProps[prop] = value;
+      return true;
+    },
+
+    has(target, prop) {
+      return allowedProps.includes(prop) || (prop in customProps);
+    },
+
+    ownKeys(target) {
+      return allowedProps.concat(Object.keys(customProps));
+    },
+
+    getOwnPropertyDescriptor(target, prop) {
+      if (allowedProps.includes(prop) || (prop in customProps)) {
+        return {
+          configurable: true,
+          enumerable: true,
+          writable: false,
+          value: this.get(target, prop)
+        };
+      }
+      return undefined;
+    }
+  });
+}
+
+const safeConsole = Object.freeze({
+  log: (...args) => console.log(...args),
+  warn: (...args) => console.warn(...args),
+  error: (...args) => console.error(...args),
+});
+
+function createSafeDocument() {
+  return new Proxy({}, {
+    get(target, prop) {
+      throw new Error(`Access to document.${prop} is forbidden in sandbox.`);
+    },
+    set() {
+      throw new Error("Modification of document is forbidden in sandbox.");
+    }
+  });
+}
+
+function sandboxEval(code, context = {}) {
+  const safeContext = {
+    window: createSafeWindow(),
+    document: createSafeDocument(),
+    console: safeConsole,
+    fetch: window.fetch.bind(window),
+    internalFS: context.internalFS,
+    sys: context.sys,
+    ...context,
+  };
+
+  const contextKeys = Object.keys(safeContext);
+  const contextValues = Object.values(safeContext);
+
+  const sandboxFunction = new Function(
+    ...contextKeys,
+    `"use strict";\n${code}`
+  );
+
+  return sandboxFunction(...contextValues);
+}
+
+function createSafeWindow() {
+  const allowedProps = ['setTimeout', 'clearTimeout', 'fetch', 'console', 'Math', 'Date'];
+  const customProps = {};
+
+  return new Proxy({}, {
+    get(target, prop) {
+      if (prop in customProps) {
+        return customProps[prop];
+      }
+      if (allowedProps.includes(prop)) {
+        return window[prop];
+      }
+      if (prop in window) {
+        throw new Error(`Access to window.${prop} is forbidden`);
+      }
+      throw new Error(`window.${prop} is not defined`);
+    },
+
+    set(target, prop, value) {
+      if (allowedProps.includes(prop)) {
+        throw new Error(`Modification of window.${prop} is forbidden`);
+      }
+      if (prop in window) {
+        throw new Error(`Cannot overwrite existing window.${prop}`);
+      }
+      if (prop in customProps) {
+        throw new Error(`window.${prop} has already been defined and cannot be changed`);
+      }
+      customProps[prop] = value;
+      return true;
+    },
+
+    has(target, prop) {
+      return allowedProps.includes(prop) || (prop in customProps);
+    },
+
+    ownKeys(target) {
+      return allowedProps.concat(Object.keys(customProps));
+    },
+
+    getOwnPropertyDescriptor(target, prop) {
+      if (allowedProps.includes(prop) || (prop in customProps)) {
+        return {
+          configurable: true,
+          enumerable: true,
+          writable: false,
+          value: this.get(target, prop)
+        };
+      }
+      return undefined;
+    }
+  });
+}
+
+const safeConsole = Object.freeze({
+  log: (...args) => console.log(...args),
+  warn: (...args) => console.warn(...args),
+  error: (...args) => console.error(...args),
+});
+
+function createSafeDocument() {
+  return new Proxy({}, {
+    get(target, prop) {
+      throw new Error(`Access to document.${prop} is forbidden in sandbox.`);
+    },
+    set() {
+      throw new Error("Modification of document is forbidden in sandbox.");
+    }
+  });
+}
+
+function sandboxEval(code, context = {}) {
+  const safeContext = {
+    window: createSafeWindow(),
+    document: createSafeDocument(),
+    console: safeConsole,
+    fetch: window.fetch.bind(window),
+    internalFS: context.internalFS,
+    sys: context.sys,
+    ...context,
+  };
+
+  const contextKeys = Object.keys(safeContext);
+  const contextValues = Object.values(safeContext);
+
+  const sandboxFunction = new Function(
+    ...contextKeys,
+    `"use strict";\n${code}`
+  );
+
+  return sandboxFunction(...contextValues);
+}
 
 let termInput = "";
 const termDiv = document.getElementById("termDiv");
@@ -194,12 +379,11 @@ const internalFS = {
         contents = JSON.parse(contentsRaw || "[]");
       } catch (e) {
         if (!force === true) console.warn(`Failed to parse contents of ${dir}`, e);
-        return;
       }
-
       for (const item of contents) {
+        
         const itemData = internalFS.getFile(item);
-        const isDir = itemData && itemData.trim().startsWith("[");
+        const isDir = this.isDirectory(item);
 
         if (isDir) {
           if (recursive === true) {
@@ -298,17 +482,52 @@ const internalFS = {
     size: entry.size || 0,
   };
   },
-  async runUnsandboxed(path) {
-    await sys.addLine(`Do you want to run a script from the path: ${path} unsandboxed? Only do this if this script is trusted. [Y/n]`);
-    inputAnswerActive = true;
-    await waitUntil(() => !inputAnswerActive);
 
-    if (inputAnswer.toLowerCase() === "y" || inputAnswer.toLowerCase() === "") {
+  async runUnsandboxed(path) {
+    const safepkgPath = "/system/security/safepkgs.json";
+    const safepkgRaw = internalFS.getFile(safepkgPath) || "[]";
+    let allowList = JSON.parse(safepkgRaw);
+    if (allowList.includes(path)) {
+      try {
+
+        sys.addLine("Running whitelisted unsandboxed script...")
         const code = internalFS.getFile(path);
         const unsandboxedFunction = new Function(code);
         return unsandboxedFunction();
+      } catch (error) {
+        sys.addLine(`[line=red]Error running unsandboxed script: ${error}[/line]`);
+      }
     }
-},
+    await sys.addLine(`Do you want to run a script from the path: ${path} unsandboxed? Only do this if this script is trusted. [A/y/n]`);
+    inputAnswerActive = true;
+    await waitUntil(() => !inputAnswerActive);
+
+    const answer = inputAnswer.toLowerCase();
+
+    if (answer === "y" || answer === "" || answer === "a") {
+      try {
+        if (answer === "a" || answer === "") {
+          if (!allowList.includes(path)) {
+            allowList.push(path);
+            this.createPath(safepkgPath, "file", JSON.stringify(allowList), {
+              "write": "SYSTEM",
+              "read": "SYSTEM",
+              "modify": "SYSTEM"
+            });
+          }
+        }
+        const code = internalFS.getFile(path);
+        const unsandboxedFunction = new Function(code);
+        return unsandboxedFunction();
+      } catch (error) {
+        sys.addLine(`[line=red]Error running unsandboxed script: ${error}[/line]`);
+      }
+    } else {
+      await sys.addLine("Execution cancelled.");
+      return;
+    }
+  },
+
 
 isDirectory(path) {
   const normalizedPath = path.endsWith("/") ? path.slice(0, -1) : path;
@@ -404,11 +623,17 @@ async function callCMD(input, params) {
         let unsandboxed = params[0] === "-nsbx" ? 1 : 0;
 
         if (inputName === pkgNameLower) {
+            
             let method = params[0 + unsandboxed] || "init";
-            const args = params.slice(1 + unsandboxed);
+            let args = params.slice(1 + unsandboxed);
 
             if (unsandboxed === 1) {
               await internalFS.runUnsandboxed(`/system/packages/${pkgName}.js`);
+              const pkg = window[pkgNameLower];
+              if (!pkg) {
+                sys.addLine("Unsandboxed run cancelled!")
+                return;
+              }
             } else {
               await internalFS.loadPackage(`/system/packages/${pkgName}.js`);
             }
@@ -494,20 +719,29 @@ async function init() {
       recoveryCheck(issues);
     }
 
+    if (verBranch === "dev") {
+      if (!internalFS.getFile("/system/packages/sideloader.js")) {
+        await internalFS.downloadPackage("sideloader");
+        await sys.addLine("Sideloader automatically installed!");
+      }
 
-    bootMGR()
+    }
+
+    await bootMGR()
     
   }
 }
 
+
+
 async function bootMGR() {
   sys.addLine("Root directory detected.");
   if (internalFS.getFile("/system/env/config.json")) {
-    sys.addLine("Hold down enter to boot into the Terminal")
+    sys.addLine("Hold down \"c\" to boot into the Terminal")
   }
   keysLocked = true;
   await new Promise(resolve => setTimeout(resolve, 500));
-  if (internalFS.getFile("/system/env/config.json") && !isKeyDown("enter")) {
+  if (internalFS.getFile("/system/env/config.json") && !isKeyDown("c")) {
       keysLocked = false;
       sys.addLine("[line=green]Environment boot config found (/system/env/config.json).[/line]");
 
@@ -544,6 +778,7 @@ async function bootMGR() {
     }
     await new Promise(resolve => setTimeout(resolve, 500));
     keysLocked = false;
+    textInput.value = "";
 
     
 
@@ -639,97 +874,4 @@ function isSystemInstalled() {
   } else {
     return false;
   }
-}
-
-function createSafeWindow() {
-  const allowedProps = ['setTimeout', 'clearTimeout', 'fetch', 'console', 'Math', 'Date'];
-  const customProps = {};
-
-  return new Proxy({}, {
-    get(target, prop) {
-      if (prop in customProps) {
-        return customProps[prop];
-      }
-      if (allowedProps.includes(prop)) {
-        return window[prop];
-      }
-      if (prop in window) {
-        throw new Error(`Access to window.${prop} is forbidden`);
-      }
-      throw new Error(`window.${prop} is not defined`);
-    },
-
-    set(target, prop, value) {
-      if (allowedProps.includes(prop)) {
-        throw new Error(`Modification of window.${prop} is forbidden`);
-      }
-      if (prop in window) {
-        throw new Error(`Cannot overwrite existing window.${prop}`);
-      }
-      if (prop in customProps) {
-        throw new Error(`window.${prop} has already been defined and cannot be changed`);
-      }
-      customProps[prop] = value;
-      return true;
-    },
-
-    has(target, prop) {
-      return allowedProps.includes(prop) || (prop in customProps);
-    },
-
-    ownKeys(target) {
-      return allowedProps.concat(Object.keys(customProps));
-    },
-
-    getOwnPropertyDescriptor(target, prop) {
-      if (allowedProps.includes(prop) || (prop in customProps)) {
-        return {
-          configurable: true,
-          enumerable: true,
-          writable: false,
-          value: this.get(target, prop)
-        };
-      }
-      return undefined;
-    }
-  });
-}
-
-const safeConsole = Object.freeze({
-  log: (...args) => console.log(...args),
-  warn: (...args) => console.warn(...args),
-  error: (...args) => console.error(...args),
-});
-
-function createSafeDocument() {
-  return new Proxy({}, {
-    get(target, prop) {
-      throw new Error(`Access to document.${prop} is forbidden in sandbox.`);
-    },
-    set() {
-      throw new Error("Modification of document is forbidden in sandbox.");
-    }
-  });
-}
-
-function sandboxEval(code, context = {}) {
-  const safeContext = {
-    window: createSafeWindow(),
-    document: createSafeDocument(),
-    console: safeConsole,
-    fetch: window.fetch.bind(window),
-    internalFS: context.internalFS,
-    sys: context.sys,
-    ...context,
-  };
-
-  const contextKeys = Object.keys(safeContext);
-  const contextValues = Object.values(safeContext);
-
-  const sandboxFunction = new Function(
-    ...contextKeys,
-    `"use strict";\n${code}`
-  );
-
-  return sandboxFunction(...contextValues);
 }

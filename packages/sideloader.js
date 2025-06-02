@@ -39,7 +39,7 @@ window.sideloader = (() => {
                 await sys.addLine("No file selected.");
                 return;
             }
-
+            const appName = file.name;
             const appCode = await new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.onload = () => resolve(reader.result);
@@ -47,19 +47,10 @@ window.sideloader = (() => {
                 reader.readAsText(file);
             });
 
-            inputAnswerActive = true;
-            await sys.addLine("What name do you want to give for the sideloaded package? If the name is the same as another package, the old package will get overwritten.");
-            await waitUntil(() => !inputAnswerActive);
-
-            if (!inputAnswer) {
-                await sys.addLine("Give a name for the package!");
-                return;
-            }
-
             try {
-                await internalFS.createPath(`/system/packages/${inputAnswer}.js`, "file", appCode);
+                await internalFS.createPath(`/system/packages/${appName}`, "file", appCode);
                 await sys.addLine("Successfully sideloaded package!");
-                await sys.addLine(`You can view your package at: /system/packages/${inputAnswer}.js`);
+                await sys.addLine(`You can view your package at: /system/packages/${appName}`);
             } catch (error) {
                 await sys.addLine("Failed to sideload package. Error: " + error);
             }

@@ -1,9 +1,11 @@
 window.huopadesktop = (() => {
+    let killSwitch = false
     let sysTempInfo = {
         "startMenuOpen":false
     }
     // Priv Sys Funcs
     const fetchAndStoreImage = async (url, path) => {
+        if (killSwitch) return;
         const response = await fetch(url);
         if (!response.ok) {
             await sys.addLine(`Failed to fetch image: ${url}`);
@@ -21,22 +23,26 @@ window.huopadesktop = (() => {
     }
 
     const openStartMenu = async () => {
+        if (killSwitch) return;
         if (!sysTempInfo.startMenuOpen) {
 
             let startMenuDiv = quantum.document.getElementById("startMenuDiv");
             const desktop = quantum.document.getElementById("desktop");
-
-            sysTempInfo.startMenuOpen = true;
+            const mainDiv = quantum.document.getElementById("termDiv");
+            sysTempInfo.startMenuOpen = "half";
 
             if (!startMenuDiv) {
                 startMenuDiv = quantum.document.createElement("div");
                 startMenuDiv.id = "startMenuDiv";
                 startMenuDiv.style.cssText = `
-                    width: 40em;
-                    height: 55%;
+                    width: 30em;
+                    height: 385px;
                     background-color: rgba(45, 45, 45, 0.75);
                     position: absolute;
                     border-radius: 1em;
+                    border: 2.5px;
+                    border-style: solid;
+                    border-color: rgba(105, 105, 105, 1);
                     left: 3%;
                     bottom: 8.5em;
                     opacity: 0;
@@ -44,26 +50,108 @@ window.huopadesktop = (() => {
                     transition: opacity 0.3s ease, transform 0.3s ease;
                 `;
 
-
                 desktop.append(startMenuDiv);
             }
-
-
+            const shutdownButton = quantum.document.createElement("button");
+            shutdownButton.style = "background-color: rgba(45, 45, 45, 0.85); border-color: rgba(105, 105, 105, 1); border-style: solid; border-radius: 0.5em; position: absolute; cursor: pointer; right: 0.5em; bottom: 0.5em; color: white; padding: 0.5em;"
+            shutdownButton.textContent = "Shutdown";
+            shutdownButton.onclick = () => { mainDiv.innerHTML = ""; killSwitch = true; sys.addLine(`The system has shut down! Date (Unix epoch): ${Date.now()}`); return; }
+            startMenuDiv.append(shutdownButton);
+            const appList = internalFS.getFile("/home/applications");
             requestAnimationFrame(() => {
                 startMenuDiv.style.opacity = "1";
                 startMenuDiv.style.transform = "translateY(0)";
             });
 
-        } else {
-            sysTempInfo.startMenuOpen = false;
+            setTimeout(() => {
+                sysTempInfo.startMenuOpen = true;
+            }, 300);
+
+
+        } else if (sysTempInfo.startMenuOpen === true){
+            sysTempInfo.startMenuOpen = "half";
             const startMenuDiv = quantum.document.getElementById("startMenuDiv");
 
             requestAnimationFrame(() => {
                 startMenuDiv.style.opacity = "0";
                 startMenuDiv.style.transform = "translateY(20px)";
             });
+            setTimeout(() => {
+                startMenuDiv.innerHTML = "";
+                setTimeout(() => {
+                    sysTempInfo.startMenuOpen = false;
+                }, 50);
+            }, 300);
+        
         }
     };
+
+    const createMainGUI = async () => {
+        if (killSwitch) return;
+        try {
+            const mainDiv = quantum.document.getElementById("termDiv");
+            mainDiv.innerHTML = "";
+
+            const desktop = quantum.document.createElement("div");
+            const appBar = quantum.document.createElement("div");
+            const imageData = internalFS.getFile("/system/env/wallpapers/default.png");
+            quantum.document.body.style.margin = "0";
+            desktop.style = `width: 100%; height: 100%; background-image: url(${imageData}); background-size: cover; background-position: center;`;
+            desktop.id = "desktop";
+            mainDiv.append(desktop);
+
+            const inputLabel = quantum.document.getElementById("inputLabel");
+            inputLabel?.remove();
+            mainDiv.style = "position: relative; width: 100vw; height: 100vh; overflow: hidden;";
+
+            if (window.innerWidth < 1050 || window.innerHeight < 700) {
+                const popup = quantum.document.createElement("div");
+                popup.style = "width: 90%; height: 90%; background-color: rgba(35, 35, 35, 0.75); border-radius: 0.5em; border-style: solid; border-color: rgba(55, 55, 55, 0.9); border-width: 2px; position: absolute; left: 50%; transform: translateX(-50%); top: 5%; "
+                const popupText = quantum.document.createElement("h1");
+                popupText.textContent = "HuopaDesktop requires a screen size of at least 1050px x 700px!";
+                popupText.style = "padding: 0.5em; max-width: 90%; margin: 1em auto; text-align: center; font-size: 3em;"
+                mainDiv.append(popup);
+                popup.append(popupText);
+                return;
+            }
+
+            appBar.id = "appBar";
+            appBar.style = `position: absolute; bottom: 20px; width: 96%; height: 5em; background-color: rgba(45, 45, 45, 0.75); border-radius: 1em; left: 50%; transform: translateX(-50%); display: flex; align-items: center; border: 2.5px; border: 2.5px; border-style: solid; border-color: rgba(105, 105, 105, 1);`;
+
+
+            desktop.append(appBar);
+
+
+            const huopalogo = internalFS.getFile("/system/env/assets/huopalogo.png");
+            const startMenuButton = quantum.document.createElement("button");
+            startMenuButton.style = `background-image: url(${huopalogo}); background-size: contain; background-repeat: no-repeat; background-position: center; width: 3.5em; height: 3.5em; border: none; background-color: transparent; border-radius: 50%; margin: 1em; transition: 0.15s;cursor: pointer; transform-origin: center;`;
+
+            appBar.id = "appBar";
+            appBar.append(startMenuButton);
+            startMenuButton.onclick = async function() {
+                openStartMenu();
+            }
+            startMenuButton.addEventListener("mouseenter", () => {
+                startMenuButton.style.filter = "brightness(0.8)";
+            });
+
+            startMenuButton.addEventListener("mouseleave", () => {
+                startMenuButton.style.filter = "brightness(1)";
+            });
+
+        } catch (error) {
+            const mainDiv = quantum.document.getElementById("termDiv");
+            mainDiv.innerHTML = "";
+            await sys.addLine("# [color=red]/!\\ [/color]")
+            await sys.addLine("## [line=red]An unhandled exeption has occurred in HuopaDesktop and the system has been forced to halt.[/line]");
+            await sys.addLine(`## Error: ${error}`);
+            await sys.addLine("Try updating your packages (such as HuopaDesktop) using the command: \"hpkg update\".");
+            await sys.addLine("If you still have issues, check if you have any custom scripts for HuopaDesktop. If you do, try booting HuopaDesktop without the scripts.");
+            await sys.addLine("If you don't have any custom scripts or the issue is still occurring, please report this issue to me (for example through the HuopaOS Github).");
+            await sys.addLine("### Reboot the system to load into HuopaDesktop or the terminal (hold down \"C\" to load into the terminal).");
+        }
+
+    }
 
     
     return {
@@ -98,42 +186,12 @@ window.huopadesktop = (() => {
 
             }
 
-            try {
+
                 await sys.addLine("Loading HuopaDesktop...");
                 await new Promise(resolve => setTimeout(resolve, 500));
 
-                const mainDiv = quantum.document.getElementById("termDiv");
-                mainDiv.innerHTML = "";
+                createMainGUI()
 
-                const desktop = quantum.document.createElement("div");
-                const appBar = quantum.document.createElement("div");
-                const imageData = internalFS.getFile("/system/env/wallpapers/default.png");
-
-                desktop.style = `width: 100%; height: 100%; background-image: url(${imageData}); background-size: cover; background-position: center;`;
-                desktop.id = "desktop";
-                appBar.id = "appBar";
-                appBar.style = `position: absolute; bottom: 20px; width: 96%; height: 5em; background-color: rgba(45, 45, 45, 0.75); border-radius: 1em; left: 50%; transform: translateX(-50%); display: flex; align-items: center;`;
-                mainDiv.style = "position: relative; width: 100vw; height: 100vh; overflow: hidden;";
-                quantum.document.body.style.margin = "0";
-
-                mainDiv.append(desktop);
-                desktop.append(appBar);
-
-                const inputLabel = quantum.document.getElementById("inputLabel");
-                inputLabel?.remove();
-
-                const huopalogo = internalFS.getFile("/system/env/assets/huopalogo.png");
-                const startMenuButton = quantum.document.createElement("button");
-                startMenuButton.style = `background-image: url(${huopalogo}); background-size: contain; background-repeat: no-repeat; background-position: center; width: 3.5em; height: 3.5em; border: none; background-color: transparent; border-radius: 50%; margin: 1em;`;
-
-                appBar.id = "appBar";
-                appBar.append(startMenuButton);
-                startMenuButton.onclick = async function() {
-                    openStartMenu();
-                }
-            } catch (error) {
-                await sys.addLine("HuopaDesktop loading failed! Error: " + error);
-            }
         },
 
 
