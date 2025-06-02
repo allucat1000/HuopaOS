@@ -53,11 +53,22 @@ window.huopadesktop = (() => {
                 desktop.append(startMenuDiv);
             }
             const shutdownButton = quantum.document.createElement("button");
-            shutdownButton.style = "background-color: rgba(45, 45, 45, 0.85); border-color: rgba(105, 105, 105, 1); border-style: solid; border-radius: 0.5em; position: absolute; cursor: pointer; right: 0.5em; bottom: 0.5em; color: white; padding: 0.5em;"
+            shutdownButton.style = "background-color: rgba(45, 45, 45, 0.7); border-color: rgba(105, 105, 105, 0.6); border-style: solid; border-radius: 0.5em; position: absolute; cursor: pointer; right: 0.5em; bottom: 0.5em; color: white; padding: 0.5em;"
             shutdownButton.textContent = "Shutdown";
             shutdownButton.onclick = () => { mainDiv.innerHTML = ""; killSwitch = true; sys.addLine(`The system has shut down! Date (Unix epoch): ${Date.now()}`); return; }
             startMenuDiv.append(shutdownButton);
-            const appList = internalFS.getFile("/home/applications");
+            const appList = JSON.parse(internalFS.getFile("/home/applications"));
+            const appText = quantum.document.createElement("h2");
+            appText.textContent = "Your apps";
+            appText.style = "margin: 0.5em; text-align: left; color: white; font-family: sans-serif;"
+            startMenuDiv.append(appText);
+            for (let i = 0; i < appList.length; i++) {
+                const appButton = quantum.document.createElement("button");
+                const cleanedAppName = appList[i].replace("/home/applications/", "")
+                appButton.textContent = cleanedAppName;
+                appButton.style = "color: white; background-color: rgba(45, 45, 45, 0.7); border-color: rgba(105, 105, 105, 0.6); border-style: solid; border-radius: 0.5em; padding: 0.5em; width: 22em; height: 3em; margin: 0.5em; text-align: left;"
+                startMenuDiv.append(appButton);
+            }
             requestAnimationFrame(() => {
                 startMenuDiv.style.opacity = "1";
                 startMenuDiv.style.transform = "translateY(0)";
@@ -104,7 +115,7 @@ window.huopadesktop = (() => {
             inputLabel?.remove();
             mainDiv.style = "position: relative; width: 100vw; height: 100vh; overflow: hidden;";
 
-            if (window.innerWidth < 1050 || window.innerHeight < 700) {
+            if (window.innerWidth < 150 || window.innerHeight < 70) {
                 const popup = quantum.document.createElement("div");
                 popup.style = "width: 90%; height: 90%; background-color: rgba(35, 35, 35, 0.75); border-radius: 0.5em; border-style: solid; border-color: rgba(55, 55, 55, 0.9); border-width: 2px; position: absolute; left: 50%; transform: translateX(-50%); top: 5%; "
                 const popupText = quantum.document.createElement("h1");
