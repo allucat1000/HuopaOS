@@ -62,6 +62,12 @@ window.huopadesktop = (() => {
             appText.textContent = "Your apps";
             appText.style = "margin: 0.5em; text-align: left; color: white; font-family: sans-serif;"
             startMenuDiv.append(appText);
+            if (appList.length < 1) {
+                const noAppsText = quantum.document.createElement("p");
+                noAppsText.textContent = "You don't seem to have any apps installed right now!";
+                noAppsText.style = "margin: 0.7em; max-width: 17em; text-align: left; color: white; font-family: sans-serif;"
+                startMenuDiv.append(noAppsText);
+            }
             for (let i = 0; i < appList.length; i++) {
                 const appButton = quantum.document.createElement("button");
                 const cleanedAppName = appList[i].replace("/home/applications/", "")
