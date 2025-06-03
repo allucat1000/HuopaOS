@@ -180,6 +180,8 @@ function sandboxEval(code, context = {}) {
   return sandboxFunction(...contextValues);
 }
 
+
+
 let termInput = "";
 const termDiv = document.getElementById("termDiv");
 let inputAnswerActive = false;
@@ -191,7 +193,7 @@ sys.addLine("### Made by [color=rgb(100, 175, 255)]Allucat1000.[/color]")
 sys.addLine("Thank you for trying this demo! If you have any suggestions or bugs, make sure to let me know!")
 sys.addLine("Use the \"hpkg install\" to install a package. \n Make sure to update your packages often using \"hpkg update\".")
 const currentVer = "0.3.1"
-const verBranch = "main";
+const verBranch = "dev";
 if (verBranch === "dev") {
   sys.addLine("### [line=yellow]Hold up![/line]")
   sys.addLine("### [line=yellow]The dev branch is in use currently! Be ready for bugs![/line]")
@@ -782,3 +784,4 @@ function isSystemInstalled() {
     return false;
   }
 }
+
