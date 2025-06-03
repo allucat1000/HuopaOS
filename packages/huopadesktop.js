@@ -4,6 +4,20 @@ window.huopadesktop = (() => {
         "startMenuOpen":false
     }
     // Priv Sys Funcs
+
+    const downloadApp = async (url, savePath) => {
+        sys.addLine(`[line=blue]Installing app to path ${savePath}...[/line]`);
+        const response = await fetch(url);
+        if (response.ok) {
+            const code = await response.text();
+            await internalFS.createPath(savePath, "file", code);
+            sys.addLine("[line=green]App installed![/line]");
+        } else {
+            sys.addLine("Failed to install app!");
+            sys.addLine(`Response status: ${response.status}`);
+        }
+       
+    }
     const fetchAndStoreImage = async (url, path) => {
         if (killSwitch) return;
         const response = await fetch(url);
@@ -22,6 +36,386 @@ window.huopadesktop = (() => {
         return true;
     }
 
+    const runAppSecure = async (appCode) => {
+        if (killSwitch) return null;
+
+        const iframe = quantum.document.createElement('iframe');
+        iframe.sandbox = "allow-scripts";
+        iframe.style.display = "none";
+        quantum.document.body.appendChild(iframe);
+
+        const iframeHTML = `
+            <script>
+                const localClickHandlers = {};
+
+                window.addEventListener("message", (event) => {
+                    const data = event.data;
+                    if (data?.type === "click" && data?.elementId) {
+                        const handler = localClickHandlers[data.elementId];
+                        if (handler) handler();
+                    }
+                });
+
+                const huopaAPI = (() => {
+                    let msgId = 0;
+                    const callbacks = new Map();
+
+                    window.addEventListener("message", (event) => {
+                        const { type, id, result, error } = event.data || {};
+                        if (type === "apiResponse" && callbacks.has(id)) {
+                            const { resolve, reject } = callbacks.get(id);
+                            callbacks.delete(id);
+                            if (error) reject(new Error(error));
+                            else resolve(result);
+                        }
+                    });
+
+                    return new Proxy({}, {
+                        get(_, prop) {
+                            if (prop === "setOnClick") {
+                                return async (elementId, handler) => {
+                                    localClickHandlers[elementId] = handler;
+                                    // Notify parent to bind a click listener that sends back message
+                                    return new Promise((resolve, reject) => {
+                                        const id = "msg_" + msgId++;
+                                        callbacks.set(id, { resolve, reject });
+                                        window.parent.postMessage({
+                                            type: "bindClickForward",
+                                            data: [elementId],
+                                            id
+                                        }, "*");
+                                    });
+                                };
+                            }
+
+                            // All other calls forwarded to parent
+                            return (...args) => {
+                                return new Promise((resolve, reject) => {
+                                    const id = "msg_" + msgId++;
+                                    callbacks.set(id, { resolve, reject });
+                                    window.parent.postMessage({ type: prop, data: args, id }, "*");
+                                });
+                            };
+                        }
+                    });
+                })();
+
+                (async () => {
+                    try {
+                        ${appCode}
+                    } catch (e) {
+                        huopaAPI.error?.("Runtime Error: " + e.message);
+                    }
+                })();
+            </script>
+        `;
+
+
+        iframe.srcdoc = iframeHTML;
+
+        await new Promise(r => setTimeout(r, 0));
+
+        return iframe;
+    };
+
+
+
+    const huopaAPI = new Proxy({}, {
+        get(target, prop) {
+            return (...args) => {
+            if (typeof huopaAPIHandlers[prop] === "function") {
+                huopaAPIHandlers[prop](...args);
+            } else {
+                console.warn(`No handler for huopaAPI method '${prop}'`);
+            }
+            };
+        }
+    });
+
+
+
+
+    const messageHandler = async (event) => {
+            if (killSwitch) return;
+            const { type, data, id } = event.data || {};
+            if (typeof type !== "string" || !huopaAPI[type]) return;
+
+            try {
+                const result = await huopaAPI[type](...(Array.isArray(data) ? data : [data]));
+                if (id) {
+                    event.source?.postMessage({ type: "apiResponse", id, result }, "*");
+                }
+            } catch (err) {
+                if (id) {
+                    event.source?.postMessage({ type: "apiResponse", id, error: err.message }, "*");
+                } else {
+                    console.error("[APP ERROR] " + err.message);
+                }
+            }
+        };
+
+
+    const huopaAPIMap = new WeakMap();
+
+    const runApp = async (appId, appCodeString) => {
+        if (killSwitch) return;
+
+        const container = await createAppContainer(appId);
+        const handlers = huopaAPIHandlers(container);
+
+        const huopaAPI = new Proxy({}, {
+            get(_, prop) {
+                return (...args) => {
+                    if (typeof handlers[prop] === "function") {
+                        return handlers[prop](...args);
+                    } else {
+                        console.warn(`No handler for huopaAPI method '${prop}'`);
+                    }
+                };
+            }
+        });
+
+
+        const iframe = await runAppSecure(appCodeString);
+
+        if (iframe && iframe.contentWindow) {
+            huopaAPIMap.set(iframe.contentWindow, huopaAPI);
+        } else {
+            console.error("runAppSecure failed to create iframe or contentWindow");
+        }
+    };
+    const elementRegistry = {}
+
+    const huopaAPIHandlers = (appContainer) => {
+        let elementIdCounter = 0;
+        return {
+            createElement: function(tag) {
+                const el = quantum.document.createElement(tag);
+                el.style.maxWidth = "100%";
+                el.style.maxHeight = "100%";
+                el.style.boxSizing = "border-box";
+                
+                const id = `el_${elementIdCounter++}`;
+                el.dataset.huopaId = id;
+                el.id = id;
+                elementRegistry[id] = el;
+                return id;
+            },
+
+            appendToApp: function(id) {    
+                const el = elementRegistry[id];
+                if (!el) {
+                    console.warn(`append: Element with ID '${id}' not found.`);
+                    return;
+                }
+                if (el) appContainer.appendChild(el);
+            },
+
+
+            append: function(parent, id) {    
+                const el = elementRegistry[id];
+                if (!el) {
+                    console.warn(`append: Element with ID '${id}' not found.`);
+                    return;
+                }
+                const parentEl = elementRegistry[parent];
+                if (!parentEl) {
+                    console.warn(`append: Element with ID '${parent}' not found.`);
+                    return;
+                }
+                parentEl.appendChild(el);
+            },
+
+            getElementById: function(id) {
+                return appContainer.querySelector(`#${id}`);
+            },
+
+            querySelector: function(sel) {
+                return appContainer.querySelector(sel);
+            },
+
+            querySelectorAll: function(sel) {
+                return appContainer.querySelectorAll(sel);
+            },
+
+            log: function(msg) {
+                console.log(`[APP LOG]: ${msg}`);
+            },
+
+            error: function(msg) {
+                console.error(`[APP ERROR]: ${msg}`);
+            },
+
+            warn: function(msg) {
+                console.error(`[APP WARN]: ${msg}`);
+            },
+
+            container: appContainer,
+
+            Math,
+
+            Date,
+
+            fetch,
+
+            setTimeout,
+
+            clearTimeout,
+
+
+            getWindowSize: function() {
+                return {
+                    width: appContainer.clientWidth,
+                    height: appContainer.clientHeight,
+                };
+            },
+
+            setText: function(id, text) {
+                const el = elementRegistry[id];
+                if (el) el.textContent = text;
+            },
+
+            setInnerHMTL: function(id, content) {
+                const el = elementRegistry[id];
+                if (el) el.innerHTML = content;
+            },
+
+            setStyle: function(id, styleText) {
+                const el = elementRegistry[id];
+                if (el) el.style = styleText;
+            },
+
+            setOnClick: function(id) {
+                const el = elementRegistry[id];
+                if (!el) return;
+
+                el.addEventListener("click", () => {
+                    sandboxWindow.postMessage({
+                        type: "event",
+                        event: "click",
+                        elementId: id
+                    }, "*");
+                });
+            }
+
+        };
+    };
+
+
+    window.addEventListener("message", async (event) => {
+        if (killSwitch) return;
+        const { type, data, id } = event.data || {};
+
+        if (type === "bindClickForward") {
+            const [elementId] = data;
+            const el = elementRegistry[elementId];
+            if (el) {
+                const clickHandler = () => {
+                    event.source.postMessage({ type: "click", elementId }, "*");
+                };
+                el.addEventListener("click", clickHandler);
+
+                if (id) {
+                    event.source.postMessage({ type: "apiResponse", id, result: true }, "*");
+                }
+            } else {
+                if (id) {
+                    console.warn(`Element ${elementId} not found in elementRegistry.`);
+                    event.source.postMessage({ type: "apiResponse", id, error: "Element not found" }, "*");
+                }
+            }
+            return;
+        }
+
+        const huopaAPI = huopaAPIMap.get(event.source);
+        if (!huopaAPI || typeof huopaAPI[type] !== "function") {
+            console.warn(`No handler for huopaAPI method '${type}'`);
+            return;
+        }
+
+        try {
+            const result = await huopaAPI[type](...(Array.isArray(data) ? data : [data]));
+            if (id) {
+                event.source?.postMessage({ type: "apiResponse", id, result }, "*");
+            }
+        } catch (err) {
+            if (id) {
+                event.source?.postMessage({ type: "apiResponse", id, error: err.message }, "*");
+            } else {
+                sys.addLine("[APP ERROR] " + err.message);
+            }
+        }
+    });
+
+    function createDraggableWindow(windowEl, dragHandleSelector = ".titlebar") {
+        const dragHandle = windowEl.querySelector(dragHandleSelector);
+        if (!dragHandle) return;
+
+        let isDragging = false;
+        let offsetX = 0;
+        let offsetY = 0;
+
+        dragHandle.style.cursor = "move";
+        dragHandle.addEventListener("mousedown", (e) => {
+            isDragging = true;
+            const rect = windowEl.getBoundingClientRect();
+            offsetX = e.clientX - rect.left;
+            offsetY = e.clientY - rect.top;
+
+            windowEl.style.position = "absolute";
+            windowEl.style.zIndex = 1000;
+
+            quantum.document.addEventListener("mousemove", onMouseMove);
+            quantum.document.addEventListener("mouseup", onMouseUp);
+        });
+
+        function onMouseMove(e) {
+            if (!isDragging) return;
+            const x = e.clientX - offsetX;
+            const y = e.clientY - offsetY;
+            windowEl.style.left = x + "px";
+            windowEl.style.top = y + "px";
+        }
+
+        function onMouseUp() {
+            isDragging = false;
+            quantum.document.removeEventListener("mousemove", onMouseMove);
+            quantum.document.removeEventListener("mouseup", onMouseUp);
+        }
+    }
+
+    const createAppContainer = async (appId) => {
+        const outerContainer = quantum.document.createElement("div");
+        outerContainer.style = `
+            position: absolute;
+            width: 700px;
+            height: 500px;
+            top: 50px;
+            left: 50px;
+            overflow: hidden;
+            resize: both;
+            border: 2px solid gray;
+            border-radius: 0.5em;
+            background: rgba(30, 30, 30, 0.8);
+        `;
+        const titleBar = quantum.document.createElement("div");
+        const appTitle = quantum.document.createElement("h3");
+        appTitle.textContent = appId;
+        appTitle.style = "font-family: sans-serif; margin: 0.5em;"
+        titleBar.className = "titlebar";
+        const container = quantum.document.createElement("div");
+        container.className = "app-container";
+        container.style = "width: 100%; height: 100%;";
+        container.id = `app-${appId}`;
+        quantum.document.getElementById("desktop").appendChild(outerContainer);
+        outerContainer.append(titleBar);
+        titleBar.append(appTitle);
+        outerContainer.append(container);
+        createDraggableWindow(outerContainer);
+        return container;
+    }
+
+    
     const openStartMenu = async () => {
         if (killSwitch) return;
         if (!sysTempInfo.startMenuOpen) {
@@ -53,11 +447,33 @@ window.huopadesktop = (() => {
                 desktop.append(startMenuDiv);
             }
             const shutdownButton = quantum.document.createElement("button");
-            shutdownButton.style = "background-color: rgba(45, 45, 45, 0.85); border-color: rgba(105, 105, 105, 1); border-style: solid; border-radius: 0.5em; position: absolute; cursor: pointer; right: 0.5em; bottom: 0.5em; color: white; padding: 0.5em;"
+            shutdownButton.style = "background-color: rgba(45, 45, 45, 0.7); border-color: rgba(105, 105, 105, 0.6); border-style: solid; border-radius: 0.5em; position: absolute; cursor: pointer; right: 0.5em; bottom: 0.5em; color: white; padding: 0.5em;"
             shutdownButton.textContent = "Shutdown";
             shutdownButton.onclick = () => { mainDiv.innerHTML = ""; killSwitch = true; sys.addLine(`The system has shut down! Date (Unix epoch): ${Date.now()}`); return; }
             startMenuDiv.append(shutdownButton);
-            const appList = internalFS.getFile("/home/applications");
+            const appList = JSON.parse(internalFS.getFile("/home/applications"));
+            const appText = quantum.document.createElement("h2");
+            appText.textContent = "Your apps";
+            appText.style = "margin: 0.5em; text-align: left; color: white; font-family: sans-serif;"
+            startMenuDiv.append(appText);
+            if (appList.length < 1) {
+                const noAppsText = quantum.document.createElement("p");
+                noAppsText.textContent = "You don't seem to have any apps installed right now!";
+                noAppsText.style = "margin: 0.7em; max-width: 17em; text-align: left; color: white; font-family: sans-serif;"
+                startMenuDiv.append(noAppsText);
+            }
+
+            for (let i = 0; i < appList.length; i++) {
+                const appButton = quantum.document.createElement("button");
+                const cleanedAppName = appList[i].replace("/home/applications/", "")
+                appButton.textContent = cleanedAppName;
+                appButton.style = "color: white; background-color: rgba(45, 45, 45, 0.7); border-color: rgba(105, 105, 105, 0.6); border-style: solid; border-radius: 0.5em; padding: 0.5em; width: 22em; height: 3em; margin: 0.5em; text-align: left;"
+                appButton.onclick = async () => {
+                    const code = internalFS.getFile(appList[i]);
+                    await runApp(cleanedAppName, code);
+                };
+                startMenuDiv.append(appButton);
+            }
             requestAnimationFrame(() => {
                 startMenuDiv.style.opacity = "1";
                 startMenuDiv.style.transform = "translateY(0)";
@@ -223,6 +639,8 @@ window.huopadesktop = (() => {
                 };
                 await internalFS.createPath("/system/env/config.json", "file", JSON.stringify(bootConfig));
                 await sys.addLine("Boot config created!");
+                await sys.addLine("Attempting to install example app...")
+                await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaDesktop/HuopaClicker.js`, "/home/applications/HuopaClicker.js")
 
                 const wallpaperSuccess = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/DefaultBG.png`, "/system/env/wallpapers/default.png");
 
