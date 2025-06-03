@@ -6,11 +6,11 @@ window.huopadesktop = (() => {
     // Priv Sys Funcs
 
     const downloadApp = async (url, savePath) => {
-        sys.addLine(`[line=blue]Installing app to path ${safePath}...[/line]`);
+        sys.addLine(`[line=blue]Installing app to path ${savePath}...[/line]`);
         const response = await fetch(url);
         if (response.ok) {
-            const code = response.text();
-            internalFS.createPath(savePath, "file", code);
+            const code = await response.text();
+            await internalFS.createPath(savePath, "file", code);
             sys.addLine("[line=green]App installed![/line]");
         } else {
             sys.addLine("Failed to install app!");
@@ -347,6 +347,43 @@ window.huopadesktop = (() => {
         }
     });
 
+    function createDraggableWindow(windowEl, dragHandleSelector = ".titlebar") {
+        const dragHandle = windowEl.querySelector(dragHandleSelector);
+        if (!dragHandle) return;
+
+        let isDragging = false;
+        let offsetX = 0;
+        let offsetY = 0;
+
+        dragHandle.style.cursor = "move";
+        dragHandle.addEventListener("mousedown", (e) => {
+            isDragging = true;
+            const rect = windowEl.getBoundingClientRect();
+            offsetX = e.clientX - rect.left;
+            offsetY = e.clientY - rect.top;
+
+            windowEl.style.position = "absolute";
+            windowEl.style.zIndex = 1000;
+
+            quantum.document.addEventListener("mousemove", onMouseMove);
+            quantum.document.addEventListener("mouseup", onMouseUp);
+        });
+
+        function onMouseMove(e) {
+            if (!isDragging) return;
+            const x = e.clientX - offsetX;
+            const y = e.clientY - offsetY;
+            windowEl.style.left = x + "px";
+            windowEl.style.top = y + "px";
+        }
+
+        function onMouseUp() {
+            isDragging = false;
+            quantum.document.removeEventListener("mousemove", onMouseMove);
+            quantum.document.removeEventListener("mouseup", onMouseUp);
+        }
+    }
+
     const createAppContainer = async (appId) => {
         const outerContainer = quantum.document.createElement("div");
         outerContainer.style = `
@@ -361,19 +398,24 @@ window.huopadesktop = (() => {
             border-radius: 0.5em;
             background: rgba(30, 30, 30, 0.8);
         `;
+        const titleBar = quantum.document.createElement("div");
         const appTitle = quantum.document.createElement("h3");
         appTitle.textContent = appId;
         appTitle.style = "font-family: sans-serif; margin: 0.5em;"
+        titleBar.className = "titlebar";
         const container = quantum.document.createElement("div");
         container.className = "app-container";
         container.style = "width: 100%; height: 100%;";
         container.id = `app-${appId}`;
         quantum.document.getElementById("desktop").appendChild(outerContainer);
-        outerContainer.append(appTitle);
+        outerContainer.append(titleBar);
+        titleBar.append(appTitle);
         outerContainer.append(container);
+        createDraggableWindow(outerContainer);
         return container;
     }
 
+    
     const openStartMenu = async () => {
         if (killSwitch) return;
         if (!sysTempInfo.startMenuOpen) {
@@ -597,7 +639,8 @@ window.huopadesktop = (() => {
                 };
                 await internalFS.createPath("/system/env/config.json", "file", JSON.stringify(bootConfig));
                 await sys.addLine("Boot config created!");
-                downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaDesktop/HuopaClicker.js`, "/home/applications/HuopaClicker.js")
+                await sys.addLine("Attempting to install example app...")
+                await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaDesktop/HuopaClicker.js`, "/home/applications/HuopaClicker.js")
 
                 const wallpaperSuccess = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/DefaultBG.png`, "/system/env/wallpapers/default.png");
 
