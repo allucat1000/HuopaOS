@@ -8,7 +8,7 @@ window.quantum = {
             get(target, prop) {
                 if (prop === "createElement") {
                     return (tag) => {
-                        const restrictedTags = ["script", "iframe", "object"];
+                        const restrictedTags = [""];
                         if (restrictedTags.includes(tag.toLowerCase())) {
                             throw new Error(`Quantum security: <${tag}> tag is not allowed.`);
                         }
