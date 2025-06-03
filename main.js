@@ -180,8 +180,6 @@ function sandboxEval(code, context = {}) {
   return sandboxFunction(...contextValues);
 }
 
-
-
 let termInput = "";
 const termDiv = document.getElementById("termDiv");
 let inputAnswerActive = false;
