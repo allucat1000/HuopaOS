@@ -620,7 +620,6 @@ window.huopadesktop = (() => {
         // Main Sys
 
         async boot() {
-            console.log("a");
             const bootConfig = JSON.parse(await internalFS.getFile("/system/env/config.json"));
             if (!bootConfig) {
                 await sys.addLine("HuopaDesktop isn't installed yet!");
