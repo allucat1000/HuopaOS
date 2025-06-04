@@ -237,120 +237,178 @@ textInput.addEventListener('keydown', function(event) {
 });
 
 
+const DB_NAME = "HuopaOS";
+const STORE_NAME = "files";
 
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, 1);
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME);
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+const idbFS = {
+  async getFile(path) {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, "readonly");
+      const store = tx.objectStore(STORE_NAME);
+      const req = store.get(path);
+      req.onsuccess = () => resolve(req.result || null);
+      req.onerror = () => reject(req.error);
+    });
+  },
+
+  async setFile(path, value) {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, "readwrite");
+      const store = tx.objectStore(STORE_NAME);
+      const req = store.put(value, path);
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+    });
+  },
+
+  async deleteFile(path) {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, "readwrite");
+      const store = tx.objectStore(STORE_NAME);
+      const req = store.delete(path);
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+    });
+  },
+
+  async getAllKeys() {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, "readonly");
+      const store = tx.objectStore(STORE_NAME);
+      const req = store.getAllKeys();
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+};
 
 const internalFS = {
-    getFile(path) {
-        return localStorage.getItem(path);
-    },
-    async createPath(path, type = "dir", content = "") {
-      const parts = path.split("/");
-      for (let i = 1; i < parts.length - 1; i++) {
-        const parentPath = "/" + parts.slice(1, i + 1).join("/");
-        if (!internalFS.getFile(parentPath)) {
-          await internalFS.createPath(parentPath, "dir");
-        }
+  async getFile(path) {
+    return await idbFS.getFile(path);
+  },
+
+  async createPath(path, type = "dir", content = "") {
+    const parts = path.split("/");
+    for (let i = 1; i < parts.length - 1; i++) {
+      const parentPath = "/" + parts.slice(1, i + 1).join("/");
+      if (!(await internalFS.getFile(parentPath))) {
+        await internalFS.createPath(parentPath, "dir");
       }
+    }
 
-      if (type === "dir") {
-        localStorage.setItem(path, content === "" ? "[]" : content);
-      } else if (type === "file") {
-        localStorage.setItem(path, content);
-      } else {
-        throw new Error("Unknown path type: " + type);
+    if (type === "dir") {
+      await idbFS.setFile(path, content === "" ? "[]" : content);
+    } else if (type === "file") {
+      await idbFS.setFile(path, content);
+    } else {
+      throw new Error("Unknown path type: " + type);
+    }
+
+    const parentPath = parts.slice(0, -1).join("/") || "/";
+    const parentData = await internalFS.getFile(parentPath) || "[]";
+    if (parentPath === "/" && path === parentPath) return;
+
+    try {
+      const parentList = JSON.parse(parentData);
+      if (!parentList.includes(path)) {
+        parentList.push(path);
+        await idbFS.setFile(parentPath, JSON.stringify(parentList));
       }
+    } catch (e) {
+      console.error(`Failed to update parent directory "${parentPath}":`, e);
+    }
+  },
 
-      const parentPath = parts.slice(0, -1).join("/") || "/";
-      const parentData = internalFS.getFile(parentPath) || "[]";
-      if (parentPath === "/" && path === parentPath) {
-        return;
-      }
-      try {
-        const parentList = JSON.parse(parentData);
-        if (!parentList.includes(path)) {
-          parentList.push(path);
-          localStorage.setItem(parentPath, JSON.stringify(parentList));
-        }
-      } catch (e) {
-        console.error(`Failed to update parent directory "${parentPath}":`, e);
-      }
-    },
+  async delDir(dir, visited = new Set(), recursive = false, force = false) {
+    if (visited.has(dir)) return;
+    visited.add(dir);
 
+    const contentsRaw = await internalFS.getFile(dir);
+    let contents = [];
 
-    async delDir(dir, visited = new Set(), recursive = false, force = false) {
-      if (visited.has(dir)) return;
-      visited.add(dir);
+    try {
+      contents = JSON.parse(contentsRaw || "[]");
+    } catch (e) {
+      if (!force) console.warn(`Failed to parse contents of ${dir}`, e);
+    }
 
-      const contentsRaw = internalFS.getFile(dir);
-      let contents = [];
+    for (const item of contents) {
+      const isDir = await this.isDirectory(item);
 
-      try {
-        contents = JSON.parse(contentsRaw || "[]");
-      } catch (e) {
-        if (!force === true) console.warn(`Failed to parse contents of ${dir}`, e);
-      }
-      for (const item of contents) {
-        
-        const itemData = internalFS.getFile(item);
-        const isDir = this.isDirectory(item);
-
-        if (isDir) {
-          if (recursive === true) {
-            await internalFS.delDir(item, visited, recursive, force);
-          } else {
-            if (!force === true) sys.addLine(`[line=red]Cannot delete directory ${item} without recursive flag[/line]`);
-            return;
-          }
+      if (isDir) {
+        if (recursive) {
+          await internalFS.delDir(item, visited, recursive, force);
         } else {
-          localStorage.removeItem(item);
+          if (!force) sys.addLine(`[line=red]Cannot delete directory ${item} without recursive flag[/line]`);
+          return;
+        }
+      } else {
+        await idbFS.deleteFile(item);
+      }
+    }
+
+    await idbFS.deleteFile(dir);
+
+    if (dir !== "/") {
+      const parts = dir.split("/");
+      const parent = parts.slice(0, -1).join("/") || "/";
+      const parentRaw = await internalFS.getFile(parent);
+      if (parentRaw) {
+        try {
+          const parentItems = JSON.parse(parentRaw);
+          const updated = parentItems.filter(i => i !== dir);
+          await internalFS.createPath(parent, "dir", JSON.stringify(updated));
+        } catch (e) {
+          if (!force) console.error(`Error updating parent ${parent}`, e);
         }
       }
-
-      localStorage.removeItem(dir);
-
-      if (dir !== "/") {
-        const parts = dir.split("/");
-        const parent = parts.slice(0, -1).join("/") || "/";
-        const parentRaw = internalFS.getFile(parent);
-        if (parentRaw) {
-          try {
-            const parentItems = JSON.parse(parentRaw);
-            const updated = parentItems.filter(i => i !== dir);
-            internalFS.createPath(parent, "dir", JSON.stringify(updated));
-          } catch (e) {
-            if (!force === true) console.error(`Error updating parent ${parent}`, e);
-          }
-        }
-      }
-    },
-
+    }
+  },
 
   async removeFromDir(dir, target) {
-    const data = JSON.parse(internalFS.getFile(dir) || "[]");
+    const data = JSON.parse(await internalFS.getFile(dir) || "[]");
     const newData = data.filter(item => item !== target);
     await internalFS.createPath(dir, "file", JSON.stringify(newData));
   },
 
-  async downloadPackage(pkgName){
+  async downloadPackage(pkgName) {
     try {
-      await sys.addLine(`[line=blue]Downloading ${pkgName}...[/line]`)
+      await sys.addLine(`[line=blue]Downloading ${pkgName}...[/line]`);
       const url = `https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/packages/${pkgName}.js?v=${Date.now()}`;
       const response = await fetch(url);
-      
+
       if (response.ok) {
-        await sys.addLine("Package downloaded! Installing...")
+        await sys.addLine("Package downloaded! Installing...");
         const packageData = await response.text();
         await internalFS.createPath(`/system/packages/${pkgName}.js`, "file", packageData);
-        if (internalFS.getFile("/system/packages").includes(`/system/packages/${pkgName}.js`)) {
-        } else {
-          sys.addLine("[line=green] [/line] Package updated.")
+
+        const pkgList = await internalFS.getFile("/system/packages") || "[]";
+        if (!JSON.parse(pkgList).includes(`/system/packages/${pkgName}.js`)) {
+          await sys.addLine("[line=green] [/line] Package updated.");
         }
 
-        await sys.addLine("Package installed.")
+        await sys.addLine("Package installed.");
       } else {
         await sys.addLine(`[line=red]Failed to fetch package, response: ${response.status}[/line]`);
       }
-
     } catch (e) {
       await sys.addLine(`[line=red]Failed to fetch package: ${pkgName}.[/line]`);
       await sys.addLine(`Error: ${e}`);
@@ -358,74 +416,51 @@ const internalFS = {
   },
 
   async loadPackage(pkgName) {
-    const code = internalFS.getFile(`${pkgName}`);
-
+    const code = await internalFS.getFile(pkgName);
     if (code) {
       try {
-        sandboxEval(code, {
-          window,
-          console,
-          internalFS,
-          sys,
-          fetch: window.fetch
-        });
-
-
+        sandboxEval(code, { window, console, internalFS, sys, fetch: window.fetch });
       } catch (e) {
-        console.error(`Failed to execute package '${pkgName}'.`);
-        console.error(`Error: ${e}`);
+        console.error(`Failed to execute package '${pkgName}'. Error:`, e);
       }
     } else {
-      
       await sys.addLine(`[line=red]Package "${pkgName}" not found in file system.[/line]`);
     }
   },
+
   async getMeta(path) {
-  const entry = internalFS.getFile(path);
-  if (!entry) {
-    return { exists: false };
-  }
-  return {
-    exists: true,
-    type: entry.type || 'file', 
-    size: entry.size || 0,
-  };
+    const entry = await internalFS.getFile(path);
+    if (!entry) return { exists: false };
+    return { exists: true, type: "file", size: entry.length || 0 };
   },
 
   async runUnsandboxed(path) {
     const safepkgPath = "/system/security/safepkgs.json";
-    const safepkgRaw = internalFS.getFile(safepkgPath) || "[]";
+    const safepkgRaw = await internalFS.getFile(safepkgPath) || "[]";
     let allowList = JSON.parse(safepkgRaw);
     if (allowList.includes(path)) {
       try {
-
-        sys.addLine("Running whitelisted unsandboxed script...")
-        const code = internalFS.getFile(path);
+        sys.addLine("Running whitelisted unsandboxed script...");
+        const code = await internalFS.getFile(path);
         const unsandboxedFunction = new Function(code);
         return unsandboxedFunction();
       } catch (error) {
         sys.addLine(`[line=red]Error running unsandboxed script: ${error}[/line]`);
       }
     }
-    await sys.addLine(`Do you want to run a script from the path: ${path} unsandboxed? Only do this if this script is trusted. [A/y/n]`);
+
+    await sys.addLine(`Do you want to run a script from the path: ${path} unsandboxed? [A/y/n]`);
     inputAnswerActive = true;
     await waitUntil(() => !inputAnswerActive);
 
     const answer = inputAnswer.toLowerCase();
-
-    if (answer === "y" || answer === "" || answer === "a") {
+    if (["y", "", "a"].includes(answer)) {
       try {
-        if (answer === "a" || answer === "") {
-          if (!allowList.includes(path)) {
-            allowList.push(path);
-            this.createPath(safepkgPath, "file", JSON.stringify(allowList), {
-              "write": "SYSTEM",
-              "read": "SYSTEM",
-              "modify": "SYSTEM"
-            });
-          }
+        if (["a", ""].includes(answer) && !allowList.includes(path)) {
+          allowList.push(path);
+          await internalFS.createPath(safepkgPath, "file", JSON.stringify(allowList));
         }
-        const code = internalFS.getFile(path);
+        const code = await internalFS.getFile(path);
         const unsandboxedFunction = new Function(code);
         return unsandboxedFunction();
       } catch (error) {
@@ -433,32 +468,24 @@ const internalFS = {
       }
     } else {
       await sys.addLine("Execution cancelled.");
-      return;
     }
   },
 
-
-isDirectory(path) {
-  const normalizedPath = path.endsWith("/") ? path.slice(0, -1) : path;
-
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key.startsWith(normalizedPath + "/")) {
-      return true;
-    }
+  async isDirectory(path) {
+    const keys = await idbFS.getAllKeys();
+    const normalizedPath = path.endsWith("/") ? path.slice(0, -1) : path;
+    return keys.some(key => key.startsWith(normalizedPath + "/"));
   }
-  return false;
-}
-
-}
+};
 
 
-function checkFileSystemIntegrity() {
+
+async function checkFileSystemIntegrity() {
   const requiredDirs = ["/system", "/home",  "/system/packages"];
   const issues = [];
 
   for (const dir of requiredDirs) {
-    const raw = internalFS.getFile(dir);
+    const raw = await internalFS.getFile(dir);
     if (!raw) {
       issues.push(`${dir} doesn't exist`);
       continue;
@@ -493,7 +520,7 @@ async function callCMD(input, params) {
         if (params[1].toLowerCase())
         await internalFS.downloadPackage(params[1].toLowerCase())
       } else if (params[0].toLowerCase() === "update") {
-        const packageList = JSON.parse(internalFS.getFile("/system/packages"));
+        const packageList = JSON.parse(await internalFS.getFile("/system/packages"));
         for (let i = 0; i < packageList.length; i++) {
           await internalFS.downloadPackage(packageList[i].replace("/system/packages/","").replace(".js",""));
         }
@@ -522,7 +549,7 @@ async function callCMD(input, params) {
 
     
     } else {
-      const rawList = internalFS.getFile("/system/packages") || "[]";
+      const rawList = await internalFS.getFile("/system/packages") || "[]";
       const packageList = JSON.parse(rawList);
 
       for (let i = 0; i < packageList.length; i++) {
@@ -573,8 +600,8 @@ async function callCMD(input, params) {
 // Bootloader / Installer
 
 async function init() {
-  let root = internalFS.getFile("/");
-  const isInstalled = isSystemInstalled()
+  let root = await internalFS.getFile("/");
+  const isInstalled = await isSystemInstalled()
 
 
   if (!isInstalled) {
@@ -627,7 +654,7 @@ async function init() {
     }
 
     if (verBranch === "dev") {
-      if (!internalFS.getFile("/system/packages/sideloader.js")) {
+      if (!await internalFS.getFile("/system/packages/sideloader.js")) {
         await internalFS.downloadPackage("sideloader");
         await sys.addLine("Sideloader automatically installed!");
       }
@@ -643,12 +670,12 @@ async function init() {
 
 async function bootMGR() {
   sys.addLine("Root directory detected.");
-  if (internalFS.getFile("/system/env/config.json")) {
+  if (await internalFS.getFile("/system/env/config.json")) {
     sys.addLine("Press \"c\" to boot into the Terminal")
   }
   keysLocked = true;
   let loadEnv = false
-  if (internalFS.getFile("/system/env/config.json")) {
+  if (await internalFS.getFile("/system/env/config.json")) {
     const currentTime = Date.now();
     const waitTime = currentTime + 1000;
     await waitUntil(() => Date.now() > waitTime || textInput.value === "c");
@@ -658,7 +685,7 @@ async function bootMGR() {
       keysLocked = false;
       sys.addLine("[line=green]Environment boot config found (/system/env/config.json).[/line]");
 
-      const config = JSON.parse(internalFS.getFile("/system/env/config.json"));
+      const config = JSON.parse(await internalFS.getFile("/system/env/config.json"));
 
       if (!config.bootpath || !config.bootname || !config.bootcmd) {
           sys.addLine("[line=red]Corrupted config! Missing bootpath, bootname, or bootcmd.[/line]");
@@ -683,7 +710,7 @@ async function bootMGR() {
   }
 
     sys.addLine("Loading packages...")
-    const packageAmount = JSON.parse(internalFS.getFile("/system/packages") || []).length;
+    const packageAmount = JSON.parse(await internalFS.getFile("/system/packages") || []).length;
           
     await sys.addLine(`[line=green]${packageAmount} package(s) found[/line]`)
     if (packageAmount > 0) {
@@ -774,8 +801,8 @@ function recoveryCheck() {
   }
 }
 
-function isSystemInstalled() {
-  const rootDir = JSON.parse(internalFS.getFile("/"));
+async function isSystemInstalled() {
+  const rootDir = JSON.parse(await internalFS.getFile("/"));
   if (!rootDir) { return false };
   if (rootDir.includes("/home") || rootDir.includes("/manifest.json") || rootDir.includes("/system")) {
     if (rootDir.includes("/home") && rootDir.includes("/manifest.json") && rootDir.includes("/system")) {
@@ -786,4 +813,20 @@ function isSystemInstalled() {
   } else {
     return false;
   }
+}
+
+function openFSDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open("HuopaFS", 1);
+
+        request.onupgradeneeded = (event) => {
+            const db = request.result;
+            if (!db.objectStoreNames.contains("files")) {
+                db.createObjectStore("files", { keyPath: "path" });
+            }
+        };
+
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
 }
