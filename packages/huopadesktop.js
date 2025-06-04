@@ -558,7 +558,7 @@ window.huopadesktop = (() => {
                 const acceptButton = quantum.document.creteElement("button");
                 acceptButton.style = "background-color: rgba(35, 35, 35, 0.75); border-radius: 0.5em; border-style: solid; border-color: rgba(55, 55, 55, 0.9);"
                 popup.append(popupText);
-                acceptButton.onClick = function() => {
+                acceptButton.onclick = () => {
                     popup.remove();
                 }
                 popup.append(acceptButton);
