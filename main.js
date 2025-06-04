@@ -644,11 +644,17 @@ async function init() {
 async function bootMGR() {
   sys.addLine("Root directory detected.");
   if (internalFS.getFile("/system/env/config.json")) {
-    sys.addLine("Hold down \"c\" to boot into the Terminal")
+    sys.addLine("Press \"c\" to boot into the Terminal")
   }
   keysLocked = true;
-  await new Promise(resolve => setTimeout(resolve, 500));
-  if (internalFS.getFile("/system/env/config.json") && !isKeyDown("c")) {
+  let loadEnv = false
+  if (internalFS.getFile("/system/env/config.json")) {
+    const currentTime = Date.now();
+    const waitTime = currentTime + 1000;
+    await waitUntil(() => Date.now() > waitTime || textInput.value === "c");
+    if (Date.now() > waitTime) {loadEnv = true;} else {textInput.value = "";}
+  }
+  if (loadEnv) {
       keysLocked = false;
       sys.addLine("[line=green]Environment boot config found (/system/env/config.json).[/line]");
 
@@ -685,7 +691,6 @@ async function bootMGR() {
     }
     await new Promise(resolve => setTimeout(resolve, 500));
     keysLocked = false;
-    textInput.value = "";
 
     
 
