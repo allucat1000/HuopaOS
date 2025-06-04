@@ -648,8 +648,8 @@ async function bootMGR() {
   }
   keysLocked = true;
   await new Promise(resolve => setTimeout(resolve, 500));
-  console.log(textInput.value);
-  console.log(textInput.value.toLowerCase());
+  sys.addLine(textInput.value);
+  sys.addLine(textInput.value.toLowerCase());
   if (internalFS.getFile("/system/env/config.json") && !textInput.value.toLowerCase() === "c") {
       keysLocked = false;
       sys.addLine("[line=green]Environment boot config found (/system/env/config.json).[/line]");
