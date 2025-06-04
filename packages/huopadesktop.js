@@ -548,14 +548,20 @@ window.huopadesktop = (() => {
             inputLabel?.remove();
             mainDiv.style = "position: relative; width: 100vw; height: 100vh; overflow: hidden;";
 
-            if (false) {
+            if (window.innerWidth < 850 || window.innerHeight < 650) {
                 const popup = quantum.document.createElement("div");
-                popup.style = "width: 90%; height: 90%; background-color: rgba(35, 35, 35, 0.75); border-radius: 0.5em; border-style: solid; border-color: rgba(55, 55, 55, 0.9); border-width: 2px; position: absolute; left: 50%; transform: translateX(-50%); top: 5%; "
+                popup.style = "width: 35%; height: 20%; background-color: rgba(35, 35, 35, 0.75); border-radius: 0.5em; border-style: solid; border-color: rgba(55, 55, 55, 0.9); border-width: 2px; position: absolute; left: 50%; transform: translateX(-50%); top: 5%; "
                 const popupText = quantum.document.createElement("h1");
-                popupText.textContent = "HuopaDesktop requires a screen size of at least 1050px x 700px!";
-                popupText.style = "padding: 0.5em; max-width: 90%; margin: 1em auto; text-align: center; font-size: 3em;"
+                popupText.textContent = "It is recommended to have a screen size of at least 850px x 650px. Click OK to continue.";
+                popupText.style = "padding: 0.5em; max-width: 90%; margin: 0.5em auto; text-align: center; font-size: 1.25em;"
                 mainDiv.append(popup);
+                const acceptButton = quantum.document.creteElement("button");
+                acceptButton.style = "background-color: rgba(35, 35, 35, 0.75); border-radius: 0.5em; border-style: solid; border-color: rgba(55, 55, 55, 0.9);"
                 popup.append(popupText);
+                acceptButton.onClick = function() => {
+                    popup.remove();
+                }
+                popup.append(acceptButton);
                 return;
             }
 
