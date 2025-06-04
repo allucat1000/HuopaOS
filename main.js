@@ -1,19 +1,19 @@
 /*
  * HuopaOS - Operating system environment in the browser
  * Copyright (C) 2025 Allucat1000
- *
+ * 
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -644,13 +644,11 @@ async function init() {
 async function bootMGR() {
   sys.addLine("Root directory detected.");
   if (internalFS.getFile("/system/env/config.json")) {
-    sys.addLine("Type \"c\" to boot into the Terminal")
+    sys.addLine("Hold down \"c\" to boot into the Terminal")
   }
   keysLocked = true;
   await new Promise(resolve => setTimeout(resolve, 500));
-  sys.addLine(textInput.value);
-  sys.addLine(textInput.value.toLowerCase());
-  if (internalFS.getFile("/system/env/config.json") && !textInput.value.toLowerCase() === "c") {
+  if (internalFS.getFile("/system/env/config.json") && !isKeyDown("c")) {
       keysLocked = false;
       sys.addLine("[line=green]Environment boot config found (/system/env/config.json).[/line]");
 
@@ -784,4 +782,3 @@ function isSystemInstalled() {
     return false;
   }
 }
-
