@@ -406,6 +406,9 @@ window.huopadesktop = (() => {
             border-radius: 0.5em;
             background: rgba(30, 30, 30, 0.8);
             margin: 0;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.15s ease, transform 0.15s ease;
         `;
 
         const titleBar = quantum.document.createElement("div");
@@ -440,6 +443,10 @@ window.huopadesktop = (() => {
         titleBar.appendChild(closeButton);
         outerContainer.append(container);
         createDraggableWindow(outerContainer);
+        requestAnimationFrame(() => {
+            outerContainer.style.opacity = "1";
+            outerContainer.style.transform = "translateY(0px)";
+        });
         return container;
     }
 
@@ -547,29 +554,33 @@ window.huopadesktop = (() => {
             const inputLabel = quantum.document.getElementById("inputLabel");
             inputLabel?.remove();
             mainDiv.style = "position: relative; width: 100vw; height: 100vh; overflow: hidden;";
-
+            let popupClosed = false;
             if (window.innerWidth < 850 || window.innerHeight < 650) {
+                const popupBG = quantum.document.createElement("div");
                 const popup = quantum.document.createElement("div");
-                popup.style = "width: 35%; height: 20%; background-color: rgba(35, 35, 35, 0.75); border-radius: 0.5em; border-style: solid; border-color: rgba(55, 55, 55, 0.9); border-width: 2px; position: absolute; left: 50%; transform: translateX(-50%); top: 5%; "
+                popup.style = "width: 90%; height: 20%; background-color: rgba(35, 35, 35, 0.75); border-radius: 0.5em; border-style: solid; border-color: rgba(55, 55, 55, 0.9); border-width: 2px; position: absolute; left: 50%; transform: translateX(-50%); top: 5%; "
                 const popupText = quantum.document.createElement("h1");
                 popupText.textContent = "It is recommended to have a screen size of at least 850px x 650px. Click OK to continue.";
                 popupText.style = "padding: 0.5em; max-width: 90%; margin: 0.5em auto; text-align: center; font-size: 1.25em;"
-                mainDiv.append(popup);
-                const acceptButton = quantum.document.creteElement("button");
-                acceptButton.style = "background-color: rgba(35, 35, 35, 0.75); border-radius: 0.5em; border-style: solid; border-color: rgba(55, 55, 55, 0.9);"
+                popupBG.style = "background-color: rgba(0, 0, 0, 0.5); width: 100%; height: 100%;"
+                desktop.append(popupBG);
+                popupBG.append(popup);
+                const acceptButton = quantum.document.createElement("button");
+                acceptButton.style = "background-color: rgba(35, 35, 35, 0.75); border-radius: 0.5em; border-style: solid; border-color: rgba(55, 55, 55, 0.9); color: white; margin: 0.5em auto; text-align: center; padding: 0.7em; display: block; cursor: pointer;"
                 popup.append(popupText);
-                acceptButton.onClick = function() => {
-                    popup.remove();
+                acceptButton.textContent = "OK";
+                acceptButton.onclick = () => {
+                    popupBG.remove();
+                    popupClosed = true;
                 }
                 popup.append(acceptButton);
-                return;
-            }
-
+            } else popupClosed = true;
+            await waitUntil(() => popupClosed);
             appBar.id = "appBar";
             appBar.style = `position: absolute; bottom: 20px; width: 96%; height: 5em; background-color: rgba(45, 45, 45, 0.75); border-radius: 1em; left: 50%; transform: translateX(-50%); display: flex; align-items: center; border: 2.5px; border: 2.5px; border-style: solid; border-color: rgba(105, 105, 105, 1);`;
 
 
-            desktop.append(appBar);
+            await desktop.append(appBar);
 
 
             const huopalogo = internalFS.getFile("/system/env/assets/huopalogo.png");
@@ -577,7 +588,7 @@ window.huopadesktop = (() => {
             startMenuButton.style = `background-image: url(${huopalogo}); background-size: contain; background-repeat: no-repeat; background-position: center; width: 3.5em; height: 3.5em; border: none; background-color: transparent; border-radius: 50%; margin: 1em; transition: 0.15s;cursor: pointer; transform-origin: center;`;
 
             appBar.id = "appBar";
-            appBar.append(startMenuButton);
+            await appBar.append(startMenuButton);
             startMenuButton.onclick = async function() {
                 openStartMenu();
             }
