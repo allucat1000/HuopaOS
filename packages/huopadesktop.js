@@ -398,8 +398,8 @@ window.huopadesktop = (() => {
             position: absolute;
             width: 700px;
             height: 500px;
-            top: 50px;
-            right: 200px;
+            top: 100px;
+            right: 125px;
             overflow: hidden;
             resize: both;
             border: 2px solid gray;
@@ -477,6 +477,7 @@ window.huopadesktop = (() => {
                     opacity: 0;
                     transform: translateY(20px);
                     transition: opacity 0.3s ease, transform 0.3s ease;
+                    z-index: 99999;
                 `;
 
                 desktop.append(startMenuDiv);
@@ -486,7 +487,7 @@ window.huopadesktop = (() => {
             shutdownButton.textContent = "Shutdown";
             shutdownButton.onclick = () => { mainDiv.innerHTML = ""; killSwitch = true; sys.addLine(`The system has shut down! Date (Unix epoch): ${Date.now()}`); return; }
             startMenuDiv.append(shutdownButton);
-            const appList = JSON.parse(internalFS.getFile("/home/applications"));
+            const appList = JSON.parse(await internalFS.getFile("/home/applications"));
             const appText = quantum.document.createElement("h2");
             appText.textContent = "Your apps";
             appText.style = "margin: 0.5em; text-align: left; color: white; font-family: sans-serif;"
@@ -504,7 +505,7 @@ window.huopadesktop = (() => {
                 appButton.textContent = cleanedAppName;
                 appButton.style = "color: white; background-color: rgba(45, 45, 45, 0.7); border-color: rgba(105, 105, 105, 0.6); border-style: solid; border-radius: 0.5em; padding: 0.5em; width: 22em; height: 3em; margin: 0.5em; text-align: left; cursor: pointer;"
                 appButton.onclick = async () => {
-                    const code = internalFS.getFile(appList[i]);
+                    const code = await internalFS.getFile(appList[i]);
                     await runApp(cleanedAppName, code);
                 };
                 startMenuDiv.append(appButton);
@@ -545,7 +546,7 @@ window.huopadesktop = (() => {
 
             const desktop = quantum.document.createElement("div");
             const appBar = quantum.document.createElement("div");
-            const imageData = internalFS.getFile("/system/env/wallpapers/default.png");
+            const imageData = await internalFS.getFile("/system/env/wallpapers/default.png");
             quantum.document.body.style.margin = "0";
             desktop.style = `width: 100%; height: 100%; background-image: url(${imageData}); background-size: cover; background-position: center;`;
             desktop.id = "desktop";
@@ -583,7 +584,7 @@ window.huopadesktop = (() => {
             await desktop.append(appBar);
 
 
-            const huopalogo = internalFS.getFile("/system/env/assets/huopalogo.png");
+            const huopalogo = await internalFS.getFile("/system/env/assets/huopalogo.png");
             const startMenuButton = quantum.document.createElement("button");
             startMenuButton.style = `background-image: url(${huopalogo}); background-size: contain; background-repeat: no-repeat; background-position: center; width: 3.5em; height: 3.5em; border: none; background-color: transparent; border-radius: 50%; margin: 1em; transition: 0.15s;cursor: pointer; transform-origin: center;`;
 
@@ -619,7 +620,8 @@ window.huopadesktop = (() => {
         // Main Sys
 
         async boot() {
-            const bootConfig = JSON.parse(internalFS.getFile("/system/env/config.json"));
+            console.log("a");
+            const bootConfig = JSON.parse(await internalFS.getFile("/system/env/config.json"));
             if (!bootConfig) {
                 await sys.addLine("HuopaDesktop isn't installed yet!");
                 await new Promise(resolve => setTimeout(resolve, 2000));
