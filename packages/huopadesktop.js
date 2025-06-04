@@ -187,17 +187,19 @@ window.huopadesktop = (() => {
         }
     };
     const elementRegistry = {}
+    let elementIdCounter = 0;
 
     const huopaAPIHandlers = (appContainer) => {
-        let elementIdCounter = 0;
+
+        
         return {
             createElement: function(tag) {
                 const el = quantum.document.createElement(tag);
                 el.style.maxWidth = "100%";
                 el.style.maxHeight = "100%";
                 el.style.boxSizing = "border-box";
-                
-                const id = `el_${elementIdCounter++}`;
+                elementIdCounter++
+                const id = `el_${elementIdCounter}`;
                 el.dataset.huopaId = id;
                 el.id = id;
                 elementRegistry[id] = el;
@@ -493,7 +495,7 @@ window.huopadesktop = (() => {
                 const appButton = quantum.document.createElement("button");
                 const cleanedAppName = appList[i].replace("/home/applications/", "")
                 appButton.textContent = cleanedAppName;
-                appButton.style = "color: white; background-color: rgba(45, 45, 45, 0.7); border-color: rgba(105, 105, 105, 0.6); border-style: solid; border-radius: 0.5em; padding: 0.5em; width: 22em; height: 3em; margin: 0.5em; text-align: left;"
+                appButton.style = "color: white; background-color: rgba(45, 45, 45, 0.7); border-color: rgba(105, 105, 105, 0.6); border-style: solid; border-radius: 0.5em; padding: 0.5em; width: 22em; height: 3em; margin: 0.5em; text-align: left; cursor: pointer;"
                 appButton.onclick = async () => {
                     const code = internalFS.getFile(appList[i]);
                     await runApp(cleanedAppName, code);
