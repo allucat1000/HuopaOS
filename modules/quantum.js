@@ -2,7 +2,6 @@ window.quantum = {
     initialized: false,
     version: "0.0.1",
     bootTime: null,
-
     get document() {
         return new Proxy(document, {
             get(target, prop) {
@@ -33,9 +32,17 @@ window.quantum = {
 
 
     init() {
+        try {
+            const sandboxCheck = document.getElementById("termDiv");
+        } catch (error) {
+            sys.addLine("Quantum initialized with sandbox! Execution cancelled!")
+            return;
+        }
+
         if (this.initialized) return "Quantum initialized already!";
         this.initialized = true;
         this.bootTime = Date.now();
+
         sys.addLine("[line=cyan]Loading Quantum Display Manager...[/line]");
     }
 };
