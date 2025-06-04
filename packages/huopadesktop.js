@@ -548,7 +548,7 @@ window.huopadesktop = (() => {
             inputLabel?.remove();
             mainDiv.style = "position: relative; width: 100vw; height: 100vh; overflow: hidden;";
 
-            if (window.innerWidth < 1050 || window.innerHeight < 700) {
+            if (false) {
                 const popup = quantum.document.createElement("div");
                 popup.style = "width: 90%; height: 90%; background-color: rgba(35, 35, 35, 0.75); border-radius: 0.5em; border-style: solid; border-color: rgba(55, 55, 55, 0.9); border-width: 2px; position: absolute; left: 50%; transform: translateX(-50%); top: 5%; "
                 const popupText = quantum.document.createElement("h1");
@@ -623,11 +623,10 @@ window.huopadesktop = (() => {
             try {
                 await quantum.init();
             } catch (e) {
-                if (e.message.includes("ReferenceError:")) return; 
-                await sys.addLine("Failed to initialize Quantum. Reinstall HuopaDesktop.");
-                await sys.addLine(`Error: ${e}`);
-                console.error(`Error: ${e}`);
+                if (e.message.includes("ReferenceError:")) return;
 
+                console.error(`Failed to initialize Quantum. Error: ${e}`);
+                return;
             }
 
 
