@@ -180,6 +180,8 @@ function sandboxEval(code, context = {}) {
   return sandboxFunction(...contextValues);
 }
 
+
+
 let termInput = "";
 const termDiv = document.getElementById("termDiv");
 let inputAnswerActive = false;
@@ -585,8 +587,6 @@ async function init() {
       await internalFS.createPath("/system");
       await internalFS.createPath("/system/modules");
       await internalFS.createPath("/system/packages");
-      await sys.addLine("Fetching required modules...");
-      await window.sys["import"]("examplemodule");
       await internalFS.createPath("/home");
       await internalFS.createPath("/home/applications");
 
