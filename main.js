@@ -644,11 +644,11 @@ async function init() {
 async function bootMGR() {
   sys.addLine("Root directory detected.");
   if (internalFS.getFile("/system/env/config.json")) {
-    sys.addLine("Hold down \"c\" to boot into the Terminal")
+    sys.addLine("Type \"c\" to boot into the Terminal")
   }
   keysLocked = true;
   await new Promise(resolve => setTimeout(resolve, 500));
-  if (internalFS.getFile("/system/env/config.json") && !isKeyDown("c")) {
+  if (internalFS.getFile("/system/env/config.json") && !textInput.value.toLowerCase() === "c") {
       keysLocked = false;
       sys.addLine("[line=green]Environment boot config found (/system/env/config.json).[/line]");
 
