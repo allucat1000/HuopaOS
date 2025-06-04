@@ -555,7 +555,7 @@ window.huopadesktop = (() => {
                 popupText.textContent = "It is recommended to have a screen size of at least 850px x 650px. Click OK to continue.";
                 popupText.style = "padding: 0.5em; max-width: 90%; margin: 0.5em auto; text-align: center; font-size: 1.25em;"
                 mainDiv.append(popup);
-                const acceptButton = quantum.document.creteElement("button");
+                const acceptButton = quantum.document.createElement("button");
                 acceptButton.style = "background-color: rgba(35, 35, 35, 0.75); border-radius: 0.5em; border-style: solid; border-color: rgba(55, 55, 55, 0.9);"
                 popup.append(popupText);
                 acceptButton.onclick = () => {
