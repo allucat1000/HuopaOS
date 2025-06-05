@@ -54,7 +54,6 @@ window.sys = {
   },
   async runCMD(input, params = []) {
     if (!input) return;
-
     await internalFS.loadPackage(`/system/terminalcmd.js`, "silent");
     await new Promise(resolve => setTimeout(resolve, 500));
 
@@ -678,7 +677,7 @@ async function bootMGR() {
   if (await internalFS.getFile("/system/env/config.json")) {
     const currentTime = Date.now();
     const waitTime = currentTime + 1000;
-    await waitUntil(() => Date.now() > waitTime || textInput.value === "c");
+    await waitUntil(() => Date.now() > waitTime || textInput.value.toLowerCase() === "c");
     if (Date.now() > waitTime) {loadEnv = true;} else {textInput.value = "";}
   }
   if (loadEnv) {
@@ -813,20 +812,4 @@ async function isSystemInstalled() {
   } else {
     return false;
   }
-}
-
-function openFSDB() {
-    return new Promise((resolve, reject) => {
-        const request = indexedDB.open("HuopaFS", 1);
-
-        request.onupgradeneeded = (event) => {
-            const db = request.result;
-            if (!db.objectStoreNames.contains("files")) {
-                db.createObjectStore("files", { keyPath: "path" });
-            }
-        };
-
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
-    });
 }

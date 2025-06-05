@@ -4,7 +4,17 @@ window.huopadesktop = (() => {
         "startMenuOpen":false
     }
     // Priv Sys Funcs
-
+    const induceCrash = async (error) =>{
+        const mainDiv = quantum.document.getElementById("termDiv");
+            mainDiv.innerHTML = "";
+            await sys.addLine("# [color=red]/!\\ [/color]")
+            await sys.addLine("## [line=red]An unhandled exeption has occurred in HuopaDesktop and the system has been forced to halt.[/line]");
+            await sys.addLine(`## Error: ${error}`);
+            await sys.addLine("Try updating your packages (such as HuopaDesktop) using the command: \"hpkg update\".");
+            await sys.addLine("If you still have issues, check if you have any custom scripts for HuopaDesktop. If you do, try booting HuopaDesktop without the scripts.");
+            await sys.addLine("If you don't have any custom scripts or the issue is still occurring, please report this issue to me (for example through the HuopaOS Github).");
+            await sys.addLine("### Reboot the system to load into HuopaDesktop or the terminal (hold down \"C\" to load into the terminal).");
+    }
     const downloadApp = async (url, savePath) => {
         sys.addLine(`[line=blue]Installing app to path ${savePath}...[/line]`);
         const response = await fetch(url);
@@ -453,6 +463,9 @@ window.huopadesktop = (() => {
     
     const openStartMenu = async () => {
         if (killSwitch) return;
+        try {
+            
+        
         if (!sysTempInfo.startMenuOpen) {
 
             let startMenuDiv = quantum.document.getElementById("startMenuDiv");
@@ -485,7 +498,14 @@ window.huopadesktop = (() => {
             const shutdownButton = quantum.document.createElement("button");
             shutdownButton.style = "background-color: rgba(45, 45, 45, 0.7); border-color: rgba(105, 105, 105, 0.6); border-style: solid; border-radius: 0.5em; position: absolute; cursor: pointer; right: 0.5em; bottom: 0.5em; color: white; padding: 0.5em;"
             shutdownButton.textContent = "Shutdown";
-            shutdownButton.onclick = () => { mainDiv.innerHTML = ""; killSwitch = true; sys.addLine(`The system has shut down! Date (Unix epoch): ${Date.now()}`); return; }
+            shutdownButton.onclick = async () => {
+                mainDiv.innerHTML = ""; killSwitch = true;
+                sys.addLine(`The system has shut down! Date (Unix epoch): ${Date.now()}`); 
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                window.location.href = window.location.href;
+                
+
+            }
             startMenuDiv.append(shutdownButton);
             const appList = JSON.parse(await internalFS.getFile("/home/applications"));
             const appText = quantum.document.createElement("h2");
@@ -536,6 +556,9 @@ window.huopadesktop = (() => {
             }, 300);
         
         }
+        } catch (error) {
+            induceCrash(error);
+        }
     };
 
     const createMainGUI = async () => {
@@ -548,7 +571,7 @@ window.huopadesktop = (() => {
             const appBar = quantum.document.createElement("div");
             const imageData = await internalFS.getFile("/system/env/wallpapers/default.png");
             quantum.document.body.style.margin = "0";
-            desktop.style = `width: 100%; height: 100%; background-image: url(${imageData}); background-size: cover; background-position: center;`;
+            desktop.style = `width: 100%; height: 100%; background-image: url(${imageData}); background-size: cover; background-position: center; font-family: sans-serif;`;
             desktop.id = "desktop";
             mainDiv.append(desktop);
 
@@ -578,7 +601,7 @@ window.huopadesktop = (() => {
             } else popupClosed = true;
             await waitUntil(() => popupClosed);
             appBar.id = "appBar";
-            appBar.style = `position: absolute; bottom: 20px; width: 96%; height: 5em; background-color: rgba(45, 45, 45, 0.75); border-radius: 1em; left: 50%; transform: translateX(-50%); display: flex; align-items: center; border: 2.5px; border: 2.5px; border-style: solid; border-color: rgba(105, 105, 105, 1);`;
+            appBar.style = `position: absolute; bottom: 20px; width: 96%; height: 4em; background-color: rgba(45, 45, 45, 0.75); border-radius: 1em; left: 50%; transform: translateX(-50%); display: flex; align-items: center; border: 2.5px; border: 2.5px; border-style: solid; border-color: rgba(105, 105, 105, 1); z-index: 15000;`;
 
 
             await desktop.append(appBar);
@@ -602,15 +625,7 @@ window.huopadesktop = (() => {
             });
 
         } catch (error) {
-            const mainDiv = quantum.document.getElementById("termDiv");
-            mainDiv.innerHTML = "";
-            await sys.addLine("# [color=red]/!\\ [/color]")
-            await sys.addLine("## [line=red]An unhandled exeption has occurred in HuopaDesktop and the system has been forced to halt.[/line]");
-            await sys.addLine(`## Error: ${error}`);
-            await sys.addLine("Try updating your packages (such as HuopaDesktop) using the command: \"hpkg update\".");
-            await sys.addLine("If you still have issues, check if you have any custom scripts for HuopaDesktop. If you do, try booting HuopaDesktop without the scripts.");
-            await sys.addLine("If you don't have any custom scripts or the issue is still occurring, please report this issue to me (for example through the HuopaOS Github).");
-            await sys.addLine("### Reboot the system to load into HuopaDesktop or the terminal (hold down \"C\" to load into the terminal).");
+            induceCrash(error);
         }
 
     }
