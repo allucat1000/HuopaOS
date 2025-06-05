@@ -1,6 +1,6 @@
 window.terminalcmd = {
   async listpkgs(args) {
-    const packagesArray = JSON.parse(internalFS.getFile("/system/packages") || "[]");
+    const packagesArray = JSON.parse(await internalFS.getFile("/system/packages") || "[]");
     const cleanedPackages = packagesArray.map(pkg => pkg.replace(/^\/system\/packages\//, ""));
     const packagesString = cleanedPackages.join(" ");
 
@@ -45,7 +45,7 @@ window.terminalcmd = {
     }
   
     try {
-      const meta = internalFS.getMeta(path);
+      const meta = await internalFS.getMeta(path);
       if (!meta) {
         if (!force) sys.addLine(`[line=red]File not found: ${path}[/line]`);
         return;
@@ -79,14 +79,14 @@ async ls(args) {
   }
 
   try {
-    const meta = internalFS.getMeta(path);
+    const meta = await internalFS.getMeta(path);
     if (!meta) {
       sys.addLine(`[line=red]File not found: ${path}[/line]`);
       return;
     }
 
 
-    const fileArray = JSON.parse(internalFS.getFile(path) || "[]");
+    const fileArray = JSON.parse(await internalFS.getFile(path) || "[]");
     const fileList = fileArray.map(f => f.replace(`${path}/`, "")).join('\n');
     sys.addLine(`All files in directory: ${path}`);
     sys.addLine(fileList);
