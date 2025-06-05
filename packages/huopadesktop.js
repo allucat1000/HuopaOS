@@ -362,7 +362,7 @@ window.huopadesktop = (() => {
     });
     let appZIndex = 100;
     function createDraggableWindow(windowEl, dragHandleSelector = ".titlebar") {
-        
+        windowEl.style.position = "absolute";
         
         const dragHandle = windowEl.querySelector(dragHandleSelector);
         if (!dragHandle) return;
@@ -404,12 +404,13 @@ window.huopadesktop = (() => {
 
     const createAppContainer = async (appId) => {
         const outerContainer = quantum.document.createElement("div");
+        const winSpawnX = window.innerWidth / 2;
         outerContainer.style = `
             position: absolute;
             width: 700px;
             height: 500px;
             top: 100px;
-            right: 125px;
+            left: ${winSpawnX}px;
             overflow: hidden;
             resize: both;
             border: 2px solid gray;
