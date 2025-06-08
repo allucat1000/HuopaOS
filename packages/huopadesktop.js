@@ -427,6 +427,7 @@ window.huopadesktop = (() => {
             opacity: 0;
             transform: translateY(20px);
             transition: opacity 0.15s ease, transform 0.15s ease;
+            backdrop-filter: blur(2px);
         `;
 
         const titleBar = quantum.document.createElement("div");
@@ -494,11 +495,12 @@ window.huopadesktop = (() => {
                     border-style: solid;
                     border-color: rgba(105, 105, 105, 1);
                     left: 3%;
-                    bottom: 8.5em;
+                    bottom: 7.5em;
                     opacity: 0;
-                    transform: translateY(20px);
+                    transform: translateY(10px);
                     transition: opacity 0.3s ease, transform 0.3s ease;
                     z-index: 99999;
+                    backdrop-filter: blur(2px);
                 `;
 
                 desktop.append(startMenuDiv);
@@ -526,17 +528,19 @@ window.huopadesktop = (() => {
                 noAppsText.style = "margin: 0.7em; max-width: 17em; text-align: left; color: white; font-family: sans-serif;"
                 startMenuDiv.append(noAppsText);
             }
-
+            const appListDiv = quantum.document.createElement("div");
+            appListDiv.style = "height: 18em; overflow: auto; position: relative;"
+            startMenuDiv.append(appListDiv);
             for (let i = 0; i < appList.length; i++) {
                 const appButton = quantum.document.createElement("button");
                 const cleanedAppName = appList[i].replace("/home/applications/", "")
                 appButton.textContent = cleanedAppName;
-                appButton.style = "color: white; background-color: rgba(45, 45, 45, 0.7); border-color: rgba(105, 105, 105, 0.6); border-style: solid; border-radius: 0.5em; padding: 0.5em; width: 22em; height: 3em; margin: 0.5em; text-align: left; cursor: pointer;"
+                appButton.style = "color: white; background-color: rgba(45, 45, 45, 0.7); border-color: rgba(105, 105, 105, 0.6); border-style: solid; border-radius: 0.5em; padding: 0.5em; width: 35em; height: 3em; margin: 0.2em 0.5em; text-align: left; cursor: pointer;"
                 appButton.onclick = async () => {
                     const code = await internalFS.getFile(appList[i]);
                     await runApp(cleanedAppName, code);
                 };
-                startMenuDiv.append(appButton);
+                appListDiv.append(appButton);
             }
             requestAnimationFrame(() => {
                 startMenuDiv.style.opacity = "1";
@@ -608,17 +612,17 @@ window.huopadesktop = (() => {
             } else popupClosed = true;
             await waitUntil(() => popupClosed);
             dock.id = "dock";
-            dock.style = `position: absolute; bottom: 20px; width: 96%; height: 4em; background-color: rgba(45, 45, 45, 0.75); border-radius: 1em; left: 50%; transform: translateX(-50%); display: flex; align-items: center; border: 2.5px; border: 2.5px; border-style: solid; border-color: rgba(105, 105, 105, 1); z-index: 15000;`;
+            dock.style = `position: absolute; bottom: 20px; width: 96%; height: 4em; background-color: rgba(45, 45, 45, 0.75); border-radius: 1em; left: 50%; transform: translateX(-50%); display: flex; align-items: center; border: 2.5px; border: 2.5px; border-style: solid; border-color: rgba(105, 105, 105, 1); z-index: 15000; backdrop-filter: blur(2px);`;
 
             await desktop.append(dock);
 
             const huopalogo = await internalFS.getFile("/system/env/assets/huopalogo.png");
             const startMenuButton = quantum.document.createElement("button");
-            startMenuButton.style = `background-image: url(${huopalogo}); background-size: contain; background-repeat: no-repeat; background-position: center; width: 3.5em; height: 3.5em; border: none; background-color: transparent; border-radius: 50%; margin: 1em; transition: 0.15s;cursor: pointer; transform-origin: center;`;
+            startMenuButton.style = `background-image: url(${huopalogo}); background-size: contain; background-repeat: no-repeat; background-position: center; width: 4em; height: 4em; border: none; background-color: transparent; border-radius: 50%; margin: 1em; transition: 0.15s;cursor: pointer; transform-origin: center;`;
             const appBar = quantum.document.createElement("div");
             const clockDiv = quantum.document.createElement("div");
             clockDiv.id = "clockDiv";
-            clockDiv.style = "padding: 0.33em; margin: 0.33em; border-radius: 0.5em; background-color: rgba(94, 94, 94, 0.37); border-style: solid; border-width: 1.5px; border-color: rgba(255, 255, 255, 0.19); text-align: center; width: 11.5em; max-height: 2.5em;"
+            clockDiv.style = "padding: 0.33em; margin: 0.33em; border-radius: 0.75em; background-color: rgba(94, 94, 94, 0.37); border-style: solid; border-width: 2.5px; border-color: rgba(255, 255, 255, 0.19); text-align: center; width: 11.5em; max-height: 2.5em;"
             const clockCurrentTime = quantum.document.createElement("p");
             const clockCurrentDate = quantum.document.createElement("p");
             createSysDaemon("clockUpdate", () => {
