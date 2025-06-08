@@ -4,7 +4,12 @@ window.huopadesktop = (() => {
         "startMenuOpen":false
     }
     // Priv Sys Funcs
-    const induceCrash = async (error) =>{
+
+    const createSysDaemon = async (name, daemonFunc) => {
+        console.log("[SYS]: Running System Daemon: " + name);
+        daemonFunc();
+    }
+    const induceCrash = async (error) => {
         const mainDiv = quantum.document.getElementById("termDiv");
             mainDiv.innerHTML = "";
             await sys.addLine("# [color=red]/!\\ [/color]")
@@ -373,6 +378,7 @@ window.huopadesktop = (() => {
 
         dragHandle.style.cursor = "grab";
         dragHandle.addEventListener("mousedown", (e) => {
+            quantum.document.body.style.userSelect = "none";
             isDragging = true;
             const rect = windowEl.getBoundingClientRect();
             offsetX = e.clientX - rect.left;
@@ -396,6 +402,7 @@ window.huopadesktop = (() => {
         }
 
         function onMouseUp() {
+            quantum.document.body.style.userSelect = "";
             isDragging = false;
             quantum.document.removeEventListener("mousemove", onMouseMove);
             quantum.document.removeEventListener("mouseup", onMouseUp);
@@ -567,7 +574,6 @@ window.huopadesktop = (() => {
         try {
             const mainDiv = quantum.document.getElementById("termDiv");
             mainDiv.innerHTML = "";
-
             const desktop = quantum.document.createElement("div");
             const dock = quantum.document.createElement("div");
             const imageData = await internalFS.getFile("/system/env/wallpapers/default.png");
@@ -611,10 +617,44 @@ window.huopadesktop = (() => {
             startMenuButton.style = `background-image: url(${huopalogo}); background-size: contain; background-repeat: no-repeat; background-position: center; width: 3.5em; height: 3.5em; border: none; background-color: transparent; border-radius: 50%; margin: 1em; transition: 0.15s;cursor: pointer; transform-origin: center;`;
             const appBar = quantum.document.createElement("div");
             const clockDiv = quantum.document.createElement("div");
-            appBar.style = `padding: -0.5em; width: 85%;`
+            clockDiv.id = "clockDiv";
+            clockDiv.style = "padding: 0.33em; margin: 0.33em; border-radius: 0.5em; background-color: rgba(94, 94, 94, 0.37); border-style: solid; border-width: 1.5px; border-color: rgba(255, 255, 255, 0.19); text-align: center; width: 11.5em; max-height: 2.5em;"
+            const clockCurrentTime = quantum.document.createElement("p");
+            const clockCurrentDate = quantum.document.createElement("p");
+            createSysDaemon("clockUpdate", () => {
+                const pad = n => String(n).padStart(2, "0");
+                const monthNameList = [
+                    "January", "February", "March", "April", "May", "June",
+                    "July", "August", "September", "October", "November", "December"
+                ];
+
+                const loop = () => {
+                    const now = new Date();
+                    clockCurrentTime.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}.${pad(now.getSeconds())}`;
+
+                    let date = now.getDate();
+                    let dateEnding = "th";
+
+                    if (date % 100 < 11 || date % 100 > 13) {
+                        if (date % 10 === 1) dateEnding = "st";
+                        else if (date % 10 === 2) dateEnding = "nd";
+                        else if (date % 10 === 3) dateEnding = "rd";
+                    }
+
+                    clockCurrentDate.textContent = `${date}${dateEnding} of ${monthNameList[now.getMonth()]}, ${now.getFullYear()}`;
+                    setTimeout(loop, 1000);
+                };
+
+                loop();
+            });
+
+            clockDiv.append(clockCurrentTime);
+            clockDiv.append(clockCurrentDate);
+            appBar.style = `width: 100%; height: 90%; border-radius: 0.7em;`
             appBar.id = "appBar";
             await dock.append(startMenuButton);
             await dock.append(appBar);
+            await dock.append(clockDiv);
 
             startMenuButton.onclick = async function() {
                 openStartMenu();
