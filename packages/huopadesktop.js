@@ -569,7 +569,7 @@ window.huopadesktop = (() => {
             mainDiv.innerHTML = "";
 
             const desktop = quantum.document.createElement("div");
-            const appBar = quantum.document.createElement("div");
+            const dock = quantum.document.createElement("div");
             const imageData = await internalFS.getFile("/system/env/wallpapers/default.png");
             quantum.document.body.style.margin = "0";
             desktop.style = `width: 100%; height: 100%; background-image: url(${imageData}); background-size: cover; background-position: center; font-family: sans-serif;`;
@@ -601,19 +601,21 @@ window.huopadesktop = (() => {
                 popup.append(acceptButton);
             } else popupClosed = true;
             await waitUntil(() => popupClosed);
-            appBar.id = "appBar";
-            appBar.style = `position: absolute; bottom: 20px; width: 96%; height: 4em; background-color: rgba(45, 45, 45, 0.75); border-radius: 1em; left: 50%; transform: translateX(-50%); display: flex; align-items: center; border: 2.5px; border: 2.5px; border-style: solid; border-color: rgba(105, 105, 105, 1); z-index: 15000;`;
+            dock.id = "dock";
+            dock.style = `position: absolute; bottom: 20px; width: 96%; height: 4em; background-color: rgba(45, 45, 45, 0.75); border-radius: 1em; left: 50%; transform: translateX(-50%); display: flex; align-items: center; border: 2.5px; border: 2.5px; border-style: solid; border-color: rgba(105, 105, 105, 1); z-index: 15000;`;
 
-
-            await desktop.append(appBar);
-
+            await desktop.append(dock);
 
             const huopalogo = await internalFS.getFile("/system/env/assets/huopalogo.png");
             const startMenuButton = quantum.document.createElement("button");
             startMenuButton.style = `background-image: url(${huopalogo}); background-size: contain; background-repeat: no-repeat; background-position: center; width: 3.5em; height: 3.5em; border: none; background-color: transparent; border-radius: 50%; margin: 1em; transition: 0.15s;cursor: pointer; transform-origin: center;`;
-
+            const appBar = quantum.document.createElement("div");
+            const clockDiv = quantum.document.createElement("div");
+            appBar.style = `padding: -0.5em; width: 85%;`
             appBar.id = "appBar";
-            await appBar.append(startMenuButton);
+            await dock.append(startMenuButton);
+            await dock.append(appBar);
+
             startMenuButton.onclick = async function() {
                 openStartMenu();
             }
