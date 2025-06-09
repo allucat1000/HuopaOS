@@ -300,11 +300,12 @@ const idbFS = {
 };
 
 const internalFS = {
-  async getFile(path, permissions = "SYSTEM") {
-    if (permissions = "SYSTEM") {
+  async getFile(path, permissions = {"read":"SYSTEM", "write":"SYSTEM", "modify":"SYSTEM"}) {
+    if (permissions.read = "SYSTEM") {
       return await idbFS.getFile(path);
     }
-    if (JSON.parse(await internalFS.getFile(path + ".perms")).read === permissions || !await internalFS.getFile(path + ".perms")) {
+    const currentPerms = JSON.parse(await internalFS.getFile(path + ".perms"))
+    if (currentPerms.read === permissions || currentPerms.read === "" || !await internalFS.getFile(path + ".perms")) {
       return await idbFS.getFile(path);
     } else {
       console.warn("Not right permissions!")
@@ -313,12 +314,13 @@ const internalFS = {
   },
 
   async createPath(path, type = "dir", content = "", permissions = {
-    "read":"SYSTEM",
-    "write":"SYSTEM",
-    "modify":"SYSTEM",
+    "read":"",
+    "write":"",
+    "modify":"",
   }) {
     if (await internalFS.getFile(path)) {
-      if (JSON.parse(await internalFS.getFile(path + ".perms") || "{\"read\":\"\", \"write\":\"\", \"modify\":\"\"}").write === permissions || permissions.write === "SYSTEM" || !await internalFS.getFile(path + ".perms")) {
+      const currentPerms = JSON.parse(await internalFS.getFile(path + ".perms") || "{\"read\":\"\", \"write\":\"\", \"modify\":\"\"}")
+      if (currentPerms.write === permissions || currentPerms.write === "" || permissions.write === "SYSTEM" || !await internalFS.getFile(path + ".perms")) {
       } else {
         console.warn("Not right permissions!")
         return "Not right permissions!";
@@ -357,7 +359,7 @@ const internalFS = {
     }
   },
 
-  async delDir(dir, visited = new Set(), recursive = false, force = false, permissions = "SYSTEM") {
+  async delDir(dir, visited = new Set(), recursive = false, force = false, permissions = {"read":"SYSTEM","write":"SYSTEM", "modify":"SYSTEM"}) {
     if (visited.has(dir)) return;
     visited.add(dir);
 
@@ -381,7 +383,8 @@ const internalFS = {
           return;
         }
       } else {
-        if (JSON.parse(await internalFS.getFile(item + ".perms")).modify === permissions || permissions.modify === "SYSTEM" || !await internalFS.getFile(item + ".perms")) {
+        const currentPerms = JSON.parse(await internalFS.getFile(item + ".perms")) || {"read":"","write":"", "modify":""}
+        if (currentPerms.modify === permissions || currentPerms.modify === "" || permissions.modify === "SYSTEM" || !await internalFS.getFile(item + ".perms")) {
           await idbFS.deleteFile(item);
         } else {
           console.warn("Not right permissions!")

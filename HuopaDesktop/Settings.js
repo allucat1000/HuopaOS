@@ -36,7 +36,7 @@ async function customizationTabLoad() {
 
     if (wallpaperList.length < 1) {
         const warning = await huopaAPI.createElement("h2");
-        await huopaAPI.setText(warning, 'You are in an outdated version of HuopaDesktop with an incorrect wallpaper config! Press Shutdown in the start menu and press "C" when you are in the terminal, then run "hpkg update" and "huopadesktop install".');
+        await huopaAPI.setText(warning, 'You are in an outdated version of HuopaDesktop with an incorrect wallpaper config! Press "Shutdown" in the start menu and press "C" when you are in the terminal, then run "hpkg update" and "huopadesktop install".');
         await huopaAPI.setStyle(warning, "text-align: center; color: white; margin: 1em;");
         await huopaAPI.append(mainScreenDiv, warning);
         return;
