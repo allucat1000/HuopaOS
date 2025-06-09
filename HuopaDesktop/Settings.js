@@ -47,9 +47,9 @@ async function customizationTabLoad() {
     await huopaAPI.append(mainScreenDiv, wallpaperChooseTitle);
     for (const wallpaperPath of wallpaperList) {
         const wallpaperButton = await huopaAPI.createElement("button")
-        await huopaAPI.setStyle(wallpaperButton, "border-radius: 0.5em; padding: 0; width: 25%; background-color: rgba(0, 0, 0, 0); margin: 1em; cursor: pointer; border-style: solid; border-color: white;")
+        await huopaAPI.setStyle(wallpaperButton, "border-radius: 0.5em; padding: 0; width: 25%; background-color: rgba(0, 0, 0, 0); margin: 1em; cursor: pointer; border-style: none;")
         const img = await huopaAPI.createElement("img");
-        await huopaAPI.setStyle(img, "border-radius: 0.5em; width: 100%; height: 100%; background-size: cover; margin: 0;")
+        await huopaAPI.setStyle(img, "border-radius: 0.5em; width: 100%; height: 100%; background-size: cover; margin: 0; border-style: solid; border-color: white;")
         await huopaAPI.setSrc(img, await huopaAPI.getFile(wallpaperPath));
         await huopaAPI.append(wallpaperButton, img);
         await huopaAPI.append(mainScreenDiv, wallpaperButton);
