@@ -626,14 +626,15 @@ window.huopadesktop = (() => {
             mainDiv.append(desktop);
             createSysDaemon("wallpaperUpdater", async () => {
                 let oldwallpaper = await internalFS.getFile("/system/env/systemconfig/settings/customization/wallpaperchosen.txt");
-                function loop() {
-                    if (!oldwallpaper === internalFS.getFile("/system/env/systemconfig/settings/customization/wallpaperchosen.txt")) {
-                        oldwallpaper = internalFS.getFile("/system/env/systemconfig/settings/customization/wallpaperchosen.txt");
-                        const wallpaperChosen = internalFS.getFile("/system/env/systemconfig/settings/customization/wallpaperchosen.txt");
-                        const imageData = internalFS.getFile(wallpaperChosen);
+                async function loop() {
+                    const updateCheck = oldwallpaper === await internalFS.getFile("/system/env/systemconfig/settings/customization/wallpaperchosen.txt");
+                    if (updateCheck === false) {
+                        oldwallpaper = await internalFS.getFile("/system/env/systemconfig/settings/customization/wallpaperchosen.txt");
+                        const wallpaperChosen = await internalFS.getFile("/system/env/systemconfig/settings/customization/wallpaperchosen.txt");
+                        const imageData = await internalFS.getFile(wallpaperChosen);
                         desktop.style = `width: 100%; height: 100%; background-image: url(${imageData}); background-size: cover; background-position: center; font-family: sans-serif;`;
                     }
-                    setTimeout(loop, 1000);
+                    setTimeout(loop, 250);
                 }
                 loop()
             })

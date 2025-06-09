@@ -83,6 +83,7 @@ window.sys = {
     termContentDiv.innerHTML = html;
     termDiv.appendChild(termContentDiv);
     termDiv.scrollTop = termDiv.scrollHeight;
+    textInput.scroll();
   }
 }
 
@@ -486,8 +487,7 @@ const internalFS = {
       try {
         if (["a", ""].includes(answer) && !allowList.includes(path)) {
           allowList.push(path);
-          console.log(allowList)
-          console.log(await internalFS.createPath(safepkgPath, "file", JSON.stringify(allowList)));
+          await internalFS.createPath(safepkgPath, "file", JSON.stringify(allowList));
         }
         const code = await internalFS.getFile(path);
         const unsandboxedFunction = new Function(code);
