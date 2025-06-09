@@ -617,6 +617,7 @@ window.huopadesktop = (() => {
             const mainDiv = quantum.document.getElementById("termDiv");
             mainDiv.innerHTML = "";
             const desktop = quantum.document.createElement("div");
+
             const dock = quantum.document.createElement("div");
             const wallpaperChosen = await internalFS.getFile("/system/env/systemconfig/settings/customization/wallpaperchosen.txt");
             const imageData = await internalFS.getFile(wallpaperChosen);
@@ -671,7 +672,7 @@ window.huopadesktop = (() => {
 
             const huopalogo = await internalFS.getFile("/system/env/assets/huopalogo.png");
             const startMenuButton = quantum.document.createElement("button");
-            startMenuButton.style = `background-image: url(${huopalogo}); background-size: contain; background-repeat: no-repeat; background-position: center; width: 4em; height: 4em; border: none; background-color: transparent; border-radius: 50%; margin: 1em; transition: 0.15s;cursor: pointer; transform-origin: center;`;
+            startMenuButton.style = `outline: none; background-image: url(${huopalogo}); background-size: contain; background-repeat: no-repeat; background-position: center; width: 4em; height: 4em; border: none; background-color: transparent; border-radius: 50%; margin: 1em; transition: 0.15s;cursor: pointer; transform-origin: center;`;
             const appBar = quantum.document.createElement("div");
             const clockDiv = quantum.document.createElement("div");
             clockDiv.id = "clockDiv";
