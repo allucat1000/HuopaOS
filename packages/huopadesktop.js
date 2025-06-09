@@ -308,9 +308,22 @@ window.huopadesktop = (() => {
                 if (el) el.textContent = text;
             },
 
-            setInnerHMTL: function(id, content) {
+            getText: function(id) {
                 const el = elementRegistry[id];
-                if (el) el.innerHTML = content;
+                if (el) el.textContent = text;
+            },
+
+            setInnerHTML: function(id, content, appID) {
+                const el = elementRegistry[id];
+                if (content || "".length > 0) {
+                    console.warn(`[APP SAFETY] Application '${appID} set innerHTML.`);
+                }
+                
+                if (el) el.innerHTML = content || "";
+            },
+            getInnerHTML: function(id) {
+                const el = elementRegistry[id];
+                return el.innerHTML || "";
             },
 
             setStyle: function(id, styleText) {
@@ -351,6 +364,15 @@ window.huopadesktop = (() => {
                 }
                 el.src = src;
             },
+            getSrc: function(id) {
+                const el = elementRegistry[id];
+                if (!el) {
+                    console.warn(`setSrc: Element with ID: '${id}' not found.`);
+                    return;
+                }
+                if (el.src) return el.src;
+            },
+
             setCertainStyle: function(id, styleName, content) {
                 const el = elementRegistry[id];
                 if (!el) {
@@ -358,7 +380,65 @@ window.huopadesktop = (() => {
                     return;
                 }
                 el.style[styleName] = content;
+            },
+
+            openFileImport: async function(accept = "*", type = "text", allowMultiple = false) {
+                const files = await new Promise((resolve, reject) => {
+                    const input = quantum.document.createElement("input");
+                    input.type = "file";
+                    input.accept = accept;
+                    input.multiple = allowMultiple;
+                    input.style.display = "none";
+
+                    input.addEventListener("change", () => {
+                        if (input.files.length > 0) {
+                            resolve(Array.from(input.files));
+                        } else {
+                            reject(new Error("No files selected!"));
+                        }
+                        appContainer.removeChild(input);
+                    });
+
+                    appContainer.appendChild(input);
+                    input.click();
+                });
+
+                const readFile = (file) => new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = () => reject(new Error("Failed to read file"));
+
+                    if (type === "text") {
+                        reader.readAsText(file);
+                    } else if (type === "dataURL") {
+                        reader.readAsDataURL(file);
+                    } else if (type === "binary") {
+                        reader.readAsArrayBuffer(file);
+                    } else {
+                        reject(new Error(`Unsupported file type "${type}"!`));
+                    }
+                });
+
+                const results = await Promise.all(files.map(readFile));
+
+                if (allowMultiple) {
+                    return files.map((file, index) => ({
+                        content: results[index],
+                        name: file.name,
+                        type: file.type,
+                        size: file.size
+                    }));
+                } else {
+                    return {
+                        content: results[0],
+                        name: files[0].name,
+                        type: files[0].type,
+                        size: files[0].size
+                    };
+                }
             }
+
+
         };
     };
 
@@ -407,7 +487,7 @@ window.huopadesktop = (() => {
             }
         }
     });
-    let appZIndex = 100;
+    let appZIndex = 500;
     function createDraggableWindow(windowEl, dragHandleSelector = ".titlebar") {
         windowEl.style.position = "absolute";
         
@@ -426,7 +506,9 @@ window.huopadesktop = (() => {
             offsetY = e.clientY - rect.top;
 
             windowEl.style.position = "absolute";
-            windowEl.style.zIndex = appZIndex++;
+            appZIndex = appZIndex + 10;
+            windowEl.style.zIndex = appZIndex;
+
 
             const x = e.clientX - offsetX;
             const y = e.clientY - offsetY;
@@ -474,15 +556,23 @@ window.huopadesktop = (() => {
             transition: opacity 0.15s ease, transform 0.15s ease;
             backdrop-filter: blur(2px);
         `;
-
         const titleBar = quantum.document.createElement("div");
+        titleBar.style = `
+            position: absolute;
+            top: 0px;
+            left: 0;
+            height: 22px;
+            width: 100%;
+            background: rgba(0, 0, 0, 0);
+            z-index: ${appZIndex + 1}
+        `;
         const appTitle = quantum.document.createElement("h3");
         appTitle.textContent = appId.replace(/\.js$/, "");;
         appTitle.style = "font-family: sans-serif; margin: 0.5em;"
         titleBar.className = "titlebar";
         const container = quantum.document.createElement("div");
         container.className = "app-container";
-        container.style = "width: 100%; height: 100%;";
+        container.style = `width: 100%; height: 100%; overflow: auto; position: relative;`;
         const closeButton = quantum.document.createElement("button");
         closeButton.textContent = "×";
         closeButton.style = `
@@ -500,6 +590,7 @@ window.huopadesktop = (() => {
             codeElem.remove();
             outerContainer.remove();
         });
+        
         container.id = `app-${appId}`;
         quantum.document.getElementById("desktop").appendChild(outerContainer);
         outerContainer.append(titleBar);
@@ -511,7 +602,9 @@ window.huopadesktop = (() => {
             outerContainer.style.opacity = "1";
             outerContainer.style.transform = "translateY(0px)";
         });
+
         return container;
+        
     }
 
     
@@ -590,6 +683,7 @@ window.huopadesktop = (() => {
                 appButton.onclick = async () => {
                     const code = await internalFS.getFile(appList[i]);
                     await runApp(cleanedAppName, code);
+                    await openStartMenu()
                 };
                 appListDiv.append(appButton);
             }
@@ -821,10 +915,12 @@ window.huopadesktop = (() => {
 
                 const wallpaper1Success = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/Wallpapers/Chilly%20Mountain.png`, "/system/env/wallpapers/Chilly Mountain.png");
                 const wallpaper2Success = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/Wallpapers/Peaceful%20Landscape.png`, "/system/env/wallpapers/Peaceful Landscape.png");
+                const wallpaper3Success = await fetchAndStoreImage(`https://raw.githubusercontent.com/dharmx/walls/main/anime/a_cartoon_of_a_woman_with_pink_hair.jpg`, "/system/env/wallpapers/AnimeGrill.png");
+                
 
                 const logoSuccess = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaLogo.png`, "/system/env/assets/huopalogo.png");
                 await internalFS.createPath("/system/env/systemconfig/settings/customization/wallpaperchosen.txt", "file", "/system/env/wallpapers/Chilly Mountain.png")
-                if (wallpaper1Success && wallpaper2Success && logoSuccess) {
+                if (wallpaper1Success && wallpaper2Success && wallpaper3Success && logoSuccess) {
                     await sys.addLine("Wallpapers and logo fetched and installed!");
                     await new Promise(resolve => setTimeout(resolve, 100));
                     await this.boot();

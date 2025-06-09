@@ -391,6 +391,7 @@ const internalFS = {
         const currentPerms = JSON.parse(await internalFS.getFile(item + ".perms")) || {"read":"","write":"", "modify":""}
         if (currentPerms.modify === permissions || currentPerms.modify === "" || permissions.modify === "SYSTEM" || !await internalFS.getFile(item + ".perms")) {
           await idbFS.deleteFile(item);
+          await idbFS.deleteFile(item + ".perms");
         } else {
           console.warn("Not right permissions!")
           return "Not right permissions!";
@@ -398,8 +399,10 @@ const internalFS = {
         
       }
     }
-    if (JSON.parse(await internalFS.getFile(dir + ".perms")).modify === permissions || permissions === "SYSTEM" || !await internalFS.getFile(dir + ".perms")) {
+    const currentPerms = JSON.parse(await internalFS.getFile(dir + ".perms")) || {"read":"","write":"", "modify":""}
+    if (currentPerms.modify === permissions || currentPerms.modify === "" || permissions.modify === "SYSTEM" || !await internalFS.getFile(item + ".perms")) {
     await idbFS.deleteFile(dir);
+    await idbFS.deleteFile(dir + ".perms");
     } else {
       console.warn("Not right permissions!")
       return "Not right permissions!"
@@ -553,7 +556,7 @@ async function callCMD(input, params) {
         if (params[1].toLowerCase())
         await internalFS.downloadPackage(params[1].toLowerCase())
       } else if (params[0].toLowerCase() === "update") {
-        const packageList = JSON.parse(await internalFS.getFile("/system/packages"));
+        const packageList = JSON.parse(await internalFS.getFile("/system/packages") || []);
         for (let i = 0; i < packageList.length; i++) {
           await internalFS.downloadPackage(packageList[i].replace("/system/packages/","").replace(".js",""));
         }
@@ -688,10 +691,10 @@ async function init(reinstall) {
         await sys.addLine("[line=red]**_You will be unable to use the system, since you don't have a core system files._**[/line]")
     }
   } else {
-    const issues = checkFileSystemIntegrity();
-    if (issues && issues.length > 0 || isSystemInstalled === "recovery") {
+    const issues = await checkFileSystemIntegrity();
+    if (issues && issues.length > 0 || isSystemInstalled() === "recovery") {
       sys.addLine("[line=red]System issues detected. Attempting recovery...[/line]");
-      recoveryCheck(issues);
+      await recoveryCheck(issues);
     }
 
     if (verBranch === "dev") {
@@ -822,23 +825,22 @@ function escapeWithBackslashes(str) {
 
 
 
-function recoveryCheck() {
-  const issues = checkFileSystemIntegrity();
+async function recoveryCheck() {
+  const issues = await checkFileSystemIntegrity();
   if (!issues) return;
 
 
-  internalFS.createPath("/system/manifest.json", JSON.stringify({
+  internalFS.createPath("/system/manifest.json", "file", JSON.stringify({
     version: currentVer,
     installedAt: Date.now(),
     corePaths: [
       "/", "/home", "/system"]
     }));
-
   for (const issue of issues) {
     const dir = issue.split(" ")[0];
-    internalFS.createPath(dir, JSON.stringify([]));
+    await internalFS.createPath(dir, "file", JSON.stringify([]));
     console.warn(`Recovered: ${dir}`);
-    sys.addLine(`[line=green]Recovered directory: ${dir}[/line]`);
+    await sys.addLine(`[line=green]Recovered directory: ${dir}[/line]`);
   }
 }
 
