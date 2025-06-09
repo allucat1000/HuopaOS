@@ -350,6 +350,14 @@ window.huopadesktop = (() => {
                     return;
                 }
                 el.src = src;
+            },
+            setCertainStyle: function(id, styleName, content) {
+                const el = elementRegistry[id];
+                if (!el) {
+                    console.warn(`setCertainStyle: Element with ID: '${id}' not found.`);
+                    return;
+                }
+                el.style[styleName] = content;
             }
         };
     };
@@ -412,7 +420,6 @@ window.huopadesktop = (() => {
 
         dragHandle.style.cursor = "grab";
         dragHandle.addEventListener("mousedown", (e) => {
-            quantum.document.body.style.userSelect = "none";
             isDragging = true;
             const rect = windowEl.getBoundingClientRect();
             offsetX = e.clientX - rect.left;
@@ -540,9 +547,9 @@ window.huopadesktop = (() => {
                     z-index: 99999;
                     backdrop-filter: blur(2px);
                 `;
-
                 desktop.append(startMenuDiv);
             }
+            startMenuDiv.style.display = "block";
             const shutdownButton = quantum.document.createElement("button");
             shutdownButton.style = "background-color: rgba(45, 45, 45, 0.7); border-color: rgba(105, 105, 105, 0.6); border-style: solid; border-radius: 0.5em; position: absolute; cursor: pointer; right: 0.5em; bottom: 0.5em; color: white; padding: 0.5em;"
             shutdownButton.textContent = "Shutdown";
@@ -555,7 +562,13 @@ window.huopadesktop = (() => {
 
             }
             startMenuDiv.append(shutdownButton);
-            const appList = JSON.parse(await internalFS.getFile("/home/applications"));
+            let appList = JSON.parse(await internalFS.getFile("/home/applications") || "[]");
+
+            if (!appList) {
+                console.warn("/home/applications does not exist. Creating...");
+                internalFS.createPath("/home/applications");
+                return;
+            }
             const appText = quantum.document.createElement("h2");
             appText.textContent = "Your apps";
             appText.style = "margin: 0.5em; text-align: left; color: white; font-family: sans-serif;"
@@ -600,6 +613,7 @@ window.huopadesktop = (() => {
             });
             setTimeout(() => {
                 startMenuDiv.innerHTML = "";
+                startMenuDiv.style.display = "none";
                 setTimeout(() => {
                     sysTempInfo.startMenuOpen = false;
                 }, 50);
@@ -623,6 +637,7 @@ window.huopadesktop = (() => {
             const imageData = await internalFS.getFile(wallpaperChosen);
             quantum.document.body.style.margin = "0";
             desktop.style = `width: 100%; height: 100%; background-image: url(${imageData}); background-size: cover; background-position: center; font-family: sans-serif;`;
+            quantum.document.body.style.userSelect = "none";
             desktop.id = "desktop";
             mainDiv.append(desktop);
             createSysDaemon("wallpaperUpdater", async () => {
