@@ -83,7 +83,10 @@ window.sys = {
     termContentDiv.innerHTML = html;
     termDiv.appendChild(termContentDiv);
     termDiv.scrollTop = termDiv.scrollHeight;
-    textInput.scroll();
+    if (textInput) {
+      textInput.scroll();
+    }
+    
   }
 }
 
