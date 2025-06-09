@@ -558,13 +558,11 @@ window.huopadesktop = (() => {
         `;
         const titleBar = quantum.document.createElement("div");
         titleBar.style = `
-            position: absolute;
-            top: 0px;
-            left: 0;
             height: 22px;
             width: 100%;
             background: rgba(0, 0, 0, 0);
             z-index: ${appZIndex + 1}
+            margin-bottom: 3px;
         `;
         const appTitle = quantum.document.createElement("h3");
         appTitle.textContent = appId.replace(/\.js$/, "");;
@@ -572,7 +570,7 @@ window.huopadesktop = (() => {
         titleBar.className = "titlebar";
         const container = quantum.document.createElement("div");
         container.className = "app-container";
-        container.style = `width: 100%; height: 100%; overflow: auto; position: relative;`;
+        container.style = `width: 100%; height: calc(100% - 25px); overflow: auto; position: relative;`;
         const closeButton = quantum.document.createElement("button");
         closeButton.textContent = "×";
         closeButton.style = `
@@ -915,12 +913,11 @@ window.huopadesktop = (() => {
 
                 const wallpaper1Success = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/Wallpapers/Chilly%20Mountain.png`, "/system/env/wallpapers/Chilly Mountain.png");
                 const wallpaper2Success = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/Wallpapers/Peaceful%20Landscape.png`, "/system/env/wallpapers/Peaceful Landscape.png");
-                const wallpaper3Success = await fetchAndStoreImage(`https://raw.githubusercontent.com/dharmx/walls/main/anime/a_cartoon_of_a_woman_with_pink_hair.jpg`, "/system/env/wallpapers/AnimeGrill.png");
                 
 
                 const logoSuccess = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaLogo.png`, "/system/env/assets/huopalogo.png");
                 await internalFS.createPath("/system/env/systemconfig/settings/customization/wallpaperchosen.txt", "file", "/system/env/wallpapers/Chilly Mountain.png")
-                if (wallpaper1Success && wallpaper2Success && wallpaper3Success && logoSuccess) {
+                if (wallpaper1Success && wallpaper2Success && logoSuccess) {
                     await sys.addLine("Wallpapers and logo fetched and installed!");
                     await new Promise(resolve => setTimeout(resolve, 100));
                     await this.boot();
