@@ -28,6 +28,8 @@ const customColors = {
   blue: "#338fff", 
 };
 
+const textInput = document.getElementById("textInput");
+
 window.sys = {
   async import(name) {
     try {
@@ -202,7 +204,6 @@ if (verBranch === "dev") {
   sys.addLine("### [line=yellow]The dev branch is in use currently! Be ready for bugs![/line]")
 }
 
-const textInput = document.getElementById("textInput");
 textInput.focus()
 
 const keysDown = {};
