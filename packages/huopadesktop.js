@@ -562,7 +562,6 @@ window.huopadesktop = (() => {
             width: 100%;
             background: rgba(0, 0, 0, 0);
             z-index: ${appZIndex + 1}
-            margin-bottom: 3px;
         `;
         const appTitle = quantum.document.createElement("h3");
         appTitle.textContent = appId.replace(/\.js$/, "");;
@@ -570,7 +569,7 @@ window.huopadesktop = (() => {
         titleBar.className = "titlebar";
         const container = quantum.document.createElement("div");
         container.className = "app-container";
-        container.style = `width: 100%; height: calc(100% - 25px); overflow: auto; position: relative;`;
+        container.style = `width: 100%; height: calc(100% - 33px); overflow: auto; position: relative;`;
         const closeButton = quantum.document.createElement("button");
         closeButton.textContent = "×";
         closeButton.style = `

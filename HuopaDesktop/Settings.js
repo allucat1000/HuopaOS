@@ -12,8 +12,8 @@ async function mainScreen() {
     await huopaAPI.setStyle(customizationTab, "display: block; background-color: rgba(45, 45, 45, 0.5); border-style: solid; border-color: rgba(105, 105, 105, 0.6); border-radius: 0.5em; color: white; margin: 0.5em auto; padding: 1.25em; width: 65%; cursor: pointer;")
     await huopaAPI.append(mainScreenDiv, customizationTab);
     await huopaAPI.setOnClick(customizationTab, () => {
-        customizationTabLoad();
         huopaAPI.deleteElement(mainScreenDiv);
+        customizationTabLoad();
     });
 }
 
@@ -29,8 +29,8 @@ async function customizationTabLoad() {
     await huopaAPI.setStyle(backButton, "display: block; background-color: rgba(45, 45, 45, 0.5); border-style: solid; border-color: rgba(105, 105, 105, 0.6); border-radius: 0.5em; color: white; padding: 0.5em; cursor: pointer; position: fixed; bottom: 0.5em; left: 0.5em;");
     await huopaAPI.append(mainScreenDiv, backButton);
     await huopaAPI.setOnClick(backButton, async () => {
-        mainScreen();
         await huopaAPI.deleteElement(mainScreenDiv);
+        await mainScreen();
     });
     const wallpaperList = JSON.parse(await huopaAPI.getFile("/system/env/wallpapers") || []);
 
@@ -65,7 +65,13 @@ async function customizationTabLoad() {
     await huopaAPI.append(wallpaperListDiv, importButton);
     await huopaAPI.setOnClick(importButton, async () => {
         const file = await huopaAPI.openFileImport("*", "dataURL");
-        await huopaAPI.writeFile("/system/env/wallpapers/" + file.name, "file", file.content);
+        if (file) {
+            await huopaAPI.writeFile("/system/env/wallpapers/" + file.name, "file", file.content);
+            await huopaAPI.deleteElement(mainScreenDiv);
+            await customizationTabLoad()
+
+        }
+        
     })
     await huopaAPI.append(mainScreenDiv, wallpaperListDiv);
     
