@@ -17,8 +17,8 @@
  */
 
 
-if (typeof window === "undefined" || typeof localStorage === "undefined") {
-  console.error("HuopaOS requires a browser with localStorage capabilities.");
+if (typeof window === "undefined") {
+  console.error("HuopaOS requires a browser with storage capabilities.");
   throw new Error("HuopaOS requires a browser environment.");
 }
 
@@ -191,7 +191,7 @@ sys.addLine("### [color=rgb(100, 175, 255)]HuopaOS [/color] beta build.")
 sys.addLine("### Made by [color=rgb(100, 175, 255)]Allucat1000.[/color]")
 sys.addLine("Thank you for trying this demo! If you have any suggestions or bugs, make sure to let me know!")
 sys.addLine("Use the \"hpkg install\" to install a package. \n Make sure to update your packages often using \"hpkg update\".")
-const currentVer = "0.3.1"
+const currentVer = "0.4.0"
 const verBranch = "main";
 if (verBranch === "dev") {
   sys.addLine("### [line=yellow]Hold up![/line]")
@@ -575,6 +575,13 @@ async function callCMD(input, params) {
 
     
     } else {
+      if (input.toLowerCase() === "sysfix") {
+        await sys.addLine("Reinstalling core system files...");
+        inputAnswer = "";
+        init(true);
+        return;
+
+      }
       const rawList = await internalFS.getFile("/system/packages") || "[]";
       const packageList = JSON.parse(rawList);
 
@@ -625,16 +632,17 @@ async function callCMD(input, params) {
 }
 // Bootloader / Installer
 
-async function init() {
+async function init(reinstall) {
   let root = await internalFS.getFile("/");
   const isInstalled = await isSystemInstalled()
 
-
-  if (!isInstalled) {
-    await sys.addLine("### System files are not installed yet. Install? [Y/n]");
-    inputAnswerActive = true;
-    await waitUntil(() => !inputAnswerActive);
-    if (inputAnswer.toLowerCase() === "y" || inputAnswer.toLowerCase() === "") {
+  if (!isInstalled || reinstall) {
+    if (!reinstall) {
+      await sys.addLine("### System files are not installed yet. Install? [Y/n]");
+      inputAnswerActive = true;
+      await waitUntil(() => !inputAnswerActive);
+    }
+    if (inputAnswer.toLowerCase() === "y" || inputAnswer.toLowerCase() === "" || reinstall) {
       await sys.addLine("Creating system directories and files...")
       await internalFS.createPath("/");
       await internalFS.createPath("/system");
@@ -643,7 +651,7 @@ async function init() {
       await internalFS.createPath("/home");
       await internalFS.createPath("/home/applications");
 
-      localStorage.setItem("/system/manifest.json", JSON.stringify({
+      internalFS.createPath("/system/manifest.json", "file", JSON.stringify({
         version: currentVer,
         installedAt: Date.now(),
         corePaths: [
@@ -812,7 +820,7 @@ function recoveryCheck() {
   if (!issues) return;
 
 
-  localStorage.setItem("/system/manifest.json", JSON.stringify({
+  internalFS.createPath("/system/manifest.json", JSON.stringify({
     version: currentVer,
     installedAt: Date.now(),
     corePaths: [
@@ -821,7 +829,7 @@ function recoveryCheck() {
 
   for (const issue of issues) {
     const dir = issue.split(" ")[0];
-    localStorage.setItem(dir, JSON.stringify([]));
+    internalFS.createPath(dir, JSON.stringify([]));
     console.warn(`Recovered: ${dir}`);
     sys.addLine(`[line=green]Recovered directory: ${dir}[/line]`);
   }
