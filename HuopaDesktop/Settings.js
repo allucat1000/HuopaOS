@@ -41,14 +41,21 @@ async function customizationTabLoad() {
         await huopaAPI.append(mainScreenDiv, warning);
         return;
     }
+    const wallpaperChooseTitle = await huopaAPI.createElement("h2");
+    await huopaAPI.setText(wallpaperChooseTitle, "Choose your wallpaper");
+    await huopaAPI.setStyle(wallpaperChooseTitle, "text-align: center; color: white; margin: 1em;");
+    await huopaAPI.append(mainScreenDiv, wallpaperChooseTitle);
     for (const wallpaperPath of wallpaperList) {
         const wallpaperButton = await huopaAPI.createElement("button")
-        await huopaAPI.setStyle(wallpaperButton, "border-radius: 0.5em;")
+        await huopaAPI.setStyle(wallpaperButton, "border-radius: 0.5em; padding: 0; width: 25%; background-color: rgba(0, 0, 0, 0); margin: 1em; cursor: pointer; border-style: solid; border-color: white;")
         const img = await huopaAPI.createElement("img");
-        await huopaAPI.setStyle(img, "border-radius: 0.5em;")
+        await huopaAPI.setStyle(img, "border-radius: 0.5em; width: 100%; height: 100%; background-size: cover; margin: 0;")
         await huopaAPI.setSrc(img, await huopaAPI.getFile(wallpaperPath));
         await huopaAPI.append(wallpaperButton, img);
         await huopaAPI.append(mainScreenDiv, wallpaperButton);
+        await huopaAPI.setOnClick(wallpaperButton, async () => {
+            await huopaAPI.writeFile("/system/env/systemconfig/settings/customization/wallpaperchosen.txt", "file", wallpaperPath);
+        })
     }
     
 }

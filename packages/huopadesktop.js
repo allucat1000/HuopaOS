@@ -618,11 +618,25 @@ window.huopadesktop = (() => {
             mainDiv.innerHTML = "";
             const desktop = quantum.document.createElement("div");
             const dock = quantum.document.createElement("div");
-            const imageData = await internalFS.getFile("/system/env/wallpapers/Chilly Mountain.png");
+            const wallpaperChosen = await internalFS.getFile("/system/env/systemconfig/settings/customization/wallpaperchosen.txt");
+            const imageData = await internalFS.getFile(wallpaperChosen);
             quantum.document.body.style.margin = "0";
             desktop.style = `width: 100%; height: 100%; background-image: url(${imageData}); background-size: cover; background-position: center; font-family: sans-serif;`;
             desktop.id = "desktop";
             mainDiv.append(desktop);
+            createSysDaemon("wallpaperUpdater", async () => {
+                let oldwallpaper = await internalFS.getFile("/system/env/systemconfig/settings/customization/wallpaperchosen.txt");
+                function loop() {
+                    if (!oldwallpaper === internalFS.getFile("/system/env/systemconfig/settings/customization/wallpaperchosen.txt")) {
+                        oldwallpaper = internalFS.getFile("/system/env/systemconfig/settings/customization/wallpaperchosen.txt");
+                        const wallpaperChosen = internalFS.getFile("/system/env/systemconfig/settings/customization/wallpaperchosen.txt");
+                        const imageData = internalFS.getFile(wallpaperChosen);
+                        desktop.style = `width: 100%; height: 100%; background-image: url(${imageData}); background-size: cover; background-position: center; font-family: sans-serif;`;
+                    }
+                    setTimeout(loop, 1000);
+                }
+                loop()
+            })
 
             const inputLabel = quantum.document.getElementById("inputLabel");
             inputLabel?.remove();
@@ -791,7 +805,7 @@ window.huopadesktop = (() => {
                 const wallpaperSuccess = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/Wallpapers/Chilly%20Mountain.png`, "/system/env/wallpapers/Chilly Mountain.png");
 
                 const logoSuccess = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaLogo.png`, "/system/env/assets/huopalogo.png");
-
+                await internalFS.createPath("/system/env/systemconfig/settings/customization/wallpaperchosen.txt", "file", "/system/env/wallpapers/Chilly Mountain.png")
                 if (wallpaperSuccess && logoSuccess) {
                     await sys.addLine("Wallpaper and logo fetched and installed!");
                     await new Promise(resolve => setTimeout(resolve, 100));
