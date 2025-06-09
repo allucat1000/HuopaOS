@@ -300,11 +300,28 @@ const idbFS = {
 };
 
 const internalFS = {
-  async getFile(path) {
-    return await idbFS.getFile(path);
+  async getFile(path, permissions = "SYSTEM") {
+    if (permissions = "SYSTEM") {
+      return await idbFS.getFile(path);
+    }
+    if (JSON.parse(await internalFS.getFile(path + ".perms")).read === permissions || !await internalFS.getFile(path + ".perms")) {
+      return await idbFS.getFile(path);
+    } else {
+      return "Not right permissions!";
+    }
   },
 
-  async createPath(path, type = "dir", content = "") {
+  async createPath(path, type = "dir", content = "", permissions = {
+    "read":"SYSTEM",
+    "write":"SYSTEM",
+    "modify":"SYSTEM",
+  }) {
+    if (await internalFS.getFile(path)) {
+      if (JSON.parse(await internalFS.getFile(path + ".perms") || "{\"read\":\"\", \"write\":\"\", \"modify\":\"\"}").write === permissions || permissions.write === "SYSTEM" || !await internalFS.getFile(path + ".perms")) {
+      } else {
+        return "Not right permissions!";
+      }
+    }
     const parts = path.split("/");
     for (let i = 1; i < parts.length - 1; i++) {
       const parentPath = "/" + parts.slice(1, i + 1).join("/");
@@ -315,8 +332,10 @@ const internalFS = {
 
     if (type === "dir") {
       await idbFS.setFile(path, content === "" ? "[]" : content);
+      await idbFS.setFile(path + ".perms", JSON.stringify(permissions || { "write":"SYSTEM", "read":"SYSTEM", "modify":"SYSTEM"}));
     } else if (type === "file") {
       await idbFS.setFile(path, content);
+      await idbFS.setFile(path + ".perms", JSON.stringify(permissions || { "write":"SYSTEM", "read":"SYSTEM", "modify":"SYSTEM"}));
     } else {
       throw new Error("Unknown path type: " + type);
     }
@@ -336,7 +355,7 @@ const internalFS = {
     }
   },
 
-  async delDir(dir, visited = new Set(), recursive = false, force = false) {
+  async delDir(dir, visited = new Set(), recursive = false, force = false, permissions = "SYSTEM") {
     if (visited.has(dir)) return;
     visited.add(dir);
 
@@ -354,17 +373,25 @@ const internalFS = {
 
       if (isDir) {
         if (recursive) {
-          await internalFS.delDir(item, visited, recursive, force);
+          await internalFS.delDir(item, visited, recursive, force, permissions);
         } else {
           if (!force) sys.addLine(`[line=red]Cannot delete directory ${item} without recursive flag[/line]`);
           return;
         }
       } else {
-        await idbFS.deleteFile(item);
+        if (JSON.parse(await internalFS.getFile(item + ".perms")).modify === permissions || permissions === "SYSTEM" || !await internalFS.getFile(item + ".perms")) {
+          await idbFS.deleteFile(item);
+        } else {
+          return "Not right permissions!";
+        }
+        
       }
     }
-
+    if (JSON.parse(await internalFS.getFile(dir + ".perms")).modify === permissions || permissions === "SYSTEM" || !await internalFS.getFile(dir + ".perms")) {
     await idbFS.deleteFile(dir);
+    } else {
+      return "Not right permissions!"
+    }
 
     if (dir !== "/") {
       const parts = dir.split("/");
@@ -382,11 +409,6 @@ const internalFS = {
     }
   },
 
-  async removeFromDir(dir, target) {
-    const data = JSON.parse(await internalFS.getFile(dir) || "[]");
-    const newData = data.filter(item => item !== target);
-    await internalFS.createPath(dir, "file", JSON.stringify(newData));
-  },
 
   async downloadPackage(pkgName) {
     try {
@@ -457,7 +479,8 @@ const internalFS = {
       try {
         if (["a", ""].includes(answer) && !allowList.includes(path)) {
           allowList.push(path);
-          await internalFS.createPath(safepkgPath, "file", JSON.stringify(allowList));
+          console.log(allowList)
+          console.log(await internalFS.createPath(safepkgPath, "file", JSON.stringify(allowList)));
         }
         const code = await internalFS.getFile(path);
         const unsandboxedFunction = new Function(code);

@@ -60,9 +60,14 @@ window.huopadesktop = (() => {
         iframe.sandbox = "allow-scripts";
         iframe.style.display = "none";
         quantum.document.body.appendChild(iframe);
+        const safeAppCode = appCode
+        .replace(/\\/g, '\\\\')
+        .replace(/`/g, '\\`')
+        .replace(/\$\{/g, '\\${');
 
         const iframeHTML = `
             <script>
+                const appName = ${JSON.stringify(appId)};
                 const localClickHandlers = {};
 
                 window.addEventListener("message", (event) => {
@@ -99,7 +104,8 @@ window.huopadesktop = (() => {
                                         window.parent.postMessage({
                                             type: "bindClickForward",
                                             data: [elementId],
-                                            id
+                                            id,
+                                            appName
                                         }, "*");
                                     });
                                 };
@@ -110,7 +116,7 @@ window.huopadesktop = (() => {
                                 return new Promise((resolve, reject) => {
                                     const id = "msg_" + msgId++;
                                     callbacks.set(id, { resolve, reject });
-                                    window.parent.postMessage({ type: prop, data: args, id }, "*");
+                                    window.parent.postMessage({ type: prop, data: args, id, appName }, "*");
                                 });
                             };
                         }
@@ -119,14 +125,13 @@ window.huopadesktop = (() => {
 
                 (async () => {
                     try {
-                        ${appCode}
+                        ${safeAppCode}
                     } catch (e) {
                         huopaAPI.error?.("Runtime Error: " + e.message);
                     }
                 })();
             </script>
         `;
-
 
         iframe.srcdoc = iframeHTML;
 
@@ -154,11 +159,11 @@ window.huopadesktop = (() => {
 
     const messageHandler = async (event) => {
             if (killSwitch) return;
-            const { type, data, id } = event.data || {};
+            const { type, data, id, appName } = event.data || {};
             if (typeof type !== "string" || !huopaAPI[type]) return;
 
             try {
-                const result = await huopaAPI[type](...(Array.isArray(data) ? data : [data]));
+                const result = await huopaAPI[type](...(Array.isArray(data) ? data : [data]), appName);
                 if (id) {
                     event.source?.postMessage({ type: "apiResponse", id, result }, "*");
                 }
@@ -229,7 +234,16 @@ window.huopadesktop = (() => {
                 }
                 if (el) appContainer.appendChild(el);
             },
+            deleteElement: function(id) {
+                const el = elementRegistry[id]
+                if (!el) {
+                    console.warn(`delete: Element with ID '${id}' not found.`);
+                    return;
+                }
+                el.remove();
+                delete elementRegistry[id];
 
+            },
 
             append: function(parent, id) {    
                 const el = elementRegistry[id];
@@ -315,8 +329,28 @@ window.huopadesktop = (() => {
                         elementId: id
                     }, "*");
                 });
-            }
+            },
 
+            getFile: function(path, permissions) {
+                return internalFS.getFile(path, permissions);
+            },
+
+            writeFile: function(path, type, content, permissions = {
+                "read":"",
+                "write":"",
+                "modify":"",
+            }) {
+                return internalFS.createPath(path, type, content, permissions);
+            },
+
+            setSrc: function(id, src) {
+                const el = elementRegistry[id];
+                if (!el) {
+                    console.warn(`setSrc: Element with ID: '${id}' not found.`);
+                    return;
+                }
+                el.src = src;
+            }
         };
     };
 
@@ -387,6 +421,10 @@ window.huopadesktop = (() => {
             windowEl.style.position = "absolute";
             windowEl.style.zIndex = appZIndex++;
 
+            const x = e.clientX - offsetX;
+            const y = e.clientY - offsetY;
+            windowEl.style.left = x + "px";
+            windowEl.style.top = y + "px";
 
             quantum.document.addEventListener("mousemove", onMouseMove);
             quantum.document.addEventListener("mouseup", onMouseUp);
@@ -422,7 +460,7 @@ window.huopadesktop = (() => {
             resize: both;
             border: 2px solid gray;
             border-radius: 0.5em;
-            background: rgba(30, 30, 30, 0.8);
+            background: rgba(30, 30, 30, 0.65);
             margin: 0;
             opacity: 0;
             transform: translateY(20px);
@@ -432,7 +470,7 @@ window.huopadesktop = (() => {
 
         const titleBar = quantum.document.createElement("div");
         const appTitle = quantum.document.createElement("h3");
-        appTitle.textContent = appId;
+        appTitle.textContent = appId.replace(/\.js$/, "");;
         appTitle.style = "font-family: sans-serif; margin: 0.5em;"
         titleBar.className = "titlebar";
         const container = quantum.document.createElement("div");
@@ -534,7 +572,7 @@ window.huopadesktop = (() => {
             for (let i = 0; i < appList.length; i++) {
                 const appButton = quantum.document.createElement("button");
                 const cleanedAppName = appList[i].replace("/home/applications/", "")
-                appButton.textContent = cleanedAppName;
+                appButton.textContent = cleanedAppName.replace(/\.js$/, "");;
                 appButton.style = "color: white; background-color: rgba(45, 45, 45, 0.7); border-color: rgba(105, 105, 105, 0.6); border-style: solid; border-radius: 0.5em; padding: 0.5em; width: 35em; height: 3em; margin: 0.2em 0.5em; text-align: left; cursor: pointer;"
                 appButton.onclick = async () => {
                     const code = await internalFS.getFile(appList[i]);
@@ -580,7 +618,7 @@ window.huopadesktop = (() => {
             mainDiv.innerHTML = "";
             const desktop = quantum.document.createElement("div");
             const dock = quantum.document.createElement("div");
-            const imageData = await internalFS.getFile("/system/env/wallpapers/default.png");
+            const imageData = await internalFS.getFile("/system/env/wallpapers/Chilly Mountain.png");
             quantum.document.body.style.margin = "0";
             desktop.style = `width: 100%; height: 100%; background-image: url(${imageData}); background-size: cover; background-position: center; font-family: sans-serif;`;
             desktop.id = "desktop";
@@ -747,11 +785,12 @@ window.huopadesktop = (() => {
                 await internalFS.createPath("/system/env/config.json", "file", JSON.stringify(bootConfig));
                 await sys.addLine("Boot config created!");
                 await sys.addLine("Attempting to install example app...")
-                await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaDesktop/HuopaClicker.js`, "/home/applications/HuopaClicker.js")
+                await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaDesktop/HuopaClicker.js`, "/home/applications/HuopaClicker.js");
+                await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaDesktop/Settings.js`, "/home/applications/Settings.js");
 
-                const wallpaperSuccess = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/DefaultBG.png`, "/system/env/wallpapers/default.png");
+                const wallpaperSuccess = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/Wallpapers/Chilly%20Mountain.png`, "/system/env/wallpapers/Chilly Mountain.png");
 
-                const logoSuccess = await fetchAndStoreImage("https://raw.githubusercontent.com/allucat1000/HuopaOS/dev/HuopaLogo.png", "/system/env/assets/huopalogo.png");
+                const logoSuccess = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaLogo.png`, "/system/env/assets/huopalogo.png");
 
                 if (wallpaperSuccess && logoSuccess) {
                     await sys.addLine("Wallpaper and logo fetched and installed!");
