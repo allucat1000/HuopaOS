@@ -96,4 +96,19 @@ async function customizationTabLoad() {
     await huopaAPI.setAttribute(bgBlurDiv, "style", "margin: 2em;");
     await huopaAPI.append(bgBlurDiv, bgBlurText);
     await huopaAPI.append(mainScreenDiv, bgBlurDiv);
+    const slider = await huopaAPI.createElement("input");
+    await huopaAPI.setAttribute(slider, "type", "range");
+    await huopaAPI.setAttribute(slider, "min", "0");
+    await huopaAPI.setAttribute(slider, "max", "12");
+    await huopaAPI.setAttribute(slider, "value", "3.5");
+
+    const label = await huopaAPI.createElement("span");
+    await huopaAPI.setAttribute(label, "textContent", "50");
+
+    // await huopaAPI.setAttribute(slider, "oninput", async () => {
+        await huopaAPI.setAttribute(label, "textContent", await huopaAPI.getAttribute(slider, "value"));
+    // });
+
+    await huopaAPI.append(mainScreenDiv, slider);
+    await huopaAPI.append(mainScreenDiv, label);
 }

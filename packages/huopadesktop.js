@@ -3,8 +3,60 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
+    const version = "0.5.1"
     // Priv Sys Funcs
+    const mainInstaller = async () => {
+        try {
+                    await sys.import("quantum");
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                } catch (error) {
+                    await sys.addLine(`Failed to fetch Quantum module! Error: ${error}`);
+                    return;
+                }
+                await sys.addLine("Quantum installed!");
+                const bootConfig = {
+                    path: "/system/modules/quantum.js",
+                    bootpath: "/system/packages/huopadesktop.js",
+                    bootname: "huopadesktop",
+                    bootcmd: "boot",
+                    version: version
+                };
+                await internalFS.createPath("/system/env/config.json", "file", JSON.stringify(bootConfig));
+                await sys.addLine("Boot config created!");
+                await sys.addLine("Attempting to install example app...")
+                await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaDesktop/HuopaClicker.js`, "/home/applications/HuopaClicker.js");
+                await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaDesktop/Settings.js`, "/home/applications/Settings.js");
+                await sys.addLine("[line=blue]Downloading and installing wallpapers...[/line]")
+                const wallpaper1Success = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/Wallpapers/Chilly%20Mountain.png`, "/system/env/wallpapers/Chilly Mountain.png");
+                const wallpaper2Success = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/Wallpapers/Peaceful%20Landscape.png`, "/system/env/wallpapers/Peaceful Landscape.png");
+                const wallpaper3Success = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/Wallpapers/Chaotic%20Creek.png`, "/system/env/wallpapers/Chaotic Creek.png");
+                const wallpaper4Success = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/Wallpapers/Forest%20Landscape.png`, "/system/env/wallpapers/Forest Landscape.png");
 
+                const logoSuccess = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaLogo.png`, "/system/env/assets/huopalogo.png");
+                await internalFS.createPath("/system/env/systemconfig/settings/customization/wallpaperchosen.txt", "file", "/system/env/wallpapers/Chilly Mountain.png")
+                if (wallpaper1Success && wallpaper2Success && wallpaper3Success && wallpaper4Success && logoSuccess) {
+                    await sys.addLine("Wallpapers and logo fetched and installed!");
+                }
+                const styleDownloadSuccess = await new Promise( async (resolve, reject) => {const response = await fetch(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaDesktop/_systemStyles.css`); if (response.ok) { internalFS.createPath("/system/env/systemStyles.css", "file", response.text()); return true; } else { console.error("Failed to fetch styles! Response: " + response.status); return false;}});
+                if (styleDownloadSuccess) {                  
+                    await internalFS.runUnsandboxed(bootConfig.path);
+                    await new Promise(resolve => setTimeout(resolve, 500));
+
+                    try {
+                        await quantum.init();
+                    } catch (e) {
+                        if (e.message.includes("ReferenceError:")) return;
+
+                        console.error(`Failed to initialize Quantum. Error: ${e}`);
+                        return;
+                    }
+                    await sys.addLine("Loading HuopaDesktop...");
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    createMainGUI();
+                } else {
+                    sys.addLine("[line=red]Failed to fetch system styles![/line]")
+                }
+    }
     const createSysDaemon = async (name, daemonFunc) => {
         console.log("[SYS]: Running System Daemon: " + name);
         daemonFunc();
@@ -19,6 +71,20 @@ window.huopadesktop = (() => {
             await sys.addLine("If you still have issues, check if you have any custom scripts for HuopaDesktop. If you do, try booting HuopaDesktop without the scripts.");
             await sys.addLine("If you don't have any custom scripts or the issue is still occurring, please report this issue to me (for example through the HuopaOS Github).");
             await sys.addLine("### Reboot the system to load into HuopaDesktop or the terminal (hold down \"C\" to load into the terminal).");
+    }
+    function importStylesheet(cssContent, id = null) {
+        const linkElement = quantum.document.createElement('link');
+
+        linkElement.rel = 'stylesheet';
+        linkElement.type = 'text/css';
+        const encodedCssContent = encodeURIComponent(cssContent);
+        linkElement.href = `data:text/css;charset=utf-8,${encodedCssContent}`;
+        if (id) {
+            linkElement.id = id;
+        }
+        quantum.document.head.appendChild(linkElement);
+
+        return linkElement;
     }
     const downloadApp = async (url, savePath) => {
         sys.addLine(`[line=blue]Installing app to path ${savePath}...[/line]`);
@@ -465,7 +531,7 @@ window.huopadesktop = (() => {
                 }
             },
 
-            getArribute: async(id, type) => {
+            getAttribute: async(id, type) => {
                 const el = elementRegistry[id];
                 if (!el) return;
                 try {
@@ -765,7 +831,7 @@ window.huopadesktop = (() => {
             const mainDiv = quantum.document.getElementById("termDiv");
             mainDiv.innerHTML = "";
             const desktop = quantum.document.createElement("div");
-
+            importStylesheet(await internalFS.getFile("/system/env/systemStyles.css"));
             const dock = quantum.document.createElement("div");
             const wallpaperChosen = await internalFS.getFile("/system/env/systemconfig/settings/customization/wallpaperchosen.txt");
             const imageData = await internalFS.getFile(wallpaperChosen);
@@ -888,6 +954,7 @@ window.huopadesktop = (() => {
                 desktop.style.opacity = "1";
             });
 
+
         } catch (error) {
             induceCrash(error);
         }
@@ -913,7 +980,11 @@ window.huopadesktop = (() => {
                 await new Promise(resolve => setTimeout(resolve, 2000));
                 return this.install();
             }
-
+            if (!bootConfig.version || bootConfig.version !== version) {
+                await sys.addLine("## You are in an outdated version of HuopaDesktop, updating...");
+                mainInstaller();
+                return;
+            }
             await internalFS.runUnsandboxed(bootConfig.path);
             await new Promise(resolve => setTimeout(resolve, 500));
 
@@ -925,12 +996,10 @@ window.huopadesktop = (() => {
                 console.error(`Failed to initialize Quantum. Error: ${e}`);
                 return;
             }
+            await sys.addLine("Loading HuopaDesktop...");
+            await new Promise(resolve => setTimeout(resolve, 100));
 
-
-                await sys.addLine("Loading HuopaDesktop...");
-                await new Promise(resolve => setTimeout(resolve, 100));
-
-                createMainGUI()
+            createMainGUI()
 
         },
 
@@ -947,39 +1016,7 @@ window.huopadesktop = (() => {
             await waitUntil(() => !inputAnswerActive);
             if (inputAnswer.toLowerCase() === "y" || inputAnswer.toLowerCase() === "") {
                 await sys.addLine("[line=blue]Installing HuopaDesktop...[/line]");
-                try {
-                    await sys.import("quantum");
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                } catch (error) {
-                    await sys.addLine(`Failed to fetch Quantum module! Error: ${error}`);
-                    return;
-                }
-                await sys.addLine("Quantum installed!");
-                const bootConfig = {
-                    path: "/system/modules/quantum.js",
-                    bootpath: "/system/packages/huopadesktop.js",
-                    bootname: "huopadesktop",
-                    bootcmd: "boot"
-                };
-                await internalFS.createPath("/system/env/config.json", "file", JSON.stringify(bootConfig));
-                await sys.addLine("Boot config created!");
-                await sys.addLine("Attempting to install example app...")
-                await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaDesktop/HuopaClicker.js`, "/home/applications/HuopaClicker.js");
-                await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaDesktop/Settings.js`, "/home/applications/Settings.js");
-
-                const wallpaper1Success = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/Wallpapers/Chilly%20Mountain.png`, "/system/env/wallpapers/Chilly Mountain.png");
-                const wallpaper2Success = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/Wallpapers/Peaceful%20Landscape.png`, "/system/env/wallpapers/Peaceful Landscape.png");
-                const wallpaper3Success = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/Wallpapers/Chaotic%20Creek.png`, "/system/env/wallpapers/Chaotic Creek.png");
-                const wallpaper4Success = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/Wallpapers/Forest%20Landscape.png`, "/system/env/wallpapers/Forest Landscape.png");
-                
-
-                const logoSuccess = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaLogo.png`, "/system/env/assets/huopalogo.png");
-                await internalFS.createPath("/system/env/systemconfig/settings/customization/wallpaperchosen.txt", "file", "/system/env/wallpapers/Chilly Mountain.png")
-                if (wallpaper1Success && wallpaper2Success && wallpaper3Success && wallpaper4Success && logoSuccess) {
-                    await sys.addLine("Wallpapers and logo fetched and installed!");
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                    await this.boot();
-                }
+                await mainInstaller()
             } else {
                 await sys.addLine("[line=red]HuopaDesktop installation has been cancelled.[/line]");
             }
