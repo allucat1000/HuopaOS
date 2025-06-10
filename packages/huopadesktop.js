@@ -37,8 +37,27 @@ window.huopadesktop = (() => {
                 if (wallpaper1Success && wallpaper2Success && wallpaper3Success && wallpaper4Success && logoSuccess) {
                     await sys.addLine("Wallpapers and logo fetched and installed!");
                 }
-                const styleDownloadSuccess = await new Promise( async (resolve, reject) => {const response = await fetch(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaDesktop/_systemStyles.css`); if (response.ok) { internalFS.createPath("/system/env/systemStyles.css", "file", response.text()); return true; } else { console.error("Failed to fetch styles! Response: " + response.status); return false;}});
-                if (styleDownloadSuccess) {                  
+                sys.addLine("[line=blue]Installing styles...[/line]")
+                const styleDownloadSuccess = await new Promise(async (resolve, reject) => {
+                    try {
+                        const response = await fetch(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaDesktop/_systemStyles.css`);
+                        if (response.ok) {
+                            const text = await response.text();
+                            await internalFS.createPath("/system/env/systemStyles.css", "file", text);
+                            resolve(true);
+                        } else {
+                            console.error("Failed to fetch styles! Response: " + response.status);
+                            resolve(false);
+                        }
+                    } catch (e) {
+                        console.error("Error during style download:", e);
+                        reject(e);
+
+                    }
+                });
+
+                if (styleDownloadSuccess) {  
+                    await sys.addLine("Styles fetched and installed!")                
                     await internalFS.runUnsandboxed(bootConfig.path);
                     await new Promise(resolve => setTimeout(resolve, 500));
 

@@ -10,7 +10,9 @@ async function mainScreen() {
 
     const customizationTab = await huopaAPI.createElement("button");
     await huopaAPI.setAttribute(customizationTab, "textContent", "Customization");
-    await huopaAPI.setAttribute(customizationTab, "style", "display: block; background-color: rgba(45, 45, 45, 0.5); border-style: solid; border-color: rgba(105, 105, 105, 0.6); border-radius: 0.5em; color: white; margin: 0.5em auto; padding: 1.25em; width: 65%; cursor: pointer;");
+    await huopaAPI.setCertainStyle(customizationTab, "padding", "1.25em");
+    await huopaAPI.setCertainStyle(customizationTab, "margin", "0.5em auto");
+    await huopaAPI.setCertainStyle(customizationTab, "width", "65%");
     await huopaAPI.append(mainScreenDiv, customizationTab);
     await huopaAPI.setAttribute(customizationTab, "onclick", () => {
         huopaAPI.deleteElement(mainScreenDiv);
@@ -28,7 +30,11 @@ async function customizationTabLoad() {
 
     const backButton = await huopaAPI.createElement("button");
     await huopaAPI.setAttribute(backButton, "textContent", "<- Back");
-    await huopaAPI.setAttribute(backButton, "style", "display: block; background-color: rgba(45, 45, 45, 0.5); border-style: solid; border-color: rgba(105, 105, 105, 0.6); border-radius: 0.5em; color: white; padding: 0.5em; cursor: pointer; position: fixed; bottom: 0.5em; left: 0.5em;");
+    await huopaAPI.setCertainStyle(backButton, "padding", "1em");
+    await huopaAPI.setCertainStyle(backButton, "position", "fixed");
+    await huopaAPI.setCertainStyle(backButton, "left", "0.5em");
+    await huopaAPI.setCertainStyle(backButton, "bottom", "0.5em");
+
     await huopaAPI.append(mainScreenDiv, backButton);
     await huopaAPI.setAttribute(backButton, "onclick", async () => {
         await huopaAPI.deleteElement(mainScreenDiv);
@@ -55,7 +61,14 @@ async function customizationTabLoad() {
 
     for (const wallpaperPath of wallpaperList) {
         const wallpaperButton = await huopaAPI.createElement("button");
-        await huopaAPI.setAttribute(wallpaperButton, "style", "border-radius: 0.5em; padding: 0; width: 25%; aspect-ratio: 16 / 9; background-color: rgba(0, 0, 0, 0); margin: 1em; cursor: pointer; overflow: hidden; border: solid 2px white; min-width: 200px; flex: 1 0 100px; max-width: 200px;");
+        await huopaAPI.setCertainStyle(importButton, "width", "25%");
+        await huopaAPI.setCertainStyle(importButton, "margin", "1em");
+        await huopaAPI.setCertainStyle(importButton, "overflow", "hidden");
+        await huopaAPI.setCertainStyle(importButton, "minWidth", "200px");
+        await huopaAPI.setCertainStyle(importButton, "flex", "1 0 100px");
+        await huopaAPI.setCertainStyle(importButton, "maxWidth", "200px");
+        await huopaAPI.setCertainStyle(importButton, "aspectRatio", "16 / 9");
+        await huopaAPI.setCertainStyle(importButton, "backgroundColor", "rgba(0, 0, 0, 0");
 
         const img = await huopaAPI.createElement("img");
         await huopaAPI.setAttribute(img, "style", "border-radius: 0.5em; width: 100%; height: 100%; background-size: cover; margin: 0; border-style: none; border-color: white; object-fit: cover; object-position: center;");
@@ -70,7 +83,14 @@ async function customizationTabLoad() {
     }
 
     const importButton = await huopaAPI.createElement("button");
-    await huopaAPI.setAttribute(importButton, "style", "border-radius: 0.5em; padding: 0; width: 25%; background-color: rgba(105, 105, 105, 0.3); margin: 1em; cursor: pointer; overflow: hidden; border: solid 2px white; min-width: 200px; flex: 1 0 100px; max-width: 200px; color: white; aspect-ratio: 16 / 9;");
+    await huopaAPI.setCertainStyle(importButton, "width", "25%");
+    await huopaAPI.setCertainStyle(importButton, "margin", "1em");
+    await huopaAPI.setCertainStyle(importButton, "overflow", "hidden");
+    await huopaAPI.setCertainStyle(importButton, "minWidth", "200px");
+    await huopaAPI.setCertainStyle(importButton, "flex", "1 0 100px");
+    await huopaAPI.setCertainStyle(importButton, "maxWidth", "200px");
+    await huopaAPI.setCertainStyle(importButton, "aspectRatio", "16 / 9");
+
     await huopaAPI.setAttribute(importButton, "textContent", "Add wallpaper from computer");
     await huopaAPI.append(wallpaperListDiv, importButton);
     await huopaAPI.setAttribute(importButton, "onclick", async () => {

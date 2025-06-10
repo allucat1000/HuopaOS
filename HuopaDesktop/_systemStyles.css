@@ -17,13 +17,13 @@ input[type="range"] {
 input[type="range"]::-webkit-slider-runnable-track {
     height: var(--slider-track-height);
     background: var(--slider-track-color);
-    border-radius: var(--slider-thumb-track-radius);
+    border-radius: var(--slider-track-border-radius);
 }
 
 input[type="range"]::-moz-range-track {
     height: var(--slider-track-height);
     background: var(--slider-track-color);
-    border-radius: var(--slider-thumb-track-radius);
+    border-radius: var(--slider-track-border-radius);
 }
 
 input[type="range"]::-webkit-slider-thumb {
