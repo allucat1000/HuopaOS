@@ -81,37 +81,57 @@ window.huopadesktop = (() => {
                 const huopaAPI = (() => {
                     let msgId = 0;
                     const callbacks = new Map();
+                    const localEventHandlers = {};
 
+                    // Listen for API responses and for forwarded events
                     window.addEventListener("message", (event) => {
-                        const { type, id, result, error } = event.data || {};
+                        const { type, id, result, error, event: evt, elementId } = event.data || {};
+
+                        // Response to our RPC
                         if (type === "apiResponse" && callbacks.has(id)) {
-                            const { resolve, reject } = callbacks.get(id);
-                            callbacks.delete(id);
-                            if (error) reject(new Error(error));
-                            else resolve(result);
+                        const { resolve, reject } = callbacks.get(id);
+                        callbacks.delete(id);
+                        return error ? reject(new Error(error)) : resolve(result);
+                        }
+
+                        // Forwarded DOM event
+                        if (type === "event" && localEventHandlers[elementId]) {
+                        return localEventHandlers[elementId]();
                         }
                     });
 
                     return new Proxy({}, {
                         get(_, prop) {
-                            if (prop === "setOnClick") {
-                                return async (elementId, handler) => {
-                                    localClickHandlers[elementId] = handler;
-                                    // Notify parent to bind a click listener that sends back message
-                                    return new Promise((resolve, reject) => {
-                                        const id = "msg_" + msgId++;
-                                        callbacks.set(id, { resolve, reject });
-                                        window.parent.postMessage({
-                                            type: "bindClickForward",
-                                            data: [elementId],
-                                            id,
-                                            appName
-                                        }, "*");
-                                    });
+                            if (prop === "setAttribute") {
+                                return async (elementId, attrName, handler) => {
+                                    if (attrName === "onclick") {
+                                        localClickHandlers[elementId] = handler;
+                                        return new Promise((resolve, reject) => {
+                                            const id = "msg_" + msgId++;
+                                            callbacks.set(id, { resolve, reject });
+                                            window.parent.postMessage({
+                                                type: "bindClickForward",
+                                                data: [elementId],
+                                                id,
+                                                appName
+                                            }, "*");
+                                        });
+                                    } else {
+                                        return new Promise((resolve, reject) => {
+                                            const id = "msg_" + msgId++;
+                                            callbacks.set(id, { resolve, reject });
+                                            window.parent.postMessage({
+                                                type: prop,
+                                                data: [elementId, attrName, handler],
+                                                id,
+                                                appName
+                                            }, "*");
+                                        });
+                                    }
                                 };
                             }
 
-                            // All other calls forwarded to parent
+                            // Other methods
                             return (...args) => {
                                 return new Promise((resolve, reject) => {
                                     const id = "msg_" + msgId++;
@@ -123,8 +143,14 @@ window.huopadesktop = (() => {
                     });
                 })();
 
+
                 (async () => {
                     try {
+                        async function setAttrs(element, attrs) {
+                            for (const [key, value] of Object.entries(attrs)) {
+                                await huopaAPI.setAttribute(element, key, value);
+                            }
+                        }
                         ${safeAppCode}
                     } catch (e) {
                         huopaAPI.error?.("Runtime Error: " + e.message);
@@ -175,6 +201,7 @@ window.huopadesktop = (() => {
                 }
             }
         };
+
 
 
     const huopaAPIMap = new WeakMap();
@@ -303,33 +330,6 @@ window.huopadesktop = (() => {
                 };
             },
 
-            setText: function(id, text) {
-                const el = elementRegistry[id];
-                if (el) el.textContent = text;
-            },
-
-            getText: function(id) {
-                const el = elementRegistry[id];
-                if (el) el.textContent = text;
-            },
-
-            setInnerHTML: function(id, content, appID) {
-                const el = elementRegistry[id];
-                if (content || "".length > 0) {
-                    console.warn(`[APP SAFETY] Application '${appID} set innerHTML.`);
-                }
-                
-                if (el) el.innerHTML = content || "";
-            },
-            getInnerHTML: function(id) {
-                const el = elementRegistry[id];
-                return el.innerHTML || "";
-            },
-
-            setStyle: function(id, styleText) {
-                const el = elementRegistry[id];
-                if (el) el.style = styleText;
-            },
 
             setOnClick: function(id) {
                 const el = elementRegistry[id];
@@ -356,22 +356,6 @@ window.huopadesktop = (() => {
                 return internalFS.createPath(path, type, content, permissions);
             },
 
-            setSrc: function(id, src) {
-                const el = elementRegistry[id];
-                if (!el) {
-                    console.warn(`setSrc: Element with ID: '${id}' not found.`);
-                    return;
-                }
-                el.src = src;
-            },
-            getSrc: function(id) {
-                const el = elementRegistry[id];
-                if (!el) {
-                    console.warn(`setSrc: Element with ID: '${id}' not found.`);
-                    return;
-                }
-                if (el.src) return el.src;
-            },
 
             setCertainStyle: function(id, styleName, content) {
                 const el = elementRegistry[id];
@@ -438,36 +422,68 @@ window.huopadesktop = (() => {
                 }
             },
             compressImage: async (dataURL, width, height, quality) => {
-            function dataURLtoBlob(dataurl) {
-                const arr = dataurl.split(',');
-                const mimeMatch = arr[0].match(/:(.*?);/);
-                const mime = mimeMatch ? mimeMatch[1] : '';
-                const bstr = atob(arr[1]);
-                let n = bstr.length;
-                const u8arr = new Uint8Array(n);
-                while(n--){
-                u8arr[n] = bstr.charCodeAt(n);
+                function dataURLtoBlob(dataurl) {
+                    const arr = dataurl.split(',');
+                    const mimeMatch = arr[0].match(/:(.*?);/);
+                    const mime = mimeMatch ? mimeMatch[1] : '';
+                    const bstr = atob(arr[1]);
+                    let n = bstr.length;
+                    const u8arr = new Uint8Array(n);
+                    while(n--){
+                    u8arr[n] = bstr.charCodeAt(n);
+                    }
+                    return new Blob([u8arr], {type:mime});
                 }
-                return new Blob([u8arr], {type:mime});
-            }
 
-            const blob = dataURLtoBlob(dataURL);
+                const blob = dataURLtoBlob(dataURL);
+                
+                const bitmap = await createImageBitmap(blob);
+                
+                const canvas = quantum.document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(bitmap, 0, 0, width, height);
+                
+                return canvas.toDataURL('image/jpeg', quality);
+            },
+
+            setAttribute: async(id, type, content) => {
+                const el = elementRegistry[id];
+                if (!el) return;
+
+                if (type === "onclick") {
+                    setOnClick(id);
+                    return;
+                } else {
+                    try {
+                    el[type] = content;
+                    } catch (e) {
+                        console.error("[huopaAPI RUN ERROR] Error with setting attribute: " + type);
+                        console.error("Error: " + e);
+                    }
+                }
+            },
+
+            getArribute: async(id, type) => {
+                const el = elementRegistry[id];
+                if (!el) return;
+                try {
+                    return el[type];
+                } catch (error) {
+                    console.error("[huopaAPI RUN ERROR] Error with getting attribute: " + type);
+                    console.error("Error: " + e);
+                }
+            },
+
             
-            const bitmap = await createImageBitmap(blob);
-            
-            const canvas = quantum.document.createElement('canvas');
-            canvas.width = width;
-            canvas.height = height;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(bitmap, 0, 0, width, height);
-            
-            return canvas.toDataURL('image/jpeg', quality);
-            }
+
 
 
 
 
         };
+
     };
 
 
@@ -650,12 +666,12 @@ window.huopadesktop = (() => {
                 startMenuDiv.style.cssText = `
                     width: 30em;
                     height: 385px;
-                    background-color: rgba(45, 45, 45, 0.75);
+                    background: rgba(30, 30, 30, 0.65);
                     position: absolute;
                     border-radius: 1em;
                     border: 2.5px;
                     border-style: solid;
-                    border-color: rgba(105, 105, 105, 1);
+                    border-color: #99999989;
                     left: 3%;
                     bottom: 7.5em;
                     opacity: 0;
@@ -809,7 +825,7 @@ window.huopadesktop = (() => {
             } else popupClosed = true;
             await waitUntil(() => popupClosed);
             dock.id = "dock";
-            dock.style = `position: absolute; bottom: 20px; width: 96%; height: 4em; background-color: rgba(45, 45, 45, 0.75); border-radius: 1em; left: 50%; transform: translateX(-50%); display: flex; align-items: center; border: 2.5px; border: 2.5px; border-style: solid; border-color: rgba(105, 105, 105, 1); z-index: 15000; backdrop-filter: blur(2px);`;
+            dock.style = `position: absolute; bottom: 20px; width: 96%; height: 4em; background: rgba(30, 30, 30, 0.65); border-radius: 1em; left: 50%; transform: translateX(-50%); display: flex; align-items: center; border: 2.5px; border: 2.5px; border-style: solid; border-color: #99999989; z-index: 15000; backdrop-filter: blur(2px);`;
 
             await desktop.append(dock);
 
