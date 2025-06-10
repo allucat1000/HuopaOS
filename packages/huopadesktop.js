@@ -77,6 +77,17 @@ window.huopadesktop = (() => {
                     sys.addLine("[line=red]Failed to fetch system styles![/line]")
                 }
     }
+    const createBugAlertWindow = async (app, errorInfo) => {
+        const container = await createAppContainer(`${app} - App has crashed`);
+        const titleText = quantum.document.createElement("h2");
+        titleText.textContent = `${app} has crashed, more info below:`;
+        const infoText = quantum.document.createElement("p");
+        infoText.textContent = `${errorInfo}`;
+        container.append(titleText);
+        titleText.style = "color: white; text-align: center; margin: 1em;"
+        infoText.style = "color: white; text-align: center; margin: 0.5em;"
+        container.append(infoText);
+    }
     const createSysDaemon = async (name, daemonFunc) => {
         console.log("[SYS]: Running System Daemon: " + name);
         daemonFunc();
@@ -255,12 +266,13 @@ window.huopadesktop = (() => {
 
 
     const huopaAPI = new Proxy({}, {
-        get(target, prop) {
+        get(target, prop, appName) {
             return (...args) => {
             if (typeof huopaAPIHandlers[prop] === "function") {
                 huopaAPIHandlers[prop](...args);
             } else {
                 console.warn(`No handler for huopaAPI method '${prop}'`);
+                createBugAlertWindow(appName, `Error: No handler for huopaAPI method ${prop}`);
             }
             };
         }
@@ -283,7 +295,9 @@ window.huopadesktop = (() => {
                 if (id) {
                     event.source?.postMessage({ type: "apiResponse", id, error: err.message }, "*");
                 } else {
+                    createBugAlertWindow(appId, err.message);
                     console.error("[APP ERROR] " + err.message);
+
                 }
             }
         };
@@ -305,6 +319,7 @@ window.huopadesktop = (() => {
                         return handlers[prop](...args);
                     } else {
                         console.warn(`No handler for huopaAPI method '${prop}'`);
+                        createBugAlertWindow(appId, `Error: No handler for huopaAPI method ${prop}`);
                     }
                 };
             }
@@ -575,7 +590,7 @@ window.huopadesktop = (() => {
 
     window.addEventListener("message", async (event) => {
         if (killSwitch) return;
-        const { type, data, id } = event.data || {};
+        const { type, data, id, appId } = event.data || {};
 
         if (type === "bindClickForward") {
             const [elementId] = data;
@@ -601,6 +616,7 @@ window.huopadesktop = (() => {
         const huopaAPI = huopaAPIMap.get(event.source);
         if (!huopaAPI || typeof huopaAPI[type] !== "function") {
             console.warn(`No handler for huopaAPI method '${type}'`);
+            createBugAlertWindow(appId, `Error: No handler for huopaAPI method ${prop}`);
             return;
         }
 
@@ -613,7 +629,8 @@ window.huopadesktop = (() => {
             if (id) {
                 event.source?.postMessage({ type: "apiResponse", id, error: err.message }, "*");
             } else {
-                sys.addLine("[APP ERROR] " + err.message);
+                createBugAlertWindow(appId, err.message);
+                console.error("[APP ERROR] " + err.message);
             }
         }
     });
