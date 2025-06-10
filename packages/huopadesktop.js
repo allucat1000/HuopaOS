@@ -3,7 +3,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "0.5.2";
+    const version = "0.5.3";
     // Priv Sys Funcs
     const mainInstaller = async () => {
         try {
@@ -26,6 +26,7 @@ window.huopadesktop = (() => {
                 await sys.addLine("Attempting to install example app...")
                 await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaDesktop/HuopaClicker.js`, "/home/applications/HuopaClicker.js");
                 await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaDesktop/Settings.js`, "/home/applications/Settings.js");
+                await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaDesktop/Sideloader.js`, "/home/applications/Sideloader.js");
                 await sys.addLine("[line=blue]Downloading and installing wallpapers...[/line]")
                 const wallpaper1Success = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/Wallpapers/Chilly%20Mountain.png`, "/system/env/wallpapers/Chilly Mountain.png");
                 const wallpaper2Success = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/Wallpapers/Peaceful%20Landscape.png`, "/system/env/wallpapers/Peaceful Landscape.png");
@@ -708,7 +709,7 @@ window.huopadesktop = (() => {
             cursor: pointer;
             position: absolute;
             right: 0.5em;
-            top: 0.5em;
+            top: 0;
         `;
         closeButton.addEventListener("click", () => {
             const codeElem = quantum.document.getElementById(`code-${appId}`);
