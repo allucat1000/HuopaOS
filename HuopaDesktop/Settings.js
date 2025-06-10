@@ -128,6 +128,7 @@ async function customizationTabLoad() {
     await huopaAPI.setAttribute(label, "textContent", "3.5px");
     await huopaAPI.setAttribute(label, "style", "color: white; display: block; text-align: center; margin: 0.5em auto;");
     await huopaAPI.setCertainStyle(slider, "margin", "0.5em auto");
+    await huopaAPI.setCertainStyle(slider, "display", "block");
 
     // await huopaAPI.setAttribute(slider, "oninput", async () => {
         await huopaAPI.setAttribute(label, "textContent", await huopaAPI.getAttribute(slider, "value"));

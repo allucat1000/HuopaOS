@@ -5,7 +5,7 @@ input[type="range"] {
     background: transparent;
     cursor: pointer;
     width: 200px;
-    --slider-track-color: rgba(65, 65, 65, 0.45);
+    --slider-track-color: rgba(95, 95, 95, 0.5);
     --slider-thumb-color: rgba(105, 105, 105, 0.9);
     --slider-thumb-size: 20px;
     --slider-thumb-border-radius: 50%;
