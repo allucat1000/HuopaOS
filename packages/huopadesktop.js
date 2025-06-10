@@ -436,7 +436,35 @@ window.huopadesktop = (() => {
                         size: files[0].size
                     };
                 }
+            },
+            compressImage: async (dataURL, width, height, quality) => {
+            function dataURLtoBlob(dataurl) {
+                const arr = dataurl.split(',');
+                const mimeMatch = arr[0].match(/:(.*?);/);
+                const mime = mimeMatch ? mimeMatch[1] : '';
+                const bstr = atob(arr[1]);
+                let n = bstr.length;
+                const u8arr = new Uint8Array(n);
+                while(n--){
+                u8arr[n] = bstr.charCodeAt(n);
+                }
+                return new Blob([u8arr], {type:mime});
             }
+
+            const blob = dataURLtoBlob(dataURL);
+            
+            const bitmap = await createImageBitmap(blob);
+            
+            const canvas = quantum.document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(bitmap, 0, 0, width, height);
+            
+            return canvas.toDataURL('image/jpeg', quality);
+            }
+
+
 
 
         };
@@ -529,7 +557,6 @@ window.huopadesktop = (() => {
         }
 
         function onMouseUp() {
-            quantum.document.body.style.userSelect = "";
             isDragging = false;
             quantum.document.removeEventListener("mousemove", onMouseMove);
             quantum.document.removeEventListener("mouseup", onMouseUp);
@@ -554,7 +581,7 @@ window.huopadesktop = (() => {
             opacity: 0;
             transform: translateY(20px);
             transition: opacity 0.15s ease, transform 0.15s ease;
-            backdrop-filter: blur(2px);
+            backdrop-filter: blur(3.5px);
         `;
         const titleBar = quantum.document.createElement("div");
         titleBar.style = `
@@ -727,7 +754,7 @@ window.huopadesktop = (() => {
             const wallpaperChosen = await internalFS.getFile("/system/env/systemconfig/settings/customization/wallpaperchosen.txt");
             const imageData = await internalFS.getFile(wallpaperChosen);
             quantum.document.body.style.margin = "0";
-            desktop.style = `width: 100%; height: 100%; background-image: url(${imageData}); background-size: cover; background-position: center; font-family: sans-serif; opacity: 0; transition: 0.5s;`;
+            desktop.style = `width: 100%; height: 100%; background-image: url(${imageData}); background-size: cover; background-position: center; font-family: sans-serif; opacity: 0; transition: 0.2s;`;
             quantum.document.body.style.userSelect = "none";
             desktop.id = "desktop";
             mainDiv.append(desktop);
@@ -738,8 +765,15 @@ window.huopadesktop = (() => {
                     if (updateCheck === false) {
                         oldwallpaper = await internalFS.getFile("/system/env/systemconfig/settings/customization/wallpaperchosen.txt");
                         const wallpaperChosen = await internalFS.getFile("/system/env/systemconfig/settings/customization/wallpaperchosen.txt");
+                        desktop.style.opacity = "0";
+                        setTimeout(async () => {
                         const imageData = await internalFS.getFile(wallpaperChosen);
-                        desktop.style = `width: 100%; height: 100%; background-image: url(${imageData}); background-size: cover; background-position: center; font-family: sans-serif;`;
+                        desktop.style = `width: 100%; height: 100%; background-image: url(${imageData}); background-size: cover; background-position: center; font-family: sans-serif; transition: 0.2s; opacity: 0;`;
+                        setTimeout(async () => {
+                            desktop.style.opacity = "1";
+                        }, 250)
+                        }, 200)
+
                     }
                     setTimeout(loop, 250);
                 }
@@ -751,6 +785,9 @@ window.huopadesktop = (() => {
             mainDiv.style = "position: relative; width: 100vw; height: 100vh; overflow: hidden;";
             let popupClosed = false;
             if (window.innerWidth < 850 || window.innerHeight < 650) {
+                requestAnimationFrame(() => {
+                    desktop.style.opacity = "1";
+                });
                 const popupBG = quantum.document.createElement("div");
                 const popup = quantum.document.createElement("div");
                 popup.style = "width: 90%; height: 20%; background-color: rgba(35, 35, 35, 0.75); border-radius: 0.5em; border-style: solid; border-color: rgba(55, 55, 55, 0.9); border-width: 2px; position: absolute; left: 50%; transform: translateX(-50%); top: 5%; "

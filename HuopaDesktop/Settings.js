@@ -51,8 +51,9 @@ async function customizationTabLoad() {
         const wallpaperButton = await huopaAPI.createElement("button")
         await huopaAPI.setStyle(wallpaperButton, "border-radius: 0.5em; padding: 0; width: 25%; aspect-ratio: 16 / 9; background-color: rgba(0, 0, 0, 0); margin: 1em; cursor: pointer; overflow: hidden; border: solid 2px white; min-width: 200px; flex: 1 0 100px; max-width: 200px;")
         const img = await huopaAPI.createElement("img");
-        await huopaAPI.setStyle(img, "border-radius: 0.5em; width: 100%; height: 100%; background-size: cover; margin: 0; border-style: none; border-color: white; object-fit: cover; object-position: center;")
-        await huopaAPI.setSrc(img, await huopaAPI.getFile(wallpaperPath));
+        await huopaAPI.setStyle(img, "border-radius: 0.5em; width: 100%; height: 100%; background-size: cover; margin: 0; border-style: none; border-color: white; object-fit: cover; object-position: center;");
+        const imageData = await huopaAPI.compressImage(await huopaAPI.getFile(wallpaperPath), 200, 112.5, "1");
+        await huopaAPI.setSrc(img, imageData);
         await huopaAPI.append(wallpaperButton, img);
         await huopaAPI.append(wallpaperListDiv, wallpaperButton);
         await huopaAPI.setOnClick(wallpaperButton, async () => {
@@ -64,7 +65,7 @@ async function customizationTabLoad() {
     await huopaAPI.setText(importButton, "Add wallpaper from computer")
     await huopaAPI.append(wallpaperListDiv, importButton);
     await huopaAPI.setOnClick(importButton, async () => {
-        const file = await huopaAPI.openFileImport("*", "dataURL");
+        const file = await huopaAPI.openFileImport(".png,.jpg,.webp,.jpeg", "dataURL");
         if (file) {
             await huopaAPI.writeFile("/system/env/wallpapers/" + file.name, "file", file.content);
             await huopaAPI.deleteElement(mainScreenDiv);
