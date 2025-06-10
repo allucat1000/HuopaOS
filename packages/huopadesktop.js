@@ -727,7 +727,7 @@ window.huopadesktop = (() => {
             const wallpaperChosen = await internalFS.getFile("/system/env/systemconfig/settings/customization/wallpaperchosen.txt");
             const imageData = await internalFS.getFile(wallpaperChosen);
             quantum.document.body.style.margin = "0";
-            desktop.style = `width: 100%; height: 100%; background-image: url(${imageData}); background-size: cover; background-position: center; font-family: sans-serif;`;
+            desktop.style = `width: 100%; height: 100%; background-image: url(${imageData}); background-size: cover; background-position: center; font-family: sans-serif; opacity: 0; transition: 0.5s;`;
             quantum.document.body.style.userSelect = "none";
             desktop.id = "desktop";
             mainDiv.append(desktop);
@@ -829,6 +829,10 @@ window.huopadesktop = (() => {
 
             startMenuButton.addEventListener("mouseleave", () => {
                 startMenuButton.style.filter = "brightness(1)";
+            });
+
+            requestAnimationFrame(() => {
+                desktop.style.opacity = "1";
             });
 
         } catch (error) {
