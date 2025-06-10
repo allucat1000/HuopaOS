@@ -78,12 +78,13 @@ window.huopadesktop = (() => {
                 }
     }
     const createBugAlertWindow = async (app, errorInfo) => {
-        const container = await createAppContainer(`${app} - App has crashed`);
+        const container = await createAppContainer(`${app}`);
         const titleText = quantum.document.createElement("h2");
         titleText.textContent = `${app} has crashed, more info below:`;
         const infoText = quantum.document.createElement("p");
         infoText.textContent = `${errorInfo}`;
         container.append(titleText);
+        container.id = `app-${app}`;
         titleText.style = "color: white; text-align: center; margin: 1em;"
         infoText.style = "color: white; text-align: center; margin: 0.5em;"
         container.append(infoText);
@@ -166,6 +167,12 @@ window.huopadesktop = (() => {
             <script>
                 const appName = ${JSON.stringify(appId)};
                 const localClickHandlers = {};
+                window.onerror = function (message, source, lineno, colno, error) {
+                    window.parent.postMessage({
+                        type: "iframeError",
+                        message, appName
+                    }, "*");
+                };
 
                 window.addEventListener("message", (event) => {
                     const data = event.data;
@@ -206,23 +213,39 @@ window.huopadesktop = (() => {
                                         return new Promise((resolve, reject) => {
                                             const id = "msg_" + msgId++;
                                             callbacks.set(id, { resolve, reject });
-                                            window.parent.postMessage({
-                                                type: "bindClickForward",
-                                                data: [elementId],
-                                                id,
-                                                appName
-                                            }, "*");
+                                            try {
+                                                window.parent.postMessage({
+                                                    type: "bindClickForward",
+                                                    data: [elementId],
+                                                    id,
+                                                    appName
+                                                }, "*");
+                                            } catch (e) {
+                                                window.parent.postMessage({
+                                                    type: "iframeError",
+                                                    e, appName
+                                                }, "*");
+                                                return;
+                                            }
                                         });
                                     } else {
                                         return new Promise((resolve, reject) => {
                                             const id = "msg_" + msgId++;
                                             callbacks.set(id, { resolve, reject });
-                                            window.parent.postMessage({
-                                                type: prop,
-                                                data: [elementId, attrName, handler],
-                                                id,
-                                                appName
-                                            }, "*");
+                                            try {
+                                                window.parent.postMessage({
+                                                    type: prop,
+                                                    data: [elementId, attrName, handler],
+                                                    id,
+                                                    appName
+                                                }, "*");
+                                            } catch (e) {
+                                                window.parent.postMessage({
+                                                    type: "iframeError",
+                                                    e, appName
+                                                }, "*");
+                                                return;
+                                            }
                                         });
                                     }
                                 };
@@ -233,11 +256,20 @@ window.huopadesktop = (() => {
                                 return new Promise((resolve, reject) => {
                                     const id = "msg_" + msgId++;
                                     callbacks.set(id, { resolve, reject });
-                                    window.parent.postMessage({ type: prop, data: args, id, appName }, "*");
+                                    try {
+                                        window.parent.postMessage({ type: prop, data: args, id, appName }, "*");
+                                    } catch (e) {
+                                                window.parent.postMessage({
+                                                    type: "iframeError",
+                                                    e, appName
+                                                }, "*");
+                                                return;
+                                            }
                                 });
                             };
                         }
                     });
+
                 })();
 
 
@@ -255,12 +287,17 @@ window.huopadesktop = (() => {
                 })();
             </script>
         `;
+        try {
+            iframe.srcdoc = iframeHTML;
 
-        iframe.srcdoc = iframeHTML;
+            await new Promise(r => setTimeout(r, 0));
 
-        await new Promise(r => setTimeout(r, 0));
-
-        return iframe;
+            return iframe;
+        } catch (error) {
+            console.error("[APP ERROR]: " + error.message);
+            createBugAlertWindow(appId, error.message);
+        }
+        
     };
 
 
@@ -590,8 +627,13 @@ window.huopadesktop = (() => {
 
     window.addEventListener("message", async (event) => {
         if (killSwitch) return;
-        const { type, data, id, appId } = event.data || {};
+        const { type, data, id, appId} = event.data || {};
 
+        if (event.data?.type === "iframeError") {
+            console.error("[APP ERROR]:", event.data);
+            createBugAlertWindow(event.data.appName, event.data.e.message);
+            return;
+        }
         if (type === "bindClickForward") {
             const [elementId] = data;
             const el = elementRegistry[elementId];
@@ -730,7 +772,10 @@ window.huopadesktop = (() => {
         `;
         closeButton.addEventListener("click", () => {
             const codeElem = quantum.document.getElementById(`code-${appId}`);
-            codeElem.remove();
+            if (codeElem) {
+                codeElem.remove();
+            }
+            
             outerContainer.remove();
         });
         
