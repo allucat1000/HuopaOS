@@ -376,7 +376,7 @@ const internalFS = {
     } catch (e) {
       if (!force) console.warn(`Failed to parse contents of ${dir}`, e);
     }
-    const isDir = await this.isDirectory(item);
+    const isDir = await this.isDirectory(dir);
     if (!isDir) {
       contents = [];
     }
