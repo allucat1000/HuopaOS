@@ -69,6 +69,7 @@ async function customizationTabLoad() {
         await huopaAPI.setCertainStyle(wallpaperButton, "maxWidth", "200px");
         await huopaAPI.setCertainStyle(wallpaperButton, "aspectRatio", "16 / 9");
         await huopaAPI.setCertainStyle(wallpaperButton, "backgroundColor", "rgba(0, 0, 0, 0");
+        await huopaAPI.setCertainStyle(wallpaperButton, "padding", "0")
 
         const img = await huopaAPI.createElement("img");
         await huopaAPI.setAttribute(img, "style", "border-radius: 0.5em; width: 100%; height: 100%; background-size: cover; margin: 0; border-style: none; border-color: white; object-fit: cover; object-position: center;");
@@ -123,7 +124,8 @@ async function customizationTabLoad() {
     await huopaAPI.setAttribute(slider, "value", "3.5");
 
     const label = await huopaAPI.createElement("span");
-    await huopaAPI.setAttribute(label, "textContent", "50");
+    await huopaAPI.setAttribute(label, "textContent", "3.5");
+    await huopaAPI.setAttribute(label, "style", "color: white; display: block; text-align: center; margin: 0.5em auto;");
 
     // await huopaAPI.setAttribute(slider, "oninput", async () => {
         await huopaAPI.setAttribute(label, "textContent", await huopaAPI.getAttribute(slider, "value"));
