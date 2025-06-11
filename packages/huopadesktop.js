@@ -787,7 +787,8 @@ window.huopadesktop = (() => {
             height: 22px;
             width: 100%;
             background: rgba(0, 0, 0, 0);
-            z-index: ${appZIndex + 1}
+            z-index: ${appZIndex + 1};
+            padding-bottom: 12px;
         `;
         const appTitle = quantum.document.createElement("h3");
         appTitle.textContent = appId.replace(/\.js$/, "");;
@@ -806,7 +807,7 @@ window.huopadesktop = (() => {
             cursor: pointer;
             position: absolute;
             right: 0.5em;
-            top: 0;
+            top: -3.33px;
         `;
         closeButton.addEventListener("click", () => {
             const codeElem = quantum.document.getElementById(`code-${appId}`);
@@ -816,12 +817,14 @@ window.huopadesktop = (() => {
             
             outerContainer.remove();
         });
-        
+        const topBarSplitter = quantum.document.createElement("div");
+        topBarSplitter.style = "width: 100%; height: 2px; background-color:rgba(128, 128, 128, 0.5); position: fixed; left: 0; top: 41px;"
         container.id = `app-${appId}`;
         quantum.document.getElementById("desktop").appendChild(outerContainer);
-        outerContainer.append(titleBar);
         titleBar.append(appTitle);
         titleBar.appendChild(closeButton);
+        outerContainer.append(titleBar);
+        container.append(topBarSplitter);
         outerContainer.append(container);
         createDraggableWindow(outerContainer);
         requestAnimationFrame(() => {
