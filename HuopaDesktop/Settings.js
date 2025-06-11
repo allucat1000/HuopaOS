@@ -112,7 +112,7 @@ async function customizationTabLoad() {
 
     const bgBlurDiv = await huopaAPI.createElement("div");
     const bgBlurText = await huopaAPI.createElement("p");
-    await huopaAPI.setAttribute(bgBlurText, "textContent", "Background blur level — Choose how blurred you want transparent backgrounds to be.");
+    await huopaAPI.setAttribute(bgBlurText, "textContent", "Background blur level — Choose how blurred you want transparent backgrounds to be. (Requires restart for most elements)");
     await huopaAPI.setAttribute(bgBlurText, "style", "text-align: center; color: white; margin: 0.5em;");
     await huopaAPI.setAttribute(bgBlurDiv, "style", "margin: 2em;");
     await huopaAPI.append(bgBlurDiv, bgBlurText);
@@ -121,18 +121,19 @@ async function customizationTabLoad() {
     await huopaAPI.setAttribute(slider, "type", "range");
     await huopaAPI.setAttribute(slider, "min", "0");
     await huopaAPI.setAttribute(slider, "max", "12");
-    await huopaAPI.setAttribute(slider, "value", "3.5");
+    await huopaAPI.setAttribute(slider, "value", await huopaAPI.getFile("/system/env/systemconfig/settings/customization/bgblur.txt") || "3.5");
     await huopaAPI.setAttribute(slider, "step", "0.1");
 
     const label = await huopaAPI.createElement("span");
-    await huopaAPI.setAttribute(label, "textContent", "3.5px");
+    await huopaAPI.setAttribute(label, "textContent", await huopaAPI.getFile("/system/env/systemconfig/settings/customization/bgblur.txt") + "px" || "3.5px");
     await huopaAPI.setAttribute(label, "style", "color: white; display: block; text-align: center; margin: 0.5em auto;");
     await huopaAPI.setCertainStyle(slider, "margin", "0.5em auto");
     await huopaAPI.setCertainStyle(slider, "display", "block");
 
-    // await huopaAPI.setAttribute(slider, "oninput", async () => {
-        await huopaAPI.setAttribute(label, "textContent", await huopaAPI.getAttribute(slider, "value"));
-    // });
+    await huopaAPI.setAttribute(slider, "oninput", async () => {
+        await huopaAPI.setAttribute(label, "textContent", await huopaAPI.getAttribute(slider, "value") + "px");
+        await huopaAPI.writeFile("/system/env/systemconfig/settings/customization/bgblur.txt", "file", await huopaAPI.getAttribute(slider, "value"))
+    });
 
     await huopaAPI.append(mainScreenDiv, slider);
     await huopaAPI.append(mainScreenDiv, label);

@@ -3,7 +3,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "0.5.3";
+    const version = "0.5.5";
     // Priv Sys Funcs
     const mainInstaller = async () => {
         try {
@@ -36,6 +36,9 @@ window.huopadesktop = (() => {
                 const logoSuccess = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaLogo.png`, "/system/env/assets/huopalogo.png");
                 if (!await internalFS.getFile("/system/env/systemconfig/settings/customization/wallpaperchosen.txt")) {
                     await internalFS.createPath("/system/env/systemconfig/settings/customization/wallpaperchosen.txt", "file", "/system/env/wallpapers/Chilly Mountain.png")
+                }
+                if (!await internalFS.getFile("/system/env/systemconfig/settings/customization/bgblur.txt")) {
+                    await internalFS.createPath("/system/env/systemconfig/settings/customization/bgblur.txt", "file", "3.5")
                 }
                 
                 if (wallpaper1Success && wallpaper2Success && wallpaper3Success && wallpaper4Success && logoSuccess) {
@@ -169,7 +172,7 @@ window.huopadesktop = (() => {
         const iframeHTML = `
             <script>
                 const appName = ${JSON.stringify(appId)};
-                const localClickHandlers = {};
+                const localEventHandlers = {};
                 window.onerror = function (message, source, lineno, colno, error) {
                     window.parent.postMessage({
                         type: "iframeError",
@@ -180,7 +183,10 @@ window.huopadesktop = (() => {
                 window.addEventListener("message", (event) => {
                     const data = event.data;
                     if (data?.type === "click" && data?.elementId) {
-                        const handler = localClickHandlers[data.elementId];
+                        const handler = localEventHandlers[data.elementId];
+                        if (handler) handler();
+                    } else if (data?.type === "input" && data?.elementId) {
+                        const handler = localEventHandlers[data.elementId];
                         if (handler) handler();
                     }
                 });
@@ -188,7 +194,6 @@ window.huopadesktop = (() => {
                 const huopaAPI = (() => {
                     let msgId = 0;
                     const callbacks = new Map();
-                    const localEventHandlers = {};
 
                     // Listen for API responses and for forwarded events
                     window.addEventListener("message", (event) => {
@@ -211,23 +216,27 @@ window.huopadesktop = (() => {
                         get(_, prop) {
                             if (prop === "setAttribute") {
                                 return async (elementId, attrName, handler) => {
-                                    if (attrName === "onclick") {
-                                        localClickHandlers[elementId] = handler;
+                                    const customAttrList = ["onclick", "oninput"];
+                                    if (customAttrList.includes(attrName)) {
+                                        localEventHandlers[elementId] = handler;
                                         return new Promise((resolve, reject) => {
                                             const id = "msg_" + msgId++;
                                             callbacks.set(id, { resolve, reject });
                                             try {
                                                 window.parent.postMessage({
-                                                    type: "bindClickForward",
-                                                    data: [elementId],
+                                                    type: "bindEventForward",
+                                                    data: [elementId, attrName],
                                                     id,
-                                                    appName
+                                                    appName,
                                                 }, "*");
                                             } catch (e) {
                                                 window.parent.postMessage({
                                                     type: "iframeError",
-                                                    e, appName
-                                                }, "*");
+                                                    message: e?.message || "Unknown error",
+                                                    stack: e?.stack || null,
+                                                    name: e?.name || "Error",
+                                                    appName
+                                                }, "*");   
                                                 return;
                                             }
                                         });
@@ -245,7 +254,10 @@ window.huopadesktop = (() => {
                                             } catch (e) {
                                                 window.parent.postMessage({
                                                     type: "iframeError",
-                                                    e, appName
+                                                    message: e?.message || "Unknown error",
+                                                    stack: e?.stack || null,
+                                                    name: e?.name || "Error",
+                                                    appName
                                                 }, "*");
                                                 return;
                                             }
@@ -262,12 +274,15 @@ window.huopadesktop = (() => {
                                     try {
                                         window.parent.postMessage({ type: prop, data: args, id, appName }, "*");
                                     } catch (e) {
-                                                window.parent.postMessage({
-                                                    type: "iframeError",
-                                                    e, appName
-                                                }, "*");
-                                                return;
-                                            }
+                                        window.parent.postMessage({
+                                            type: "iframeError",
+                                            message: e?.message || "Unknown error",
+                                            stack: e?.stack || null,
+                                            name: e?.name || "Error",
+                                            appName
+                                        }, "*");   
+                                        return;
+                                    }
                                 });
                             };
                         }
@@ -285,7 +300,17 @@ window.huopadesktop = (() => {
                         }
                         ${safeAppCode}
                     } catch (e) {
-                        huopaAPI.error?.("Runtime Error: " + e.message);
+                        try {
+                            huopaAPI.error?.("Runtime Error: " + e.message);
+                        } catch (logErr) {
+                            window.parent.postMessage({
+                                type: "iframeError",
+                                message: e?.message || "Unknown error in app",
+                                stack: e?.stack,
+                                appName
+                            }, "*");
+                        }
+                        
                     }
                 })();
             </script>
@@ -631,20 +656,29 @@ window.huopadesktop = (() => {
     window.addEventListener("message", async (event) => {
         if (killSwitch) return;
         const { type, data, id, appId} = event.data || {};
-
         if (event.data?.type === "iframeError") {
             console.error("[APP ERROR]:", event.data);
-            createBugAlertWindow(event.data.appName, event.data.e.message);
+            createBugAlertWindow(event.data.appName, event.data.message);
             return;
         }
-        if (type === "bindClickForward") {
-            const [elementId] = data;
+
+        if (type && type === "bindEventForward") {
+            const elementId = data[0];
+            const attrName = data[1];
             const el = elementRegistry[elementId];
             if (el) {
-                const clickHandler = () => {
-                    event.source.postMessage({ type: "click", elementId }, "*");
-                };
-                el.addEventListener("click", clickHandler);
+                if (attrName === "onclick") {
+                    const clickHandler = () => {
+                        event.source.postMessage({ type: "click", elementId }, "*");
+                    };
+                    el.addEventListener("click", clickHandler);
+                } else if (attrName === "oninput"){
+                    const inputHandler = () => {
+                        event.source.postMessage({ type: "input", elementId }, "*");
+                    };
+                    el.addEventListener("input", inputHandler);
+                }
+                
 
                 if (id) {
                     event.source.postMessage({ type: "apiResponse", id, result: true }, "*");
@@ -730,6 +764,7 @@ window.huopadesktop = (() => {
     const createAppContainer = async (appId) => {
         const outerContainer = quantum.document.createElement("div");
         const winSpawnX = window.innerWidth / 2;
+        const blur = await internalFS.getFile("/system/env/systemconfig/settings/customization/bgblur.txt");
         outerContainer.style = `
             position: absolute;
             width: 700px;
@@ -745,7 +780,7 @@ window.huopadesktop = (() => {
             opacity: 0;
             transform: translateY(20px);
             transition: opacity 0.15s ease, transform 0.15s ease;
-            backdrop-filter: blur(3.5px);
+            backdrop-filter: blur(${blur}px);
         `;
         const titleBar = quantum.document.createElement("div");
         titleBar.style = `
@@ -833,7 +868,9 @@ window.huopadesktop = (() => {
                 `;
                 desktop.append(startMenuDiv);
             }
+            const blur = await internalFS.getFile("/system/env/systemconfig/settings/customization/bgblur.txt");
             startMenuDiv.style.display = "block";
+            startMenuDiv.style.backdropFilter = `blur(${blur}px)`;
             const shutdownButton = quantum.document.createElement("button");
             shutdownButton.style = "background-color: rgba(45, 45, 45, 0.7); border-color: rgba(105, 105, 105, 0.6); border-style: solid; border-radius: 0.5em; position: absolute; cursor: pointer; right: 0.5em; bottom: 0.5em; color: white; padding: 0.5em;"
             shutdownButton.textContent = "Shutdown";
@@ -976,7 +1013,8 @@ window.huopadesktop = (() => {
             } else popupClosed = true;
             await waitUntil(() => popupClosed);
             dock.id = "dock";
-            dock.style = `position: absolute; bottom: 20px; width: 96%; height: 4em; background: rgba(30, 30, 30, 0.65); border-radius: 1em; left: 50%; transform: translateX(-50%); display: flex; align-items: center; border: 2.5px; border: 2.5px; border-style: solid; border-color: #99999989; z-index: 15000; backdrop-filter: blur(2px);`;
+            const blur = await internalFS.getFile("/system/env/systemconfig/settings/customization/bgblur.txt");
+            dock.style = `position: absolute; bottom: 20px; width: 96%; height: 4em; background: rgba(30, 30, 30, 0.65); border-radius: 1em; left: 50%; transform: translateX(-50%); display: flex; align-items: center; border: 2.5px; border: 2.5px; border-style: solid; border-color: #99999989; z-index: 15000; backdrop-filter: blur(${blur}px);`;
 
             await desktop.append(dock);
 
