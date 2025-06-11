@@ -20,15 +20,14 @@ let loggedIn = false
 await huopaAPI.setAttribute(loginButton, "onclick", async () => {
     if (loginPromptOpen) return;
     loginPromptOpen = true;
-    token = await huopaAPI.openRoturLogin();
-    if (token) loggedIn = true;
-    if (loggedIn) { 
-        loginPromptOpen = false; 
-        await huopaAPI.setAttribute(loginButton, "textContent", "Logged In");
+    const token = await huopaAPI.openRoturLogin();
+    if (token) {
         await huopaAPI.setCertainStyle(loginButton, "opacity", "0.7");
-        postDiv = await huopaAPI
+        await huopaAPI.setAttribute(loginButton, "textContent", "Logged in")
     }
 })
+
+
 
 // Feed loading
 
@@ -63,3 +62,5 @@ if (response.ok) {
     
     await huopaAPI.appendToApp(errorMessage);
 }
+
+

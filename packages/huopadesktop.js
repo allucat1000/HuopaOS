@@ -96,55 +96,61 @@ window.huopadesktop = (() => {
         container.append(infoText);
     }
 
-    const createRoturLoginWindow = async (app) => {
-        const container = await createAppContainer(`Rotur Login`);
-        const titleText = quantum.document.createElement("h1");
-        titleText.textContent = `Login to Rotur`;
-        const infoText = quantum.document.createElement("p");
-        infoText.textContent = `By logging in, you agree to give your Rotur Token to ${app}`;
-        container.append(titleText);
-        container.id = `app-Rotur Login`;
-        titleText.style = "color: white; text-align: center; margin: 1em;"
-        infoText.style = "color: white; text-align: center; margin: 0.5em;"
-        container.append(infoText);
-        const usernameInput = quantum.document.createElement("input");
-        const passwordInput = quantum.document.createElement("input");
+const createRoturLoginWindow = async (app) => {
+        return new Promise( async(resolve, reject) => {
+            const container = await createAppContainer(`Rotur Login`);
+            const titleText = quantum.document.createElement("h1");
+            titleText.textContent = `Login to Rotur`;
+            const infoText = quantum.document.createElement("p");
+            infoText.textContent = `By logging in, you agree to give your Rotur Token to ${app}`;
+            container.append(titleText);
+            container.id = `app-Rotur Login`;
+            titleText.style = "color: white; text-align: center; margin: 1em;"
+            infoText.style = "color: white; text-align: center; margin: 0.5em;"
+            container.append(infoText);
+            const usernameInput = quantum.document.createElement("input");
+            const passwordInput = quantum.document.createElement("input");
 
-        usernameInput.placeholder = "Username";
-        passwordInput.placeholder = "Password";
-        usernameInput.style.display = "block";
-        passwordInput.style.display = "block";
-        usernameInput.style.margin = "1em auto";
-        passwordInput.style.margin = "1em auto";
+            usernameInput.placeholder = "Username";
+            passwordInput.placeholder = "Password";
+            usernameInput.style.display = "block";
+            passwordInput.style.display = "block";
+            usernameInput.style.margin = "1em auto";
+            passwordInput.style.margin = "1em auto";
 
-        const submitButton = quantum.document.createElement("button");
-        submitButton.textContent = "Login";
-        container.append(usernameInput);
-        container.append(passwordInput);
-        submitButton.style.margin = "1em auto";
-        container.append(submitButton);
-        const resultText = quantum.document.createElement("p");
-        resultText.style = "color: white; text-align: center; margin: 0.5em;";
-        container.append(resultText);
-        submitButton.onclick = async() => {
-            fetch("https://social.rotur.dev/get_user?username=" + usernameInput.value + "&password=" + CryptoJS.MD5(passwordInput.value).toString())
-            .then(response => response.json())
-            .then(data => {
+            const submitButton = quantum.document.createElement("button");
+            submitButton.textContent = "Login";
+            container.append(usernameInput);
+            container.append(passwordInput);
+            submitButton.style.margin = "1em auto";
+            container.append(submitButton);
+            const resultText = quantum.document.createElement("p");
+            resultText.style = "color: white; text-align: center; margin: 0.5em;";
+            container.append(resultText);
+            submitButton.onclick = async () => {
+            try {
+                const response = await fetch(`https://social.rotur.dev/get_user?username=${usernameInput.value}&password=${CryptoJS.MD5(passwordInput.value).toString()}`);
+                const data = await response.json();
+                
                 if (data.error) {
                     resultText.textContent = "Failed to login to Rotur! Error: " + data.error;
-                    throw new Error(data.error);
-                    return;
-                } else {
-                    resultText.textContent = "Logged into Rotur! You may close this window."
-                    return data.key;
+                    return reject(data.error); // reject only, don't throw after
                 }
-            }).catch(error => {
+
+                resultText.textContent = "Logged into Rotur! You may close this window.";
+                resolve(data.key);
+            } catch (error) {
                 resultText.textContent = "Error fetching user data: " + error;
-                console.error('Error fetching user data:', error);
-                return;
-            });
-        }
+                console.error("Login error:", error);
+                reject(error);
+            }
+        };
+
+
+        })
+        
     }
+
     const createSysDaemon = async (name, daemonFunc) => {
         console.log("[SYS]: Running System Daemon: " + name);
         daemonFunc();
@@ -736,7 +742,6 @@ window.huopadesktop = (() => {
             createBugAlertWindow(event.data.appName, event.data.message);
             return;
         }
-
         if (type && type === "bindEventForward") {
             const elementId = data[0];
             const attrName = data[1];
@@ -775,7 +780,8 @@ window.huopadesktop = (() => {
         }
 
         try {
-            const result = await huopaAPI[type](...(Array.isArray(data) ? data : [data]), event.data.appName);
+            
+            const result = await huopaAPI[type](...(Array.isArray(data) ? data : [data]));
             if (id) {
                 event.source?.postMessage({ type: "apiResponse", id, result }, "*");
             }
