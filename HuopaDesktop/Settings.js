@@ -126,7 +126,7 @@ async function customizationTabLoad() {
 
     const label = await huopaAPI.createElement("span");
     await huopaAPI.setAttribute(label, "textContent", await huopaAPI.getFile("/system/env/systemconfig/settings/customization/bgblur.txt") + "px" || "3.5px");
-    await huopaAPI.setAttribute(label, "style", "color: white; display: block; text-align: center; margin: 0.5em auto;");
+    await huopaAPI.setAttribute(label, "style", "color: white; display: block; text-align: center; margin: 0.5em auto; padding-bottom: 1.5em;");
     await huopaAPI.setCertainStyle(slider, "margin", "0.5em auto");
     await huopaAPI.setCertainStyle(slider, "display", "block");
 
