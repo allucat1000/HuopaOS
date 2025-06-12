@@ -59,6 +59,8 @@ await huopaAPI.setAttribute(loginButton, "onclick", async () => {
 
 async function createPostSendDiv() {
         // Post creation
+        const oldPostCreateDiv = await huopaAPI.getElementById("postCreateDiv");
+        if (oldPostCreateDiv) await huopaAPI.deleteElement(oldPostCreateDiv);
         const postTextArea = await huopaAPI.createElement("textarea");
         await huopaAPI.append(postCreateDiv, postTextArea);
         const postButton = await huopaAPI.createElement("button");
@@ -67,6 +69,7 @@ async function createPostSendDiv() {
         await huopaAPI.append(postCreateDiv, postButton);
         const postSendInfoText = await huopaAPI.createElement("p");
         await huopaAPI.setAttribute(postSendInfoText, "style", "color: white; margin: 0.5em; text-align: center;");
+        await huopaAPI.setAttribute(postCreateDiv, "id", "postCreateDiv");
         await huopaAPI.append(postCreateDiv, postSendInfoText);
         await huopaAPI.setCertainStyle(postCreateDiv, "outline", "none");
 
