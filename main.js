@@ -325,8 +325,9 @@ const internalFS = {
   }) {
     if (await internalFS.getFile(path)) {
       const currentPerms = JSON.parse(await internalFS.getFile(path + ".perms") || "{\"read\":\"\", \"write\":\"\", \"modify\":\"\"}")
-      if (currentPerms.write === permissions || currentPerms.write === "" || permissions.write === "SYSTEM" || !await internalFS.getFile(path + ".perms")) {
+      if (currentPerms.write === (permissions.write || permissions)|| currentPerms.write === "" || permissions.write === "SYSTEM" || !await internalFS.getFile(path + ".perms") || !currentPerms.write && currentPerms === permissions) {
       } else {
+        console.log(currentPerms.write, permissions)
         console.warn("Not right permissions!")
         return "Not right permissions!";
       }

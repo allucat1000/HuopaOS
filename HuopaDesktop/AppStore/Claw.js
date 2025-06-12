@@ -10,34 +10,53 @@ await huopaAPI.setCertainStyle(loginButton, "top", "0.5em");
 await huopaAPI.setCertainStyle(loginButton, "right", "0.5em");
 await huopaAPI.appendToApp(loginButton);
 await huopaAPI.appendToApp(postCreateDiv);
-let loginPromptOpen = false
 const loadingText = await huopaAPI.createElement("h3");
 await huopaAPI.setAttribute(loadingText, "textContent", "Loading Claw feed...");
 await huopaAPI.setAttribute(loadingText, "style", "text-align: center; color: white;");
 await huopaAPI.appendToApp(loadingText);
-let loginState = false
-// Login
 let token = "";
 let loggedIn = false
+let loginState = false
+let storedToken = await huopaAPI.safeStorageRead("roturToken");
+if (storedToken) {
+    await huopaAPI.setCertainStyle(loginButton, "opacity", "1");
+    await huopaAPI.setAttribute(loginButton, "textContent", "Sign out")
+    token = storedToken
+    storedToken = "";
+    loggedIn = true;
+    loginState = true;
+    await createPostSendDiv()
+}
+
+// Login
 await huopaAPI.setAttribute(loginButton, "onclick", async () => {
-    if (loginState === true) return;
+    if (loginState === true) {
+        await huopaAPI.safeStorageWrite("roturToken", "file", "");
+        token = "";
+        loggedIn = false;
+        loginState = false;
+        return;
+    }
     if (loginState === "inProcess") {
         await huopaAPI.setAttribute(loginButton, "textContent", "Login with Rotur");
         await huopaAPI.setCertainStyle(loginButton, "opacity", "1");
-        loginPromptOpen = false;
         loginState = false;
         return;
     }
     loginState = "inProcess"
     await huopaAPI.setCertainStyle(loginButton, "opacity", "0.85");
     await huopaAPI.setAttribute(loginButton, "textContent", "Logging in...")
-    loginPromptOpen = true;
-    const token = await huopaAPI.openRoturLogin();
+    token = await huopaAPI.openRoturLogin();
     if (token) {
         loginState = true
-        await huopaAPI.setCertainStyle(loginButton, "opacity", "0.7");
-        await huopaAPI.setAttribute(loginButton, "textContent", "Logged in")
+        await huopaAPI.setCertainStyle(loginButton, "opacity", "1");
+        await huopaAPI.setAttribute(loginButton, "textContent", "Sign out")
+        await huopaAPI.safeStorageWrite("roturToken", "file", token);
+        createPostSendDiv()
+    }
+})
 
+async function createPostSendDiv() {
         // Post creation
         const postTextArea = await huopaAPI.createElement("textarea");
         await huopaAPI.append(postCreateDiv, postTextArea);
@@ -53,7 +72,7 @@ await huopaAPI.setAttribute(loginButton, "onclick", async () => {
         // Post sending
 
         await huopaAPI.setAttribute(postButton, "onclick", async () => {
-            const response = await huopaAPI.fetch("https://social.rotur.dev/post?auth=" + token + "&content=" + await huopaAPI.getAttribute(postTextArea, "value"));
+            const response = await huopaAPI.fetch("https://social.rotur.dev/post?auth=" + token + "&content=" + await huopaAPI.getAttribute(postTextArea, "value") + "&os=HuopaOS");
             if (response.ok) {
                 await huopaAPI.setAttribute(postSendInfoText, "textContent", "Sent post successfully!");
                 await new Promise(resolve => setTimeout(resolve, 1500));
@@ -85,9 +104,7 @@ await huopaAPI.setAttribute(loginButton, "onclick", async () => {
                 await huopaAPI.setAttribute(postSendInfoText, "textContent", "");
             }
         })
-    }
-})
-
+}
 
 
 // Feed loading

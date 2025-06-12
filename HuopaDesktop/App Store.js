@@ -21,7 +21,6 @@ if (response.ok) {
         await huopaAPI.setAttribute(loadingText, "textContent", "Failed to parse app list.");
         return;
     }
-    await huopaAPI.log(list + " type: " + typeof list);
     if (Array.isArray(list)) {
         await huopaAPI.deleteElement(loadingText);
         for (const appArray of list) {
@@ -68,7 +67,7 @@ if (response.ok) {
                         installState = true;
                     } else {
                         await huopaAPI.setAttribute(installButton, "textContent", "Failed to install!");
-                        await huopaAPI.log("Failed to install '" + appName + "'. Status: " + response.status);
+                        await huopaAPI.error("Failed to install '" + appName + "'. Status: " + response.status);
                     }
                 } else if (installState === true) {
                     installState = "mid";

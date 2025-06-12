@@ -587,10 +587,16 @@ const createRoturLoginWindow = async (app) => {
             },
 
             getFile: function(path, permissions) {
+                if (path.startsWith("/system/env/appconfig")) {
+                    console.warn("[huopaAPI SAFETY]: App tried reading in safeStorage using default read command!")
+                }
                 return internalFS.getFile(path, permissions);
             },
 
             deleteFile: function(path, permissions) {
+                if (path.startsWith("/system/env/appconfig")) {
+                    console.warn("[huopaAPI SAFETY]: App tried deleting file in safeStorage using default delete command!")
+                }
                 return internalFS.delDir(path, permissions);
             },
 
@@ -599,6 +605,9 @@ const createRoturLoginWindow = async (app) => {
                 "write":"",
                 "modify":"",
             }) {
+                if (path.startsWith("/system/env/appconfig")) {
+                    console.warn("[huopaAPI SAFETY]: App tried writing in safeStorage using default write command!")
+                }
                 return internalFS.createPath(path, type, content, permissions);
             },
 
@@ -746,12 +755,14 @@ const createRoturLoginWindow = async (app) => {
                 parent.insertBefore(el, parent.firstChild);
             },
 
-            safeStorageWrite: async(path, content, type, appId) => {
-                internalFS.createPath("/system/env/appconfig/"+ appId + "/" + path, type, content, `{"read":"${appId}", "write":"${appId}", "modify":"${appId}"}`);
+            safeStorageWrite: async(data, appId) => {
+                if (!appId) { console.warn("No app ID inputted for SafeStorageWrite. Call cancelled."); return;}
+                await internalFS.createPath("/system/env/appconfig/"+ appId + "/" + data[0], data[1], data[2], `"${appId}"`);
             },
 
             safeStorageRead: async(path, appId) => {
-                internalFS.getFile("/system/env/appconfig/"+ appId + "/" + path);
+                if (!appId) { console.warn("No app ID inputted for SafeStorageRead. Call cancelled."); return;}
+                return await internalFS.getFile("/system/env/appconfig/"+ appId + "/" + path);
             }
 
 
@@ -800,7 +811,6 @@ const createRoturLoginWindow = async (app) => {
             }
             return;
         }
-        console.log(type, data, id, appId);
         const huopaAPI = huopaAPIMap.get(event.source);
         if (!huopaAPI || typeof huopaAPI[type] !== "function") {
             console.warn(`No handler for huopaAPI method '${type}'`);
@@ -812,8 +822,14 @@ const createRoturLoginWindow = async (app) => {
             let result;
             if (type === "openRoturLogin") {
                 result = await huopaAPI[type]([event.data.appName]);
-            } else if (type.includes("safeStorage")) {
-                result = await huopaAPI[type](...(Array.isArray(data) ? data : [data]), appId);
+            } else if (type === "safeStorageWrite") {  
+
+                result = await huopaAPI[type]((Array.isArray(data) ? data : [data].splice(3)), event.data.appName);
+
+            } else if (type === "safeStorageRead"){
+
+                result = await huopaAPI[type](Array.isArray(data) ? data : data[0], event.data.appName);
+
             } else {
                 result = await huopaAPI[type](...(Array.isArray(data) ? data : [data]));
             }
