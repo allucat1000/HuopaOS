@@ -80,7 +80,7 @@ await huopaAPI.setAttribute(loginButton, "onclick", async () => {
                     await huopaAPI.prepend(postList, postDiv);
                 }
             } else {
-                await huopaAPI.setAttribute(postSendInfoText, "textContent", "Failed to send post! Status: " + response.status);
+                await huopaAPI.setAttribute(postSendInfoText, "textContent", "Failed to send post! Error: " + response.body.error);
                 await new Promise(resolve => setTimeout(resolve, 10000));
                 await huopaAPI.setAttribute(postSendInfoText, "textContent", "");
             }
