@@ -35,6 +35,7 @@ await huopaAPI.setAttribute(loginButton, "onclick", async () => {
         token = "";
         loggedIn = false;
         loginState = false;
+        await huopaAPI.setAttribute(loginButton, "textContent", "Login with Rotur");
         return;
     }
     if (loginState === "inProcess") {
