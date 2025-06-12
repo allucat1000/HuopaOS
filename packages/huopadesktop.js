@@ -791,7 +791,7 @@ const createRoturLoginWindow = async (app) => {
             }
             return;
         }
-
+        console.log(type, data, id, appId);
         const huopaAPI = huopaAPIMap.get(event.source);
         if (!huopaAPI || typeof huopaAPI[type] !== "function") {
             console.warn(`No handler for huopaAPI method '${type}'`);
@@ -800,8 +800,13 @@ const createRoturLoginWindow = async (app) => {
         }
 
         try {
+            let result;
+            if (type === "openRoturLogin") {
+                result = await huopaAPI[type]([event.data.appName]);
+            } else {
+                result = await huopaAPI[type](...(Array.isArray(data) ? data : [data]));
+            }
             
-            const result = await huopaAPI[type](...(Array.isArray(data) ? data : [data]));
             if (id) {
                 event.source?.postMessage({ type: "apiResponse", id, result }, "*");
             }
