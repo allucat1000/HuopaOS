@@ -1,1 +1,0 @@
-An app that you can use to sideload other apps. It is recommended not to run unknown untrusted apps.

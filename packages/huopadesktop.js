@@ -744,9 +744,15 @@ const createRoturLoginWindow = async (app) => {
                     console.warn(`prepend: No element with ID ${parentId}`);
                 }
                 parent.insertBefore(el, parent.firstChild);
-            }
+            },
 
-            
+            safeStorageWrite: async(path, content, type, appId) => {
+                internalFS.createPath("/system/env/appconfig/"+ appId + "/" + path, type, content, `{"read":"${appId}", "write":"${appId}", "modify":"${appId}"}`);
+            },
+
+            safeStorageRead: async(path, appId) => {
+                internalFS.getFile("/system/env/appconfig/"+ appId + "/" + path);
+            }
 
 
 
@@ -806,6 +812,8 @@ const createRoturLoginWindow = async (app) => {
             let result;
             if (type === "openRoturLogin") {
                 result = await huopaAPI[type]([event.data.appName]);
+            } else if (type.includes("safeStorage")) {
+                result = await huopaAPI[type](...(Array.isArray(data) ? data : [data]), appId);
             } else {
                 result = await huopaAPI[type](...(Array.isArray(data) ? data : [data]));
             }

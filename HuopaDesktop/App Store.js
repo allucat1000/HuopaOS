@@ -24,14 +24,9 @@ if (response.ok) {
     await huopaAPI.log(list + " type: " + typeof list);
     if (Array.isArray(list)) {
         await huopaAPI.deleteElement(loadingText);
-        for (const appName of list) {
-            const response = await huopaAPI.fetch("https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/AppStore/" + appName + ".txt");
-            if (!response.ok) {
-                await huopaAPI.error("Failed to fetch app code! Status: " + response.status);
-                return;
-            }
-
-            const appInfo = response.body;
+        for (const appArray of list) {
+            const appName = appArray.name
+            const appInfo = appArray.description
             const appDiv = await huopaAPI.createElement("div");
             const name = await huopaAPI.createElement("h3");
             const desc = await huopaAPI.createElement("p");

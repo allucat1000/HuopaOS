@@ -1,0 +1,1 @@
+await huopaAPI.writeFile("/system/env/FilePerms")

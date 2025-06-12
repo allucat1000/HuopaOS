@@ -1,1 +1,0 @@
-A very minimal clicker game. Was the first app to ever be made for HuopaDesktop.

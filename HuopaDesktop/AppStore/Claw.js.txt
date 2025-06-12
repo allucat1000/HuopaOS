@@ -1,1 +1,0 @@
-A client for the Claw social media platform. Uses the inbuilt Rotur Login portal for HuopaDesktop.
