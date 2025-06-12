@@ -721,6 +721,26 @@ const createRoturLoginWindow = async (app) => {
 
             openRoturLogin: async(appId) => {
                 return await createRoturLoginWindow(appId);
+            },
+
+            prependToApp: async(id) => {
+                const el = elementRegistry[id];
+                if (!el) {
+                    console.warn(`prependToApp: No element with ID ${id}`)
+                }
+                appContainer.insertBefore(el, appContainer.firstChild);
+            },
+
+            prepend: async(parentId, id) => {
+                const el = elementRegistry[id];
+                const parent = elementRegistry[parentId];
+                if (!el) {
+                    console.warn(`prepend: No element with ID ${id}`);
+                }
+                if (!parent) {
+                    console.warn(`prepend: No element with ID ${parentId}`);
+                }
+                parent.insertBefore(el, parent.firstChild);
             }
 
             

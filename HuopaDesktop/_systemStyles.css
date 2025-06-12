@@ -68,3 +68,15 @@ button {
     padding: 1em;
     cursor: pointer;
 }
+
+textarea {
+    width: 90%;
+    height: 70px;
+    background-color: rgba(35, 35, 35, 0.5);
+    margin: 0.5em auto;
+    display: block;
+    border-radius: 0.5em;
+    color: white;
+    padding: 0.5em;
+    resize: none;
+}
