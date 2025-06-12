@@ -590,6 +590,10 @@ const createRoturLoginWindow = async (app) => {
                 return internalFS.getFile(path, permissions);
             },
 
+            deleteFile: function(path, permissions) {
+                return internalFS.delDir(path, permissions);
+            },
+
             writeFile: function(path, type, content, permissions = {
                 "read":"",
                 "write":"",

@@ -364,7 +364,7 @@ const internalFS = {
     }
   },
 
-  async delDir(dir, visited = new Set(), recursive = false, force = false, permissions = {"read":"SYSTEM","write":"SYSTEM", "modify":"SYSTEM"}) {
+  async delDir(dir, permissions = {"read":"SYSTEM","write":"SYSTEM", "modify":"SYSTEM"}, visited = new Set(), recursive = false, force = false) {
     if (visited.has(dir)) return;
     visited.add(dir);
 
