@@ -3,7 +3,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "0.6.0";
+    const version = "0.6.1";
     // Priv Sys Funcs
     const mainInstaller = async () => {
         try {
@@ -151,7 +151,7 @@ const createRoturLoginWindow = async (app) => {
     }
 
     const createSysDaemon = async (name, daemonFunc) => {
-        consoleo("[SYS]: Running System Daemon: " + name);
+        console.log("[SYS]: Running System Daemon: " + name);
         daemonFunc();
     }
     const induceCrash = async (error) => {

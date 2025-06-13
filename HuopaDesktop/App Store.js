@@ -48,7 +48,7 @@ if (response.ok) {
             const ver = await huopaAPI.safeStorageRead(appName + "/version.txt")
             let update = false;
             if (!ver || ver !== appArray.version) update = true;
-            if (await huopaAPI.getFile("/home/applications/" + appName) && update) {
+            if (await huopaAPI.getFile("/home/applications/" + appName) && !update) {
                 installState = true
                 await huopaAPI.setAttribute(installButton, "textContent", "Uninstall");
             } else {
