@@ -53,7 +53,7 @@ if (response.ok) {
                 await huopaAPI.setAttribute(installButton, "textContent", "Uninstall");
             } else {
                 installState = false;
-                if (update) {
+                if (update && await huopaAPI.getFile("/home/applications/" + appName)) {
                     await huopaAPI.setAttribute(installButton, "textContent", "Update");
                 } else {
                     await huopaAPI.setAttribute(installButton, "textContent", "Install");
