@@ -3,7 +3,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "0.6.2";
+    const version = "0.6.3";
     // Priv Sys Funcs
     const mainInstaller = async () => {
         try {
@@ -112,6 +112,7 @@ const createRoturLoginWindow = async (app) => {
 
             usernameInput.placeholder = "Username";
             passwordInput.placeholder = "Password";
+            passwordInput.type = "password"
             usernameInput.style.display = "block";
             passwordInput.style.display = "block";
             usernameInput.style.margin = "1em auto";
