@@ -45,12 +45,19 @@ if (response.ok) {
             await huopaAPI.setCertainStyle(installButton, "top", "0.5em");
             await huopaAPI.setCertainStyle(installButton, "right", "0.5em");
             let installState;
-            if (await huopaAPI.getFile("/home/applications/" + appName)) {
+            const ver = await huopaAPI.safeStorageRead(appName + "/version.txt")
+            let update = false;
+            if (!ver || ver !== appArray.version) update = true;
+            if (await huopaAPI.getFile("/home/applications/" + appName) && update) {
                 installState = true
                 await huopaAPI.setAttribute(installButton, "textContent", "Uninstall");
             } else {
                 installState = false;
-                await huopaAPI.setAttribute(installButton, "textContent", "Install");
+                if (update) {
+                    await huopaAPI.setAttribute(installButton, "textContent", "Update");
+                } else {
+                    await huopaAPI.setAttribute(installButton, "textContent", "Install");
+                }
             }
             
         
@@ -63,6 +70,7 @@ if (response.ok) {
                         await huopaAPI.setAttribute(installButton, "textContent", "Installing...");
                         const code = response.body;
                         await huopaAPI.writeFile("/home/applications/" + appName, "file", code);
+                        await huopaAPI.safeStorageWrite(appName + "/version.txt", "file", appArray.version)
                         await huopaAPI.setAttribute(installButton, "textContent", "Uninstall");
                         installState = true;
                     } else {

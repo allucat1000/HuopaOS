@@ -151,7 +151,7 @@ const createRoturLoginWindow = async (app) => {
     }
 
     const createSysDaemon = async (name, daemonFunc) => {
-        console.log("[SYS]: Running System Daemon: " + name);
+        consoleo("[SYS]: Running System Daemon: " + name);
         daemonFunc();
     }
     const induceCrash = async (error) => {
