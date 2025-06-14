@@ -141,7 +141,7 @@ async function customizationTabLoad() {
 
     const bgOpacDiv = await huopaAPI.createElement("div");
     const bgOpacText = await huopaAPI.createElement("p");
-    await huopaAPI.setAttribute(bgOpacText, "textContent", "Background opacity — Choose how transparent you want backgrounds to be. (Requires restart for most elements)");
+    await huopaAPI.setAttribute(bgOpacText, "textContent", "Window opacity — Choose how transparent you want windows to be. (Requires restart for most elements)");
     await huopaAPI.setAttribute(bgOpacText, "style", "text-align: center; color: white; margin: 0.5em;");
     await huopaAPI.setAttribute(bgOpacDiv, "style", "margin: 2em;");
     await huopaAPI.append(bgOpacDiv, bgOpacText);

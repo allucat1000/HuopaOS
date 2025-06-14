@@ -3,7 +3,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "0.6.6";
+    const version = "0.7.0";
     // Priv Sys Funcs
     const mainInstaller = async () => {
         try {
@@ -987,14 +987,13 @@ const createRoturLoginWindow = async (app) => {
             const desktop = quantum.document.getElementById("desktop");
             const mainDiv = quantum.document.getElementById("termDiv");
             sysTempInfo.startMenuOpen = "half";
-            const opacity = await internalFS.getFile("/system/env/systemconfig/settings/customization/bgopac.txt");
             if (!startMenuDiv) {
                 startMenuDiv = quantum.document.createElement("div");
                 startMenuDiv.id = "startMenuDiv";
                 startMenuDiv.style.cssText = `
                     width: 30em;
                     height: 385px;
-                    background: rgba(30, 30, 30, ${opacity});
+                    background: rgba(30, 30, 30, 0.65);
                     position: absolute;
                     border-radius: 1em;
                     border: 2.5px;
@@ -1157,8 +1156,7 @@ const createRoturLoginWindow = async (app) => {
             await waitUntil(() => popupClosed);
             dock.id = "dock";
             const blur = await internalFS.getFile("/system/env/systemconfig/settings/customization/bgblur.txt");
-            const opacity = await internalFS.getFile("/system/env/systemconfig/settings/customization/bgopac.txt");
-            dock.style = `position: absolute; bottom: 20px; width: 96%; height: 4em; background: rgba(30, 30, 30, ${opacity}); border-radius: 1em; left: 50%; transform: translateX(-50%); display: flex; align-items: center; border: 2.5px; border: 2.5px; border-style: solid; border-color: #99999989; z-index: 15000; backdrop-filter: blur(${blur}px);`;
+            dock.style = `position: absolute; bottom: 20px; width: 96%; height: 4em; background: rgba(30, 30, 30, 0.65); border-radius: 1em; left: 50%; transform: translateX(-50%); display: flex; align-items: center; border: 2.5px; border: 2.5px; border-style: solid; border-color: #99999989; z-index: 15000; backdrop-filter: blur(${blur}px);`;
 
             await desktop.append(dock);
 
