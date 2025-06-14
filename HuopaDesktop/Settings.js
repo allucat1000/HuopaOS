@@ -154,7 +154,7 @@ async function customizationTabLoad() {
     await huopaAPI.setAttribute(opacSlider, "step", "0.05");
 
     const opacLabel = await huopaAPI.createElement("span");
-    await huopaAPI.setAttribute(opacLabel, "textContent", await huopaAPI.getFile("/system/env/systemconfig/settings/customization/bgopac.txt") * 100 + "%" || "75%");
+    await huopaAPI.setAttribute(opacLabel, "textContent", Math.round(await huopaAPI.getFile("/system/env/systemconfig/settings/customization/bgopac.txt") * 100) + "%" || "75%");
     await huopaAPI.setAttribute(opacLabel, "style", "color: white; display: block; text-align: center; margin: 0.5em auto; padding-bottom: 1.5em;");
     await huopaAPI.setCertainStyle(opacSlider, "margin", "0.5em auto");
     await huopaAPI.setCertainStyle(opacSlider, "display", "block");
