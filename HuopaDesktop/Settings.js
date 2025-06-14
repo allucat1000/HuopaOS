@@ -150,19 +150,20 @@ async function customizationTabLoad() {
     await huopaAPI.setAttribute(opacSlider, "type", "range");
     await huopaAPI.setAttribute(opacSlider, "min", "0.3");
     await huopaAPI.setAttribute(opacSlider, "max", "1");
-    await huopaAPI.setAttribute(opacSlider, "value", await huopaAPI.getFile("/system/env/systemconfig/settings/customization/bgopac.txt") || "0.75");
+    await huopaAPI.setAttribute(opacSlider, "value", Math.round(await huopaAPI.getFile("/system/env/systemconfig/settings/customization/bgopac.txt")) || "0.75");
     await huopaAPI.setAttribute(opacSlider, "step", "0.05");
 
     const opacLabel = await huopaAPI.createElement("span");
-    await huopaAPI.setAttribute(opacLabel, "textContent", await huopaAPI.getFile("/system/env/systemconfig/settings/customization/bgopac.txt") + "px" || "75%");
+    await huopaAPI.setAttribute(opacLabel, "textContent", await huopaAPI.getFile("/system/env/systemconfig/settings/customization/bgopac.txt") * 100 + "%" || "75%");
     await huopaAPI.setAttribute(opacLabel, "style", "color: white; display: block; text-align: center; margin: 0.5em auto; padding-bottom: 1.5em;");
     await huopaAPI.setCertainStyle(opacSlider, "margin", "0.5em auto");
     await huopaAPI.setCertainStyle(opacSlider, "display", "block");
 
     await huopaAPI.setAttribute(opacSlider, "oninput", async () => {
-        await huopaAPI.setAttribute(opacLabel, "textContent", await huopaAPI.getAttribute(opacSlider, "value") * 100 + "%");
+        await huopaAPI.setAttribute(opacLabel, "textContent", Math.round(await huopaAPI.getAttribute(opacSlider, "value") * 100) + "%");
         await huopaAPI.writeFile("/system/env/systemconfig/settings/customization/bgopac.txt", "file", await huopaAPI.getAttribute(opacSlider, "value"))
     });
-
+    await huopaAPI.append(mainScreenDiv, opacSlider);
+    await huopaAPI.append(mainScreenDiv, opacLabel);
 
 }
