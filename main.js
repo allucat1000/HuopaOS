@@ -849,7 +849,12 @@ async function recoveryCheck() {
 }
 
 async function isSystemInstalled() {
-  const rootDir = JSON.parse(await internalFS.getFile("/"));
+  try {
+    const rootDir = JSON.parse(await internalFS.getFile("/"));
+  } catch {
+    return false;
+  }
+  
   if (!rootDir) { return false };
   if (rootDir.includes("/home") || rootDir.includes("/manifest.json") || rootDir.includes("/system")) {
     if (rootDir.includes("/home") && rootDir.includes("/manifest.json") && rootDir.includes("/system")) {

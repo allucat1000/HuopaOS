@@ -1036,6 +1036,7 @@ const createRoturLoginWindow = async (app) => {
                     transition: opacity 0.3s ease, transform 0.3s ease;
                     z-index: 99999;
                     backdrop-filter: blur(2px);
+                    padding: 0.25em;
                 `;
                 desktop.append(startMenuDiv);
             }
@@ -1186,6 +1187,7 @@ const createRoturLoginWindow = async (app) => {
             await waitUntil(() => popupClosed);
             dock.id = "dock";
             const blur = await internalFS.getFile("/system/env/systemconfig/settings/customization/bgblur.txt");
+            const docked = await internalFS.getFile("/system/env/systemconfig/settings/customization/dockedTaskbar.txt");
             dock.style = `position: absolute; bottom: 20px; width: 96%; height: 4em; background: rgba(30, 30, 30, 0.65); border: rgba(65, 65, 65, 0.65) 1.5px solid; border-radius: 2.33em; left: 50%; transform: translateX(-50%); display: flex; align-items: center; border-color: #99999989; z-index: 15000; backdrop-filter: blur(${blur}px);`;
 
             await desktop.append(dock);
@@ -1196,14 +1198,14 @@ const createRoturLoginWindow = async (app) => {
             const appBar = quantum.document.createElement("div");
             const clockDiv = quantum.document.createElement("div");
             clockDiv.id = "clockDiv";
-            clockDiv.style = "padding: 0.33em; margin: 0.33em; border-radius: 0; border-style: none; border-width: 0px; text-align: center; width: 11.5em;"
+            clockDiv.style = "padding: 0em; margin: 0em; border-radius: 0; border-style: none; border-width: 0px; text-align: center; width: 10.5em;"
             const clockCurrentTime = quantum.document.createElement("p");
             const clockCurrentDate = quantum.document.createElement("p");
             createSysDaemon("clockUpdate", () => {
                 const pad = n => String(n).padStart(2, "0");
                 const monthNameList = [
-                    "January", "February", "March", "April", "May", "June",
-                    "July", "August", "September", "October", "November", "December"
+                    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
                 ];
 
                 const loop = () => {
@@ -1219,7 +1221,7 @@ const createRoturLoginWindow = async (app) => {
                         else if (date % 10 === 3) dateEnding = "rd";
                     }
 
-                    clockCurrentDate.textContent = `${date}${dateEnding} of ${monthNameList[now.getMonth()]}, ${now.getFullYear()}`;
+                    clockCurrentDate.textContent = `${monthNameList[now.getMonth()]} ${date}${dateEnding}, ${now.getFullYear()}`;
                     setTimeout(loop, 1000);
                 };
 
