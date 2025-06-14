@@ -114,3 +114,24 @@ input[type="color"]::-moz-color-swatch {
   border: none;
   border-radius: 0.5em;
 }
+
+
+/* Default checkbox input style */
+
+input[type="checkbox"] {
+  appearance: none;          
+  -webkit-appearance: none;
+  background-color: rgba(65, 65, 65, 0.5); 
+  border: 1px solid rgba(105, 105, 105, 0.65);
+  width: 16px;
+  height: 16px;
+  border-radius: 0.5em;
+  cursor: pointer;
+  position: relative;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+input[type="checkbox"]:checked {
+  background-color: rgba(60, 160, 20, 0.5);
+  border-color: rgba(90, 190, 50, 0.65);
+}

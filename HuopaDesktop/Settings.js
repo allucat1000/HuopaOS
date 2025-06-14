@@ -178,11 +178,39 @@ async function customizationTabLoad() {
     await huopaAPI.setAttribute(appBorderColorPicker, "type", "color");
     await huopaAPI.setAttribute(appBorderColorPicker, "value", await huopaAPI.getFile("/system/env/systemconfig/settings/customization/windowbordercolor.txt") || "");
     await huopaAPI.append(mainScreenDiv, appBorderColorPicker);
-    await huopaAPI.setCertainStyle(appBorderColorDiv, "margin", "1em;")
+    await huopaAPI.setCertainStyle(appBorderColorDiv, "margin", "1em");
 
     await huopaAPI.setAttribute(appBorderColorPicker, "oninput", async () => {
         await huopaAPI.writeFile("/system/env/systemconfig/settings/customization/windowbordercolor.txt", "file", await huopaAPI.getAttribute(appBorderColorPicker, "value"));
     });
 
     await huopaAPI.append(appBorderColorDiv, appBorderColorPicker);
+
+    const dockSegmentTitle = await huopaAPI.createElement("h2");
+    await huopaAPI.setAttribute(dockSegmentTitle, "textContent", "Dock settings");
+    await huopaAPI.setAttribute(dockSegmentTitle, "style", "text-align: center; margin: 1em;");
+    await huopaAPI.append(mainScreenDiv, dockSegmentTitle);
+
+    const dockDockedDiv = await huopaAPI.createElement("div");
+    const dockDockedTitle = await huopaAPI.createElement("p");
+    await huopaAPI.setAttribute(dockDockedTitle, "textContent", "Dock to screen edge — Make the dock fill the screen edges (Requires restart)");
+    await huopaAPI.setAttribute(dockDockedTitle, "style", "text-align: center; color: white; margin: 0.5em;");
+    await huopaAPI.setAttribute(dockDockedDiv, "style", "margin: 2em; padding-bottom: 1.5em;");
+    await huopaAPI.append(dockDockedDiv, dockDockedTitle);
+    await huopaAPI.append(mainScreenDiv, dockDockedDiv);
+
+    const dockDockedCheckbox = await huopaAPI.createElement("input");
+    await huopaAPI.setAttribute(dockDockedCheckbox, "type", "checkbox");
+    await huopaAPI.setAttribute(dockDockedCheckbox, "checked", await huopaAPI.getFile("/system/env/systemconfig/settings/customization/dockedTaskbar.txt") || false);
+    await huopaAPI.append(mainScreenDiv, dockDockedCheckbox);
+    await huopaAPI.setCertainStyle(dockDockedDiv, "margin", "1em");
+    await huopaAPI.setCertainStyle(dockDockedCheckbox, "margin", "1em auto");
+    await huopaAPI.setCertainStyle(dockDockedCheckbox, "display", "block");
+
+    await huopaAPI.setAttribute(dockDockedCheckbox, "oninput", async () => {
+        await huopaAPI.log("a")
+        await huopaAPI.writeFile("/system/env/systemconfig/settings/customization/dockedTaskbar.txt", "file", await huopaAPI.getAttribute(dockDockedCheckbox, "checked"));
+    });
+
+    await huopaAPI.append(dockDockedDiv, dockDockedCheckbox);
 }
