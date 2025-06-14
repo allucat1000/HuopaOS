@@ -849,8 +849,9 @@ async function recoveryCheck() {
 }
 
 async function isSystemInstalled() {
+  let rootDir;
   try {
-    const rootDir = JSON.parse(await internalFS.getFile("/"));
+    rootDir = JSON.parse(await internalFS.getFile("/"));
   } catch {
     return false;
   }
