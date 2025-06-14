@@ -49,7 +49,7 @@ window.huopadesktop = (() => {
                     await sys.addLine("Wallpapers and logo fetched and installed!");
                 }
                 sys.addLine("[line=blue]Installing styles...[/line]");
-                
+
                 if (!await internalFS.getFile("/system/env/systemconfig/settings/customization/wallpaperchosen.txt")) {
                     await internalFS.createPath("/system/env/systemconfig/settings/customization/wallpaperchosen.txt", "file", "/system/env/wallpapers/Chilly Mountain.png")
                 }
@@ -950,16 +950,28 @@ const createRoturLoginWindow = async (app) => {
         container.className = "app-container";
         container.style = `width: 100%; height: calc(100% - 33px); overflow: auto; position: relative;`;
         const closeButton = quantum.document.createElement("button");
-        closeButton.textContent = "×";
+        closeButton.innerHTML = `
+            <?xml version="1.0" encoding="iso-8859-1"?>
+            <!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
+            <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+            <svg fill="#ffffff" height="15px" width="15px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
+                viewBox="0 0 460.775 460.775" xml:space="preserve">
+            <path d="M285.08,230.397L456.218,59.27c6.076-6.077,6.076-15.911,0-21.986L423.511,4.565c-2.913-2.911-6.866-4.55-10.992-4.55
+                c-4.127,0-8.08,1.639-10.993,4.55l-171.138,171.14L59.25,4.565c-2.913-2.911-6.866-4.55-10.993-4.55
+                c-4.126,0-8.08,1.639-10.992,4.55L4.558,37.284c-6.077,6.075-6.077,15.909,0,21.986l171.138,171.128L4.575,401.505
+                c-6.074,6.077-6.074,15.911,0,21.986l32.709,32.719c2.911,2.911,6.865,4.55,10.992,4.55c4.127,0,8.08-1.639,10.994-4.55
+                l171.117-171.12l171.118,171.12c2.913,2.911,6.866,4.55,10.993,4.55c4.128,0,8.081-1.639,10.992-4.55l32.709-32.719
+                c6.074-6.075,6.074-15.909,0-21.986L285.08,230.397z"/>
+            </svg>
+        `;
         closeButton.style = `
             background: transparent;
             border: none;
             color: white;
-            font-size: 1em;
             cursor: pointer;
             position: absolute;
-            right: 0.5em;
-            top: -3.33px;
+            right: 0;
+            top: 0;
         `;
         closeButton.addEventListener("click", () => {
             const codeElem = quantum.document.getElementById(`code-${appId}`);
@@ -1179,7 +1191,7 @@ const createRoturLoginWindow = async (app) => {
             const appBar = quantum.document.createElement("div");
             const clockDiv = quantum.document.createElement("div");
             clockDiv.id = "clockDiv";
-            clockDiv.style = "padding: 0.33em; margin: 0.33em; border-radius: 0.75em; background-color: rgba(94, 94, 94, 0.37); border-style: solid; border-width: 2.5px; border-color: rgba(255, 255, 255, 0.19); text-align: center; width: 11.5em; max-height: 2.5em;"
+            clockDiv.style = "padding: 0.33em; margin: 0.33em; border-radius: 0.75em; border-style: solid; border-width: 0px; border-color: rgba(255, 255, 255, 0.19); text-align: center; width: 11.5em; max-height: 2.5em;"
             const clockCurrentTime = quantum.document.createElement("p");
             const clockCurrentDate = quantum.document.createElement("p");
             createSysDaemon("clockUpdate", () => {
