@@ -3,7 +3,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "0.7.0";
+    const version = "0.7.1";
     // Priv Sys Funcs
     const mainInstaller = async () => {
         try {
@@ -27,12 +27,29 @@ window.huopadesktop = (() => {
                 await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaDesktop/Settings.js`, "/home/applications/Settings.js");
                 await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaDesktop/App%20Store.js`, "/home/applications/App Store.js");
                 await sys.addLine("[line=blue]Downloading and installing wallpapers...[/line]")
-                const wallpaper1Success = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/Wallpapers/Chilly%20Mountain.png`, "/system/env/wallpapers/Chilly Mountain.png");
-                const wallpaper2Success = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/Wallpapers/Peaceful%20Landscape.png`, "/system/env/wallpapers/Peaceful Landscape.png");
-                const wallpaper3Success = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/Wallpapers/Chaotic%20Creek.png`, "/system/env/wallpapers/Chaotic Creek.png");
-                const wallpaper4Success = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/Wallpapers/Forest%20Landscape.png`, "/system/env/wallpapers/Forest Landscape.png");
-
+                let wallpaper1Success;
+                let wallpaper2Success;
+                let wallpaper3Success;
+                let wallpaper4Success;
+                if (!await internalFS.getFile("/system/env/wallpapers/Chilly Mountain.png")) {
+                    wallpaper1Success = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/Wallpapers/Chilly%20Mountain.png`, "/system/env/wallpapers/Chilly Mountain.png");
+                }
+                if (!await internalFS.getFile("/system/env/wallpapers/Peaceful Landscape.png")) {
+                    wallpaper2Success = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/Wallpapers/Peaceful%20Landscape.png`, "/system/env/wallpapers/Peaceful Landscape.png");
+                }
+                if (!await internalFS.getFile("/system/env/wallpapers/Chaotic Creek.png")) {
+                    wallpaper3Success = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/Wallpapers/Chaotic%20Creek.png`, "/system/env/wallpapers/Chaotic Creek.png");
+                }
+                if (!await internalFS.getFile("/system/env/wallpapers/Forest Landscape.png")) {
+                    wallpaper4Success = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/Wallpapers/Forest%20Landscape.png`, "/system/env/wallpapers/Forest Landscape.png");
+                }
+                
                 const logoSuccess = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaLogo.png`, "/system/env/assets/huopalogo.png");
+                if (wallpaper1Success && wallpaper2Success && wallpaper3Success && wallpaper4Success && logoSuccess) {
+                    await sys.addLine("Wallpapers and logo fetched and installed!");
+                }
+                sys.addLine("[line=blue]Installing styles...[/line]");
+                
                 if (!await internalFS.getFile("/system/env/systemconfig/settings/customization/wallpaperchosen.txt")) {
                     await internalFS.createPath("/system/env/systemconfig/settings/customization/wallpaperchosen.txt", "file", "/system/env/wallpapers/Chilly Mountain.png")
                 }
@@ -44,10 +61,6 @@ window.huopadesktop = (() => {
                     await internalFS.createPath("/system/env/systemconfig/settings/customization/bgopac.txt", "file", "0.65")
                 }
                 
-                if (wallpaper1Success && wallpaper2Success && wallpaper3Success && wallpaper4Success && logoSuccess) {
-                    await sys.addLine("Wallpapers and logo fetched and installed!");
-                }
-                sys.addLine("[line=blue]Installing styles...[/line]")
                 const styleDownloadSuccess = await new Promise(async (resolve, reject) => {
                     try {
                         const response = await fetch(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaDesktop/_systemStyles.css`);
