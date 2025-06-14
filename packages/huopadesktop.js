@@ -3,7 +3,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "0.6.3";
+    const version = "0.6.4";
     // Priv Sys Funcs
     const mainInstaller = async () => {
         try {
@@ -38,6 +38,10 @@ window.huopadesktop = (() => {
                 }
                 if (!await internalFS.getFile("/system/env/systemconfig/settings/customization/bgblur.txt")) {
                     await internalFS.createPath("/system/env/systemconfig/settings/customization/bgblur.txt", "file", "3.5")
+                }
+
+                if (!await internalFS.getFile("/system/env/systemconfig/settings/customization/bgopac.txt")) {
+                    await internalFS.createPath("/system/env/systemconfig/settings/customization/bgopac.txt", "file", "0.65")
                 }
                 
                 if (wallpaper1Success && wallpaper2Success && wallpaper3Success && wallpaper4Success && logoSuccess) {
@@ -899,6 +903,7 @@ const createRoturLoginWindow = async (app) => {
         const outerContainer = quantum.document.createElement("div");
         const winSpawnX = window.innerWidth / 2;
         const blur = await internalFS.getFile("/system/env/systemconfig/settings/customization/bgblur.txt");
+        const opacity = await internalFS.getFile("/system/env/systemconfig/settings/customization/bgopac.txt");
         outerContainer.style = `
             position: absolute;
             width: 700px;
@@ -909,7 +914,7 @@ const createRoturLoginWindow = async (app) => {
             resize: both;
             border: 2px solid gray;
             border-radius: 0.5em;
-            background: rgba(30, 30, 30, 0.65);
+            background: rgba(30, 30, 30, ${opacity});
             margin: 0;
             opacity: 0;
             transform: translateY(20px);
@@ -982,14 +987,14 @@ const createRoturLoginWindow = async (app) => {
             const desktop = quantum.document.getElementById("desktop");
             const mainDiv = quantum.document.getElementById("termDiv");
             sysTempInfo.startMenuOpen = "half";
-
+            const opacity = await internalFS.getFile("/system/env/systemconfig/settings/customization/bgopac.txt");
             if (!startMenuDiv) {
                 startMenuDiv = quantum.document.createElement("div");
                 startMenuDiv.id = "startMenuDiv";
                 startMenuDiv.style.cssText = `
                     width: 30em;
                     height: 385px;
-                    background: rgba(30, 30, 30, 0.65);
+                    background: rgba(30, 30, 30, ${opacity});
                     position: absolute;
                     border-radius: 1em;
                     border: 2.5px;
@@ -1152,7 +1157,8 @@ const createRoturLoginWindow = async (app) => {
             await waitUntil(() => popupClosed);
             dock.id = "dock";
             const blur = await internalFS.getFile("/system/env/systemconfig/settings/customization/bgblur.txt");
-            dock.style = `position: absolute; bottom: 20px; width: 96%; height: 4em; background: rgba(30, 30, 30, 0.65); border-radius: 1em; left: 50%; transform: translateX(-50%); display: flex; align-items: center; border: 2.5px; border: 2.5px; border-style: solid; border-color: #99999989; z-index: 15000; backdrop-filter: blur(${blur}px);`;
+            const opacity = await internalFS.getFile("/system/env/systemconfig/settings/customization/bgopac.txt");
+            dock.style = `position: absolute; bottom: 20px; width: 96%; height: 4em; background: rgba(30, 30, 30, ${opacity}); border-radius: 1em; left: 50%; transform: translateX(-50%); display: flex; align-items: center; border: 2.5px; border: 2.5px; border-style: solid; border-color: #99999989; z-index: 15000; backdrop-filter: blur(${blur}px);`;
 
             await desktop.append(dock);
 
