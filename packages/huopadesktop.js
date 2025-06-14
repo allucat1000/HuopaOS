@@ -3,7 +3,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "0.7.1";
+    const version = "0.7.2";
     // Priv Sys Funcs
     const mainInstaller = async () => {
         try {
@@ -59,6 +59,10 @@ window.huopadesktop = (() => {
 
                 if (!await internalFS.getFile("/system/env/systemconfig/settings/customization/bgopac.txt")) {
                     await internalFS.createPath("/system/env/systemconfig/settings/customization/bgopac.txt", "file", "0.65")
+                }
+
+                if (!await internalFS.getFile("/system/env/systemconfig/settings/customization/windowbordercolor.txt")) {
+                    await internalFS.createPath("/system/env/systemconfig/settings/customization/windowbordercolor.txt", "file", "#808080")
                 }
                 
                 const styleDownloadSuccess = await new Promise(async (resolve, reject) => {
@@ -917,6 +921,7 @@ const createRoturLoginWindow = async (app) => {
         const winSpawnX = window.innerWidth / 2;
         const blur = await internalFS.getFile("/system/env/systemconfig/settings/customization/bgblur.txt");
         const opacity = await internalFS.getFile("/system/env/systemconfig/settings/customization/bgopac.txt");
+        const borderColor = await internalFS.getFile("/system/env/systemconfig/settings/customization/windowbordercolor.txt");
         outerContainer.style = `
             position: absolute;
             width: 700px;
@@ -925,7 +930,7 @@ const createRoturLoginWindow = async (app) => {
             left: ${winSpawnX}px;
             overflow: hidden;
             resize: both;
-            border: 2px solid gray;
+            border: 2px solid ${borderColor};
             border-radius: 0.5em;
             background: rgba(30, 30, 30, ${opacity});
             margin: 0;
@@ -1181,17 +1186,17 @@ const createRoturLoginWindow = async (app) => {
             await waitUntil(() => popupClosed);
             dock.id = "dock";
             const blur = await internalFS.getFile("/system/env/systemconfig/settings/customization/bgblur.txt");
-            dock.style = `position: absolute; bottom: 20px; width: 96%; height: 4em; background: rgba(30, 30, 30, 0.65); border-radius: 1em; left: 50%; transform: translateX(-50%); display: flex; align-items: center; border: 2.5px; border: 2.5px; border-style: solid; border-color: #99999989; z-index: 15000; backdrop-filter: blur(${blur}px);`;
+            dock.style = `position: absolute; bottom: 20px; width: 96%; height: 4em; background: rgba(30, 30, 30, 0.65); border: rgba(65, 65, 65, 0.65) 1.5px solid; border-radius: 2.33em; left: 50%; transform: translateX(-50%); display: flex; align-items: center; border-color: #99999989; z-index: 15000; backdrop-filter: blur(${blur}px);`;
 
             await desktop.append(dock);
 
             const huopalogo = await internalFS.getFile("/system/env/assets/huopalogo.png");
             const startMenuButton = quantum.document.createElement("button");
-            startMenuButton.style = `outline: none; background-image: url(${huopalogo}); background-size: contain; background-repeat: no-repeat; background-position: center; width: 4em; height: 4em; border: none; background-color: transparent; border-radius: 50%; margin: 1em; transition: 0.15s;cursor: pointer; transform-origin: center;`;
+            startMenuButton.style = `outline: none; background-image: url(${huopalogo}); background-size: contain; background-repeat: no-repeat; background-position: center; width: 4em; height: 4em; border: none; background-color: transparent; border-radius: 50%; margin: 0.66em; transition: 0.15s;cursor: pointer; transform-origin: center;`;
             const appBar = quantum.document.createElement("div");
             const clockDiv = quantum.document.createElement("div");
             clockDiv.id = "clockDiv";
-            clockDiv.style = "padding: 0.33em; margin: 0.33em; border-radius: 0.75em; border-style: solid; border-width: 0px; border-color: rgba(255, 255, 255, 0.19); text-align: center; width: 11.5em; max-height: 2.5em;"
+            clockDiv.style = "padding: 0.33em; margin: 0.33em; border-radius: 0; border-style: none; border-width: 0px; text-align: center; width: 11.5em;"
             const clockCurrentTime = quantum.document.createElement("p");
             const clockCurrentDate = quantum.document.createElement("p");
             createSysDaemon("clockUpdate", () => {

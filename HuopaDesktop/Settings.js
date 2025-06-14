@@ -135,8 +135,8 @@ async function customizationTabLoad() {
         await huopaAPI.writeFile("/system/env/systemconfig/settings/customization/bgblur.txt", "file", await huopaAPI.getAttribute(slider, "value"))
     });
 
-    await huopaAPI.append(mainScreenDiv, slider);
-    await huopaAPI.append(mainScreenDiv, label);
+    await huopaAPI.append(bgBlurDiv, slider);
+    await huopaAPI.append(bgBlurDiv, label);
 
 
     const bgOpacDiv = await huopaAPI.createElement("div");
@@ -163,7 +163,26 @@ async function customizationTabLoad() {
         await huopaAPI.setAttribute(opacLabel, "textContent", Math.round(await huopaAPI.getAttribute(opacSlider, "value") * 100) + "%");
         await huopaAPI.writeFile("/system/env/systemconfig/settings/customization/bgopac.txt", "file", await huopaAPI.getAttribute(opacSlider, "value"))
     });
-    await huopaAPI.append(mainScreenDiv, opacSlider);
-    await huopaAPI.append(mainScreenDiv, opacLabel);
+    await huopaAPI.append(bgOpacDiv, opacSlider);
+    await huopaAPI.append(bgOpacDiv, opacLabel);
 
+    const appBorderColorDiv = await huopaAPI.createElement("div");
+    const appBorderColorTitle = await huopaAPI.createElement("p");
+    await huopaAPI.setAttribute(appBorderColorTitle, "textContent", "Window border color — Choose the color of window borders. (Requires restart for most elements)");
+    await huopaAPI.setAttribute(appBorderColorTitle, "style", "text-align: center; color: white; margin: 0.5em;");
+    await huopaAPI.setAttribute(appBorderColorDiv, "style", "margin: 2em; padding-bottom: 1.5em;");
+    await huopaAPI.append(appBorderColorDiv, appBorderColorTitle);
+    await huopaAPI.append(mainScreenDiv, appBorderColorDiv);
+
+    const appBorderColorPicker = await huopaAPI.createElement("input");
+    await huopaAPI.setAttribute(appBorderColorPicker, "type", "color");
+    await huopaAPI.setAttribute(appBorderColorPicker, "value", await huopaAPI.getFile("/system/env/systemconfig/settings/customization/windowbordercolor.txt") || "");
+    await huopaAPI.append(mainScreenDiv, appBorderColorPicker);
+    await huopaAPI.setCertainStyle(appBorderColorDiv, "margin", "1em;")
+
+    await huopaAPI.setAttribute(appBorderColorPicker, "oninput", async () => {
+        await huopaAPI.writeFile("/system/env/systemconfig/settings/customization/windowbordercolor.txt", "file", await huopaAPI.getAttribute(appBorderColorPicker, "value"));
+    });
+
+    await huopaAPI.append(appBorderColorDiv, appBorderColorPicker);
 }

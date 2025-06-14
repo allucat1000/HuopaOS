@@ -82,3 +82,35 @@ textarea {
     padding: 0.5em;
     resize: none;
 }
+
+/* Default color input style */
+
+input[type="color"] {
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  padding: 0;
+  width: 175px;
+  height: 25px;
+  border-radius: 0.5em;
+  overflow: hidden;
+  cursor: pointer;
+  background-color: transparent;
+  margin: 0.5em auto;
+  display: block;
+}
+
+input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+  border-radius: 0.5em;
+}
+
+input[type="color"]::-webkit-color-swatch {
+  border: none;
+  border-radius: 0.5em;
+}
+
+input[type="color"]::-moz-color-swatch {
+  border: none;
+  border-radius: 0.5em;
+}
