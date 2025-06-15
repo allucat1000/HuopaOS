@@ -1008,9 +1008,6 @@ const createRoturLoginWindow = async (app) => {
         
     }
     let docked;
-    async() => {
-        docked = await internalFS.getFile("/system/env/systemconfig/settings/customization/dockedTaskbar.txt");
-    }
 
     const openStartMenu = async () => {
         if (killSwitch) return;
@@ -1132,6 +1129,7 @@ const createRoturLoginWindow = async (app) => {
     const createMainGUI = async () => {
         if (killSwitch) return;
         try {
+            docked = await internalFS.getFile("/system/env/systemconfig/settings/customization/dockedTaskbar.txt");
             importLib("https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js");
             const mainDiv = quantum.document.getElementById("termDiv");
             mainDiv.innerHTML = "";
@@ -1197,7 +1195,7 @@ const createRoturLoginWindow = async (app) => {
             await waitUntil(() => popupClosed);
             dock.id = "dock";
             const blur = await internalFS.getFile("/system/env/systemconfig/settings/customization/bgblur.txt");
-            
+            console.log(docked)
             if (docked && docked === true) {
                 dock.style = `position: absolute; bottom: 0; width: 100%; height: 4em; background: rgba(30, 30, 30, 0.65); border-top: rgba(65, 65, 65, 0.65) 1.5px solid; border-radius: 0; left: 50%; transform: translateX(-50%); display: flex; align-items: center; border-color: #99999989; z-index: 15000; backdrop-filter: blur(${blur}px);`;
             } else {

@@ -386,7 +386,7 @@ const internalFS = {
 
       if (isDir) {
         if (recursive) {
-          await internalFS.delDir(item, visited, recursive, force, permissions);
+          await internalFS.delDir(item, permissions, visited, recursive, force);
         } else {
           if (!force) sys.addLine(`[line=red]Cannot delete directory ${item} without recursive flag[/line]`);
           return;
