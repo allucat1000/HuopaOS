@@ -994,7 +994,7 @@ const createRoturLoginWindow = async (app) => {
         `;
         const titleBar = quantum.document.createElement("div");
         titleBar.style = `
-            height: 22px;
+            height: 30px;
             width: 100%;
             background: rgba(0, 0, 0, 0);
             z-index: ${appZIndex + 1};
