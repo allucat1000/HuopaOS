@@ -57,7 +57,7 @@ async function customizationTabLoad() {
     await huopaAPI.append(mainScreenDiv, wallpaperChooseTitle);
 
     const wallpaperListDiv = await huopaAPI.createElement("div");
-    await huopaAPI.setAttribute(wallpaperListDiv, "style", "display: flex; width: 95%; height: 100%; flex-wrap: wrap; justify-content: center;");
+    await huopaAPI.setAttribute(wallpaperListDiv, "style", "display: flex; width: 95%; height: 100%; flex-wrap: wrap; justify-content: center; margin: 0.5em auto;");
 
     for (const wallpaperPath of wallpaperList) {
         const wallpaperButton = await huopaAPI.createElement("button");
