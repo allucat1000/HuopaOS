@@ -3,7 +3,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "0.8.0";
+    const version = "0.8.1";
     // Priv Sys Funcs
 
     const mainInstaller = async () => {
@@ -34,7 +34,8 @@ window.huopadesktop = (() => {
                 if (!await internalFS.getFile("/home/applications/App Store.js.icon")) {
                     await internalFS.createPath("/home/applications/App Store.js.icon", "file", `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-cart-icon lucide-shopping-cart"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>`);
                 }
-                
+                await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaDesktop/File%20Manager.js`, "/home/applications/File Manager.js");
+
                 await sys.addLine("[line=blue]Downloading and installing wallpapers...[/line]")
                 let wallpaper1Success;
                 let wallpaper2Success;
@@ -922,7 +923,7 @@ const createRoturLoginWindow = async (app) => {
         }
     });
     let appZIndex = 500;
-    function createDraggableWindow(windowEl, dragHandleSelector = ".titlebar") {
+    const createDraggableWindow = (windowEl, dragHandleSelector = ".titlebar") => {
         windowEl.style.position = "absolute";
         
         const dragHandle = windowEl.querySelector(dragHandleSelector);
@@ -968,6 +969,71 @@ const createRoturLoginWindow = async (app) => {
             quantum.document.removeEventListener("mouseup", onMouseUp);
         }
     }
+    const minWidth = 200;
+    const minHeight = 150;
+    const onResizeStart = (e) => {
+        e.preventDefault();
+        const dir = e.target.dataset.direction;
+        const win = e.target.parentElement;
+        const startX = e.clientX;
+        const startY = e.clientY;
+        const startRect = win.getBoundingClientRect();
+
+        function onMouseMove(ev) {
+            const dx = ev.clientX - startX;
+            const dy = ev.clientY - startY;
+
+            let newWidth = startRect.width;
+            let newHeight = startRect.height;
+            let newLeft = startRect.left;
+            let newTop = startRect.top;
+
+            if (dir.includes("right")) {
+                newWidth = Math.max(minWidth, startRect.width + dx);
+            }
+
+            if (dir.includes("bottom")) {
+                newHeight = Math.max(minHeight, startRect.height + dy);
+            }
+
+            if (dir.includes("left")) {
+                const proposedWidth = startRect.width - dx;
+                if (proposedWidth >= minWidth) {
+                    newWidth = proposedWidth;
+                    newLeft = startRect.left + dx;
+                } else {
+                    newWidth = minWidth;
+                    newLeft = startRect.left + (startRect.width - minWidth);
+                }
+            }
+
+            if (dir.includes("top")) {
+                const proposedHeight = startRect.height - dy;
+                if (proposedHeight >= minHeight) {
+                    newHeight = proposedHeight;
+                    newTop = startRect.top + dy;
+                } else {
+                    newHeight = minHeight;
+                    newTop = startRect.top + (startRect.height - minHeight);
+                }
+            }
+
+            win.style.width = `${newWidth}px`;
+            win.style.height = `${newHeight}px`;
+            win.style.left = `${newLeft}px`;
+            win.style.top = `${newTop}px`;
+        }
+
+
+
+        function onMouseUp() {
+            quantum.document.removeEventListener("mousemove", onMouseMove);
+            quantum.document.removeEventListener("mouseup", onMouseUp);
+        }
+
+        quantum.document.addEventListener("mousemove", onMouseMove);
+        quantum.document.addEventListener("mouseup", onMouseUp);
+    }
 
     const createAppContainer = async (appId, appPath) => {
         const outerContainer = quantum.document.createElement("div");
@@ -982,7 +1048,6 @@ const createRoturLoginWindow = async (app) => {
             top: 100px;
             left: ${winSpawnX}px;
             overflow: hidden;
-            resize: both;
             border: 2px solid ${borderColor};
             border-radius: 0.5em;
             background: rgba(30, 30, 30, ${opacity});
@@ -992,6 +1057,30 @@ const createRoturLoginWindow = async (app) => {
             transition: opacity 0.15s ease, transform 0.15s ease;
             backdrop-filter: blur(${blur}px);
         `;
+        const resizers = [
+            { dir: 'top',    cursor: 'ns-resize',   style: { top: '-2px', left: '0', width: '100%', height: '5px' }},
+            { dir: 'right',  cursor: 'ew-resize',   style: { top: '0', right: '-2px', width: '5px', height: '100%' }},
+            { dir: 'bottom', cursor: 'ns-resize',   style: { bottom: '-2px', left: '0', width: '100%', height: '5px' }},
+            { dir: 'left',   cursor: 'ew-resize',   style: { top: '0', left: '-2px', width: '5px', height: '100%' }},
+            { dir: 'top-left',     cursor: 'nwse-resize', style: { top: '-2px', left: '-2px', width: '8px', height: '8px' }},
+            { dir: 'top-right',    cursor: 'nesw-resize', style: { top: '-2px', right: '-2px', width: '8px', height: '8px' }},
+            { dir: 'bottom-left',  cursor: 'nesw-resize', style: { bottom: '-2px', left: '-2px', width: '8px', height: '8px' }},
+            { dir: 'bottom-right', cursor: 'nwse-resize', style: { bottom: '-2px', right: '-2px', width: '8px', height: '8px' }},
+        ];
+
+        for (const r of resizers) {
+            const el = quantum.document.createElement("div");
+            el.dataset.direction = r.dir;
+            el.style.position = "absolute";
+            el.style.zIndex = "1000";
+            el.style.cursor = r.cursor;
+            el.style.userSelect = "none";
+            el.style.background = "transparent";
+            Object.assign(el.style, r.style);
+            outerContainer.appendChild(el);
+
+            el.addEventListener("mousedown", onResizeStart);
+        }
         const titleBar = quantum.document.createElement("div");
         titleBar.style = `
             height: 30px;
@@ -1052,6 +1141,7 @@ const createRoturLoginWindow = async (app) => {
         container.append(topBarSplitter);
         outerContainer.append(container);
         createDraggableWindow(outerContainer);
+
         requestAnimationFrame(() => {
             outerContainer.style.opacity = "1";
             outerContainer.style.transform = "translateY(0px)";
