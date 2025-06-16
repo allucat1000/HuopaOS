@@ -8,22 +8,44 @@ async function mainScreen() {
     await huopaAPI.appendToApp(mainScreenDiv);
     await huopaAPI.append(mainScreenDiv, title);
 
+    const wallpapersTab = await huopaAPI.createElement("button");
+    await huopaAPI.setAttribute(wallpapersTab, "textContent", "Wallpapers");
+    await huopaAPI.setCertainStyle(wallpapersTab, "padding", "1.25em");
+    await huopaAPI.setCertainStyle(wallpapersTab, "margin", "1em auto");
+    await huopaAPI.setCertainStyle(wallpapersTab, "width", "65%");
+    await huopaAPI.append(mainScreenDiv, wallpapersTab);
+    await huopaAPI.setAttribute(wallpapersTab, "onclick", () => {
+        huopaAPI.deleteElement(mainScreenDiv);
+        wallpapersTabLoad();
+    });
+
+
     const customizationTab = await huopaAPI.createElement("button");
     await huopaAPI.setAttribute(customizationTab, "textContent", "Customization");
     await huopaAPI.setCertainStyle(customizationTab, "padding", "1.25em");
-    await huopaAPI.setCertainStyle(customizationTab, "margin", "0.5em auto");
+    await huopaAPI.setCertainStyle(customizationTab, "margin", "1em auto");
     await huopaAPI.setCertainStyle(customizationTab, "width", "65%");
     await huopaAPI.append(mainScreenDiv, customizationTab);
     await huopaAPI.setAttribute(customizationTab, "onclick", () => {
         huopaAPI.deleteElement(mainScreenDiv);
         customizationTabLoad();
     });
-}
 
-async function customizationTabLoad() {
+    const dockTab = await huopaAPI.createElement("button");
+    await huopaAPI.setAttribute(dockTab, "textContent", "Dock");
+    await huopaAPI.setCertainStyle(dockTab, "padding", "1.25em");
+    await huopaAPI.setCertainStyle(dockTab, "margin", "1em auto");
+    await huopaAPI.setCertainStyle(dockTab, "width", "65%");
+    await huopaAPI.append(mainScreenDiv, dockTab);
+    await huopaAPI.setAttribute(dockTab, "onclick", () => {
+        huopaAPI.deleteElement(mainScreenDiv);
+        dockTabLoad();
+    });
+}
+async function wallpapersTabLoad() {
     const mainScreenDiv = await huopaAPI.createElement("div");
     const title = await huopaAPI.createElement("h1");
-    await huopaAPI.setAttribute(title, "textContent", "Customization");
+    await huopaAPI.setAttribute(title, "textContent", "Wallpapers");
     await huopaAPI.setAttribute(title, "style", "text-align: center; color: white; margin: 1em;");
     await huopaAPI.appendToApp(mainScreenDiv);
     await huopaAPI.append(mainScreenDiv, title);
@@ -57,7 +79,7 @@ async function customizationTabLoad() {
     await huopaAPI.append(mainScreenDiv, wallpaperChooseTitle);
 
     const wallpaperListDiv = await huopaAPI.createElement("div");
-    await huopaAPI.setAttribute(wallpaperListDiv, "style", "display: flex; width: 95%; height: 100%; flex-wrap: wrap; justify-content: center; margin: 0.5em auto;");
+    await huopaAPI.setAttribute(wallpaperListDiv, "style", "display: flex; width: 95%; height: 100%; flex-wrap: wrap; justify-content: center; margin: 0.5em auto; padding-bottom: 1.5em;");
 
     for (const wallpaperPath of wallpaperList) {
         const wallpaperButton = await huopaAPI.createElement("button");
@@ -104,11 +126,27 @@ async function customizationTabLoad() {
     });
 
     await huopaAPI.append(mainScreenDiv, wallpaperListDiv);
+}
+async function customizationTabLoad() {
+    const mainScreenDiv = await huopaAPI.createElement("div");
+    const title = await huopaAPI.createElement("h1");
+    await huopaAPI.setAttribute(title, "textContent", "Customization");
+    await huopaAPI.setAttribute(title, "style", "text-align: center; color: white; margin: 1em;");
+    await huopaAPI.appendToApp(mainScreenDiv);
+    await huopaAPI.append(mainScreenDiv, title);
 
-    const otherTitle = await huopaAPI.createElement("h2");
-    await huopaAPI.setAttribute(otherTitle, "textContent", "Other options");
-    await huopaAPI.setAttribute(otherTitle, "style", "text-align: center; margin: 1em;");
-    await huopaAPI.append(mainScreenDiv, otherTitle);
+    const backButton = await huopaAPI.createElement("button");
+    await huopaAPI.setAttribute(backButton, "innerHTML", '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left-icon lucide-arrow-left"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>');
+    await huopaAPI.setCertainStyle(backButton, "padding", "1em");
+    await huopaAPI.setCertainStyle(backButton, "position", "fixed");
+    await huopaAPI.setCertainStyle(backButton, "left", "0.5em");
+    await huopaAPI.setCertainStyle(backButton, "bottom", "0.5em");
+
+    await huopaAPI.append(mainScreenDiv, backButton);
+    await huopaAPI.setAttribute(backButton, "onclick", async () => {
+        await huopaAPI.deleteElement(mainScreenDiv);
+        await mainScreen();
+    });
 
     const bgBlurDiv = await huopaAPI.createElement("div");
     const bgBlurText = await huopaAPI.createElement("p");
@@ -185,11 +223,28 @@ async function customizationTabLoad() {
     });
 
     await huopaAPI.append(appBorderColorDiv, appBorderColorPicker);
+}
 
-    const dockSegmentTitle = await huopaAPI.createElement("h2");
-    await huopaAPI.setAttribute(dockSegmentTitle, "textContent", "Dock settings");
-    await huopaAPI.setAttribute(dockSegmentTitle, "style", "text-align: center; margin: 1em;");
-    await huopaAPI.append(mainScreenDiv, dockSegmentTitle);
+async function dockTabLoad() {
+    const mainScreenDiv = await huopaAPI.createElement("div");
+    const title = await huopaAPI.createElement("h1");
+    await huopaAPI.setAttribute(title, "textContent", "Dock");
+    await huopaAPI.setAttribute(title, "style", "text-align: center; color: white; margin: 1em;");
+    await huopaAPI.appendToApp(mainScreenDiv);
+    await huopaAPI.append(mainScreenDiv, title);
+
+    const backButton = await huopaAPI.createElement("button");
+    await huopaAPI.setAttribute(backButton, "innerHTML", '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left-icon lucide-arrow-left"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>');
+    await huopaAPI.setCertainStyle(backButton, "padding", "1em");
+    await huopaAPI.setCertainStyle(backButton, "position", "fixed");
+    await huopaAPI.setCertainStyle(backButton, "left", "0.5em");
+    await huopaAPI.setCertainStyle(backButton, "bottom", "0.5em");
+
+    await huopaAPI.append(mainScreenDiv, backButton);
+    await huopaAPI.setAttribute(backButton, "onclick", async () => {
+        await huopaAPI.deleteElement(mainScreenDiv);
+        await mainScreen();
+    });
 
     const dockDockedDiv = await huopaAPI.createElement("div");
     const dockDockedTitle = await huopaAPI.createElement("p");

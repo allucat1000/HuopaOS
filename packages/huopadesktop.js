@@ -6,9 +6,6 @@ window.huopadesktop = (() => {
     const version = "0.8.0";
     // Priv Sys Funcs
 
-    const isSafeHTML = (html) => {
-        return !/(<script|on\w+=|javascript:)/i.test(html);
-    }
     const mainInstaller = async () => {
         try {
                     await sys.import("quantum");
@@ -202,16 +199,19 @@ const createRoturLoginWindow = async (app) => {
             await sys.addLine("If you don't have any custom scripts or the issue is still occurring, please report this issue to me (for example through the HuopaOS Github).");
             await sys.addLine("### Reboot the system to load into HuopaDesktop or the terminal (hold down \"C\" to load into the terminal).");
     }
-    function importStylesheet(cssContent, id = null) {
+    function importStylesheet(content, dataURL = false) {
         const linkElement = quantum.document.createElement('link');
-
         linkElement.rel = 'stylesheet';
-        linkElement.type = 'text/css';
-        const encodedCssContent = encodeURIComponent(cssContent);
-        linkElement.href = `data:text/css;charset=utf-8,${encodedCssContent}`;
-        if (id) {
-            linkElement.id = id;
+        if (!dataURL) {
+            linkElement.href = content;
+        } else {
+            linkElement.type = 'text/css';
+            const encodedContent = encodeURIComponent(content);
+            linkElement.href = `data:text/css;charset=utf-8,${encodedContent}`;
         }
+        
+        
+
         quantum.document.head.appendChild(linkElement);
 
         return linkElement;
@@ -1203,12 +1203,13 @@ const createRoturLoginWindow = async (app) => {
             const mainDiv = quantum.document.getElementById("termDiv");
             mainDiv.innerHTML = "";
             const desktop = quantum.document.createElement("div");
-            importStylesheet(await internalFS.getFile("/system/env/systemStyles.css"));
+            importStylesheet(await internalFS.getFile("/system/env/systemStyles.css"), true);
+            importStylesheet("https://fonts.googleapis.com/css?family=Figtree", false)
             const dock = quantum.document.createElement("div");
             const wallpaperChosen = await internalFS.getFile("/system/env/systemconfig/settings/customization/wallpaperchosen.txt");
             const imageData = await internalFS.getFile(wallpaperChosen);
             quantum.document.body.style.margin = "0";
-            desktop.style = `width: 100%; height: 100%; background-image: url(${imageData}); background-size: cover; background-position: center; font-family: sans-serif; opacity: 0; transition: 0.2s;`;
+            desktop.style = `width: 100%; height: 100%; background-image: url(${imageData}); background-size: cover; background-position: center; font-family: sans-serif; opacity: 0; transition: 0.2s; font-family: "Figtree", sans-serif;`;
             quantum.document.body.style.userSelect = "none";
             desktop.id = "desktop";
             mainDiv.append(desktop);
