@@ -56,7 +56,7 @@ if (response.ok) {
                 if (update && await huopaAPI.getFile("/home/applications/" + appName)) {
                     await huopaAPI.setAttribute(installButton, "textContent", "Update");
                 } else {
-                    await huopaAPI.setAttribute(installButton, "textContent", "Install");
+                    await huopaAPI.setAttribute(installButton, "innerHTML", "Install");
                 }
             }
             
@@ -72,6 +72,14 @@ if (response.ok) {
                         await huopaAPI.writeFile("/home/applications/" + appName, "file", code);
                         await huopaAPI.safeStorageWrite(appName + "/version.txt", "file", appArray.version)
                         await huopaAPI.setAttribute(installButton, "textContent", "Uninstall");
+                        if (appArray.icon) {
+                            const response = await huopaAPI.fetch("https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/AppStore/" + appName + ".icon");
+                            if (response.ok) {
+                                await huopaAPI.writeFile("/home/applications/" + appName + ".icon", "file", response.body);
+                            } else {
+                                await huopaAPI.error("Failed to fetch app icon!")
+                            }
+                        }
                         installState = true;
                     } else {
                         await huopaAPI.setAttribute(installButton, "textContent", "Failed to install!");

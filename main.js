@@ -349,11 +349,10 @@ const internalFS = {
     } else {
       throw new Error("Unknown path type: " + type);
     }
-
+    if (path.endsWith(".icon")) return;
     const parentPath = parts.slice(0, -1).join("/") || "/";
     const parentData = await internalFS.getFile(parentPath) || "[]";
     if (parentPath === "/" && path === parentPath) return;
-
     try {
       const parentList = JSON.parse(parentData);
       if (!parentList.includes(path)) {

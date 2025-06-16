@@ -3,8 +3,12 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "0.7.3";
+    const version = "0.8.0";
     // Priv Sys Funcs
+
+    const isSafeHTML = (html) => {
+        return !/(<script|on\w+=|javascript:)/i.test(html);
+    }
     const mainInstaller = async () => {
         try {
                     await sys.import("quantum");
@@ -25,7 +29,15 @@ window.huopadesktop = (() => {
                 await sys.addLine("Boot config created!");
                 await sys.addLine("Attempting to install example app...")
                 await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaDesktop/Settings.js`, "/home/applications/Settings.js");
+                if (!await internalFS.getFile("/home/applications/Settings.js.icon")) {
+                    await internalFS.createPath("/home/applications/Settings.js.icon", "file", `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings-icon lucide-settings"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>`);
+                }
+                
                 await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaDesktop/App%20Store.js`, "/home/applications/App Store.js");
+                if (!await internalFS.getFile("/home/applications/App Store.js.icon")) {
+                    await internalFS.createPath("/home/applications/App Store.js.icon", "file", `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-cart-icon lucide-shopping-cart"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>`);
+                }
+                
                 await sys.addLine("[line=blue]Downloading and installing wallpapers...[/line]")
                 let wallpaper1Success;
                 let wallpaper2Success;
@@ -460,10 +472,10 @@ const createRoturLoginWindow = async (app) => {
 
     const huopaAPIMap = new WeakMap();
 
-    const runApp = async (appId, appCodeString) => {
+    const runApp = async (appId, appCodeString, appPath) => {
         if (killSwitch) return;
 
-        const container = await createAppContainer(appId);
+        const container = await createAppContainer(appId, appPath);
         const handlers = huopaAPIHandlers(container);
 
         const huopaAPI = new Proxy({}, {
@@ -562,7 +574,7 @@ const createRoturLoginWindow = async (app) => {
             },
 
             warn: function(msg) {
-                console.error(`[APP WARN]: ${msg}`);
+                console.warn(`[APP WARN]: ${msg}`);
             },
 
             container: appContainer,
@@ -611,16 +623,31 @@ const createRoturLoginWindow = async (app) => {
                 });
             },
 
+            setOnInput: function(id) {
+                const el = elementRegistry[id];
+                if (!el) return;
+
+                el.addEventListener("input", () => {
+                    sandboxWindow.postMessage({
+                        type: "event",
+                        event: "input",
+                        elementId: id
+                    }, "*");
+                });
+            },
+
             getFile: function(path, permissions) {
                 if (path.startsWith("/system/env/appconfig")) {
-                    console.warn("[huopaAPI SAFETY]: App tried reading in safeStorage using default read command!")
+                    console.warn("[huopaAPI SAFETY]: App tried reading in safeStorage using default read command!");
+                    return "[HuopaDesktop FS Security]: No permissions";
                 }
                 return internalFS.getFile(path, permissions);
             },
 
             deleteFile: function(path, permissions) {
                 if (path.startsWith("/system/env/appconfig")) {
-                    console.warn("[huopaAPI SAFETY]: App tried deleting file in safeStorage using default delete command!")
+                    console.warn("[huopaAPI SAFETY]: App tried deleting file in safeStorage using default delete command!");
+                    return "[HuopaDesktop FS Security]: No permissions";
                 }
                 return internalFS.delDir(path, permissions);
             },
@@ -631,7 +658,8 @@ const createRoturLoginWindow = async (app) => {
                 "modify":"",
             }) {
                 if (path.startsWith("/system/env/appconfig")) {
-                    console.warn("[huopaAPI SAFETY]: App tried writing in safeStorage using default write command!")
+                    console.warn("[huopaAPI SAFETY]: App tried writing in safeStorage using default write command!");
+                    return "[HuopaDesktop FS Security]: No permissions";
                 }
                 return internalFS.createPath(path, type, content, permissions);
             },
@@ -735,9 +763,19 @@ const createRoturLoginWindow = async (app) => {
                 if (type === "onclick") {
                     setOnClick(id);
                     return;
+                } else if (type === "oninput") {
+                    setOnInput(id);
+                    return;
+                } else if (type.toLowerCase() === "innerhtml") {
+                    try {
+                        el[type] = DOMPurify.sanitize(content);
+                    } catch (e) {
+                        console.error("[huopaAPI RUN ERROR] Error with setting innerHTML");
+                        console.error("Error: " + e);
+                    }
                 } else {
                     try {
-                    el[type] = content;
+                        el[type] = content;
                     } catch (e) {
                         console.error("[huopaAPI RUN ERROR] Error with setting attribute: " + type);
                         console.error("Error: " + e);
@@ -782,16 +820,28 @@ const createRoturLoginWindow = async (app) => {
 
             safeStorageWrite: async(data, appId) => {
                 if (!appId) { console.warn("No app ID inputted for SafeStorageWrite. Call cancelled."); return;}
-                await internalFS.createPath("/system/env/appconfig/"+ appId + "/" + data[0], data[1], data[2], `"${appId}"`);
+                await internalFS.createPath("/system/env/appconfig/"+ appId.replace(".js", "") + "/" + data[0], data[1], data[2], `"${appId}"`);
             },
 
             safeStorageRead: async(path, appId) => {
                 if (!appId) { console.warn("No app ID inputted for SafeStorageRead. Call cancelled."); return;}
-                return await internalFS.getFile("/system/env/appconfig/"+ appId + "/" + path);
+                return await internalFS.getFile("/system/env/appconfig/"+ appId.replace(".js", "") + "/" + path);
+            },
+
+            runApp: async(path) => {
+                if (!path || !path.endsWith(".js")) {
+                    if (!path) {
+                        console.warn("No path given for app execution. Request cancelled.");
+                        return;
+                    } else {
+                        console.warn("File not correct type or is directory. Request cancelled.");
+                        return;
+                    }
+                }
+                const appName = path.split("/").pop().slice(0, -3);
+                const code = await internalFS.getFile(path);
+                await runApp(appName, code, path);
             }
-
-
-
 
 
         };
@@ -919,7 +969,7 @@ const createRoturLoginWindow = async (app) => {
         }
     }
 
-    const createAppContainer = async (appId) => {
+    const createAppContainer = async (appId, appPath) => {
         const outerContainer = quantum.document.createElement("div");
         const winSpawnX = window.innerWidth / 2;
         const blur = await internalFS.getFile("/system/env/systemconfig/settings/customization/bgblur.txt");
@@ -949,7 +999,22 @@ const createRoturLoginWindow = async (app) => {
             background: rgba(0, 0, 0, 0);
             z-index: ${appZIndex + 1};
             padding-bottom: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            align-content: flex-start;
         `;
+        const appIcon = quantum.document.createElement("img");
+        appIcon.style.marginLeft = "0.75em";
+        const appIconSrc = await internalFS.getFile(appPath + ".icon");
+        if (!appIconSrc) {
+            const defaultSVG = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-code-icon lucide-file-code"><path d="M10 12.5 8 15l2 2.5"/><path d="m14 12.5 2 2.5-2 2.5"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/></svg>
+            `;
+
+            appIcon.src = `data:image/svg+xml;utf8,${encodeURIComponent(defaultSVG)}`;
+        } else {
+            appIcon.src = "data:image/svg+xml;utf8," + encodeURIComponent(appIconSrc);
+        }
         const appTitle = quantum.document.createElement("h3");
         appTitle.textContent = appId.replace(/\.js$/, "");;
         appTitle.style = "font-family: sans-serif; margin: 0.5em;"
@@ -958,20 +1023,7 @@ const createRoturLoginWindow = async (app) => {
         container.className = "app-container";
         container.style = `width: 100%; height: calc(100% - 33px); overflow: auto; position: relative;`;
         const closeButton = quantum.document.createElement("button");
-        closeButton.innerHTML = `
-            <?xml version="1.0" encoding="iso-8859-1"?>
-            <!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
-            <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-            <svg fill="#ffffff" height="15px" width="15px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
-                viewBox="0 0 460.775 460.775" xml:space="preserve">
-            <path d="M285.08,230.397L456.218,59.27c6.076-6.077,6.076-15.911,0-21.986L423.511,4.565c-2.913-2.911-6.866-4.55-10.992-4.55
-                c-4.127,0-8.08,1.639-10.993,4.55l-171.138,171.14L59.25,4.565c-2.913-2.911-6.866-4.55-10.993-4.55
-                c-4.126,0-8.08,1.639-10.992,4.55L4.558,37.284c-6.077,6.075-6.077,15.909,0,21.986l171.138,171.128L4.575,401.505
-                c-6.074,6.077-6.074,15.911,0,21.986l32.709,32.719c2.911,2.911,6.865,4.55,10.992,4.55c4.127,0,8.08-1.639,10.994-4.55
-                l171.117-171.12l171.118,171.12c2.913,2.911,6.866,4.55,10.993,4.55c4.128,0,8.081-1.639,10.992-4.55l32.709-32.719
-                c6.074-6.075,6.074-15.909,0-21.986L285.08,230.397z"/>
-            </svg>
-        `;
+        closeButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-icon lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
         closeButton.style = `
             background: transparent;
             border: none;
@@ -979,7 +1031,7 @@ const createRoturLoginWindow = async (app) => {
             cursor: pointer;
             position: absolute;
             right: 0;
-            top: 0;
+            top: -4px;
         `;
         closeButton.addEventListener("click", () => {
             const codeElem = quantum.document.getElementById(`code-${appId}`);
@@ -993,6 +1045,7 @@ const createRoturLoginWindow = async (app) => {
         topBarSplitter.style = "width: 100%; height: 2px; background-color:rgba(128, 128, 128, 0.5); position: fixed; left: 0; top: 41px;"
         container.id = `app-${appId}`;
         quantum.document.getElementById("desktop").appendChild(outerContainer);
+        titleBar.append(appIcon);
         titleBar.append(appTitle);
         titleBar.appendChild(closeButton);
         outerContainer.append(titleBar);
@@ -1084,14 +1137,30 @@ const createRoturLoginWindow = async (app) => {
             startMenuDiv.append(appListDiv);
             for (let i = 0; i < appList.length; i++) {
                 const appButton = quantum.document.createElement("button");
-                const cleanedAppName = appList[i].replace("/home/applications/", "")
-                appButton.textContent = cleanedAppName.replace(/\.js$/, "");;
-                appButton.style = "color: white; background-color: rgba(45, 45, 45, 0.7); border-color: rgba(105, 105, 105, 0.6); border-style: solid; border-radius: 0.5em; padding: 0.5em; width: 35em; height: 3em; margin: 0.2em 0.5em; text-align: left; cursor: pointer;"
+                const cleanedAppName = appList[i].replace("/home/applications/", "");
+                const appTitle = quantum.document.createElement("p");
+                appTitle.textContent = cleanedAppName.replace(/\.js$/, "");
+                appButton.style = "color: white; background-color: rgba(45, 45, 45, 0.7); border-color: rgba(105, 105, 105, 0.6); border-style: solid; border-radius: 0.5em; padding: 0.5em; width: 35em; height: 3em; margin: 0.2em 0.5em; text-align: left; cursor: pointer; display: flex; flex-wrap: wrap; align-content: flex-start;"
+                const appIcon = quantum.document.createElement("img");
+                appIcon.style = "display: inline; padding-right: 0.2em;"
+                appTitle.style = "display: inline;"
+                const appIconSrc = await internalFS.getFile(appList[i] + ".icon");
+                if (!appIconSrc) {
+                    const defaultSVG = `
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-code-icon lucide-file-code"><path d="M10 12.5 8 15l2 2.5"/><path d="m14 12.5 2 2.5-2 2.5"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/></svg>
+                    `;
+
+                    appIcon.src = `data:image/svg+xml;utf8,${encodeURIComponent(defaultSVG)}`;
+                } else {
+                    appIcon.src = "data:image/svg+xml;utf8," + encodeURIComponent(appIconSrc);
+                }
                 appButton.onclick = async () => {
                     const code = await internalFS.getFile(appList[i]);
-                    await runApp(cleanedAppName, code);
+                    await runApp(cleanedAppName, code, appList[i]);
                     await openStartMenu()
                 };
+                appButton.append(appIcon);
+                appButton.append(appTitle);
                 appListDiv.append(appButton);
             }
             requestAnimationFrame(() => {
@@ -1195,7 +1264,6 @@ const createRoturLoginWindow = async (app) => {
             await waitUntil(() => popupClosed);
             dock.id = "dock";
             const blur = await internalFS.getFile("/system/env/systemconfig/settings/customization/bgblur.txt");
-            console.log(docked)
             if (docked && docked === true) {
                 dock.style = `position: absolute; bottom: 0; width: 100%; height: 4em; background: rgba(30, 30, 30, 0.65); border-top: rgba(65, 65, 65, 0.65) 1.5px solid; border-radius: 0; left: 50%; transform: translateX(-50%); display: flex; align-items: center; border-color: #99999989; z-index: 15000; backdrop-filter: blur(${blur}px);`;
             } else {
@@ -1223,7 +1291,7 @@ const createRoturLoginWindow = async (app) => {
 
                 const loop = () => {
                     const now = new Date();
-                    clockCurrentTime.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}.${pad(now.getSeconds())}`;
+                    clockCurrentTime.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
 
                     let date = now.getDate();
                     let dateEnding = "th";

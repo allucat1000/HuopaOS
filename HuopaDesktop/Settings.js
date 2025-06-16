@@ -29,7 +29,7 @@ async function customizationTabLoad() {
     await huopaAPI.append(mainScreenDiv, title);
 
     const backButton = await huopaAPI.createElement("button");
-    await huopaAPI.setAttribute(backButton, "textContent", "<- Back");
+    await huopaAPI.setAttribute(backButton, "innerHTML", '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left-icon lucide-arrow-left"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>');
     await huopaAPI.setCertainStyle(backButton, "padding", "1em");
     await huopaAPI.setCertainStyle(backButton, "position", "fixed");
     await huopaAPI.setCertainStyle(backButton, "left", "0.5em");
@@ -208,7 +208,6 @@ async function customizationTabLoad() {
     await huopaAPI.setCertainStyle(dockDockedCheckbox, "display", "block");
 
     await huopaAPI.setAttribute(dockDockedCheckbox, "oninput", async () => {
-        await huopaAPI.log("a")
         await huopaAPI.writeFile("/system/env/systemconfig/settings/customization/dockedTaskbar.txt", "file", await huopaAPI.getAttribute(dockDockedCheckbox, "checked"));
     });
 
