@@ -56,7 +56,7 @@ window.terminalcmd = {
         return;
       }
   
-      await internalFS.delDir(path, {"read":"SYSTEM","write":"SYSTEM", "modify":"SYSTEM"}, new Set(), recursive, force)
+      await internalFS.delDir(path, {"read":"SYSTEM","write":"SYSTEM", "modify":"SYSTEM"}, recursive, force, new Set())
       sys.addLine(`[line=green]Deleted: ${path}[/line]`);
   
     } catch (e) {
@@ -87,7 +87,7 @@ async ls(args) {
 
 
     const fileArray = JSON.parse(await internalFS.getFile(path) || "[]");
-    const fileList = fileArray.map(f => f.replace(`${path}/`, "")).join('\n');
+    const fileList = fileArray.map(f => f.replace(`${path}/`, "")).join("\n");
     sys.addLine(`All files in directory: ${path}`);
     sys.addLine(fileList);
     

@@ -231,10 +231,10 @@ textInput.addEventListener('keydown', function(event) {
     const params = textInput.value
         .split(' ')
         .slice(1);
-
+    const replaced = params.map(str => str.replaceAll("+", " "));
     sys.addLine("$ " + textInput.value)
     if (!inputAnswerActive) {
-        callCMD(cmd, params)
+        callCMD(cmd, replaced)
     } else {
         inputAnswer = cmd;
         inputAnswerActive = false
@@ -331,7 +331,6 @@ const internalFS = {
       const currentPerms = JSON.parse(await internalFS.getFile(path + ".perms") || "{\"read\":\"\", \"write\":\"\", \"modify\":\"\"}")
       if (currentPerms.write === (permissions.write || permissions)|| currentPerms.write === "" || permissions.write === "SYSTEM" || !await internalFS.getFile(path + ".perms") || !currentPerms.write && currentPerms === permissions) {
       } else {
-        console.log(currentPerms.write, permissions)
         console.warn("Not right permissions!")
         return "Not right permissions!";
       }
