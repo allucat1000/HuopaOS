@@ -1171,6 +1171,19 @@ const createRoturLoginWindow = async (app) => {
             right: 0;
             top: -4px;
         `;
+        const appBar = quantum.document.getElementById("appBar");
+
+        const appToDock = quantum.document.createElement("div");
+        appToDock.style = "height: 2em; width: 2em; display: flex; align-items: center; justify-content: center; background-color: rgba(75, 75, 75, 0.3); border-radius: 25%; padding: 0.5em; margin-right: 0.5em; cursor: pointer;";
+        const appToDockImg = quantum.document.createElement("img");
+        appToDockImg.style = "border-radius: 0.5em; width: 2em; height: 2em;";
+        appToDockImg.src = appIcon.src;
+        appToDock.append(appToDockImg);
+        appBar.append(appToDock);
+        appToDock.onclick = async() => {
+            appZIndex = appZIndex + 10;
+            outerContainer.style.zIndex = appZIndex;
+        }
         closeButton.addEventListener("click", () => {
             const codeElem = quantum.document.getElementById(`code-${appId}`);
             if (codeElem) {
@@ -1178,7 +1191,9 @@ const createRoturLoginWindow = async (app) => {
             }
             
             outerContainer.remove();
+            appToDock.remove();
         });
+        
         const topBarSplitter = quantum.document.createElement("div");
         topBarSplitter.style = "width: 100%; height: 2px; background-color:rgba(128, 128, 128, 0.5); position: fixed; left: 0; top: 41px;"
         container.id = `app-${appId}`;
@@ -1451,7 +1466,7 @@ const createRoturLoginWindow = async (app) => {
 
             clockDiv.append(clockCurrentTime);
             clockDiv.append(clockCurrentDate);
-            appBar.style = `width: 100%; height: 90%; border-radius: 0.7em;`
+            appBar.style = `width: 100%; height: 90%; border-radius: 0.7em;   display: flex; align-items: center; overflow-x: auto; overflow-y: hidden; position: relative;`
             appBar.id = "appBar";
             await dock.append(startMenuButton);
             await dock.append(appBar);

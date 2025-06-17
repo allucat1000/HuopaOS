@@ -43,6 +43,5 @@ window.quantum = {
         this.initialized = true;
         this.bootTime = Date.now();
 
-        sys.addLine("[line=cyan]Loading Quantum Display Manager...[/line]");
     }
 };

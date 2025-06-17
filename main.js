@@ -231,7 +231,11 @@ textInput.addEventListener('keydown', function(event) {
     const params = textInput.value
         .split(' ')
         .slice(1);
-    const replaced = params.map(str => str.replaceAll("+", " "));
+    
+  const replaced = arr.map(str =>
+    str.replace(/\\@/g, "@")
+      .replace(/(?<!\\)@/g, "#")
+  );
     sys.addLine("$ " + textInput.value)
     if (!inputAnswerActive) {
         callCMD(cmd, replaced)
