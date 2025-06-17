@@ -76,7 +76,7 @@ window.sys = {
   },
 
   async addLine(text) {
-    if (sessionType = "graphical") {
+    if (sessionType === "graphical") {
       console.log(text);
       return;
     }
