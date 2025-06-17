@@ -190,16 +190,21 @@ const createRoturLoginWindow = async (app) => {
         daemonFunc();
     }
     const induceCrash = async (error) => {
-        sessionType = "terminal";
         const mainDiv = quantum.document.getElementById("termDiv");
-            mainDiv.innerHTML = "";
-            await sys.addLine("# [color=red]/!\\ [/color]")
-            await sys.addLine("## [line=red]An unhandled exeption has occurred in HuopaDesktop and the system has been forced to halt.[/line]");
-            await sys.addLine(`## Error: ${error}`);
+            mainDiv.innerHTML = ""
+            await sys.addLine("--/!\\--")
+            await sys.addLine("An unhandled exeption has occurred in HuopaDesktop and the system has been forced to halt.");
+            await sys.addLine(`Error: ${error}`);
             await sys.addLine("Try updating your packages (such as HuopaDesktop) using the command: \"hpkg update\".");
             await sys.addLine("If you still have issues, check if you have any custom scripts for HuopaDesktop. If you do, try booting HuopaDesktop without the scripts.");
             await sys.addLine("If you don't have any custom scripts or the issue is still occurring, please report this issue to me (for example through the HuopaOS Github).");
-            await sys.addLine("### Reboot the system to load into HuopaDesktop or the terminal (hold down \"C\" to load into the terminal).");
+            await sys.addLine("Reboot the system to load into HuopaDesktop or the terminal (hold down \"C\" to load into the terminal).");
+            const errorTitle = quantum.document.createElement("h1");
+            errorTitle.textContent = "/!\\";
+            mainDiv.append(errorTitle);
+            const errorInfo = quantum.document.createElement("h2");
+            errorInfo.textContent = "An unhandled exeption has occurred in HuopaDesktop and the system has been forced to halt. For more info, check the DevTools console.";
+            mainDiv.append(errorInfo);
     }
     function importStylesheet(content, dataURL = false) {
         const linkElement = quantum.document.createElement('link');
@@ -1330,7 +1335,6 @@ const createRoturLoginWindow = async (app) => {
     const createMainGUI = async () => {
         if (killSwitch) return;
         try {
-            sessionType = "graphical";
             docked = await internalFS.getFile("/system/env/systemconfig/settings/customization/dockedTaskbar.txt");
             importLib("https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js");
             const mainDiv = quantum.document.getElementById("termDiv");
