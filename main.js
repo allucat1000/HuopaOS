@@ -21,7 +21,7 @@ if (typeof window === "undefined") {
   console.error("HuopaOS requires a browser with storage capabilities.");
   throw new Error("HuopaOS requires a browser environment.");
 }
-
+let sessionType = "terminal"
 const customColors = {
   red: "#ff5454", 
   green: "#4eff33",
@@ -76,6 +76,10 @@ window.sys = {
   },
 
   async addLine(text) {
+    if (sessionType = "graphical") {
+      console.log(text);
+      return;
+    }
     const newText = preprocessLineTag(text);
     const escapedText = escapeWithBackslashes(newText);
     const coloredText = parseColorsAndBackgrounds(escapedText);
@@ -364,7 +368,7 @@ const internalFS = {
     }
   },
 
-  async delDir(dir, permissions = {"read":"SYSTEM","write":"SYSTEM", "modify":"SYSTEM"}, visited = new Set(), recursive = false, force = false) {
+  async delDir(dir, permissions = {"read":"SYSTEM","write":"SYSTEM", "modify":"SYSTEM"}, recursive = false, force = false, visited = new Set()) {
     if (visited.has(dir)) return;
     visited.add(dir);
 
@@ -385,7 +389,7 @@ const internalFS = {
 
       if (isDir) {
         if (recursive) {
-          await internalFS.delDir(item, permissions, visited, recursive, force);
+          await internalFS.delDir(item, permissions, recursive, force, visited);
         } else {
           if (!force) sys.addLine(`[line=red]Cannot delete directory ${item} without recursive flag[/line]`);
           return;

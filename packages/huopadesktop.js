@@ -190,6 +190,7 @@ const createRoturLoginWindow = async (app) => {
         daemonFunc();
     }
     const induceCrash = async (error) => {
+        sessionType = "terminal";
         const mainDiv = quantum.document.getElementById("termDiv");
             mainDiv.innerHTML = "";
             await sys.addLine("# [color=red]/!\\ [/color]")
@@ -645,12 +646,12 @@ const createRoturLoginWindow = async (app) => {
                 return internalFS.getFile(path, permissions);
             },
 
-            deleteFile: function(path, permissions) {
+            deleteFile: function(path, recursive = true, permissions) {
                 if (path.startsWith("/system/env/appconfig")) {
                     console.warn("[huopaAPI SAFETY]: App tried deleting file in safeStorage using default delete command!");
                     return "[HuopaDesktop FS Security]: No permissions";
                 }
-                return internalFS.delDir(path, permissions);
+                return internalFS.delDir(path, permissions, recursive);
             },
 
             writeFile: function(path, type, content, permissions = {
@@ -842,6 +843,47 @@ const createRoturLoginWindow = async (app) => {
                 const appName = path.split("/").pop().slice(0, -3);
                 const code = await internalFS.getFile(path);
                 await runApp(appName, code, path);
+            },
+
+            addClass: async(id, className) => {
+                const el = elementRegistry[id];
+                if (!el) {
+                    console.warn(`addClass: No element with ID ${id}`);
+                    return;
+                }
+                try {
+                    el.classList.add(className);
+                } catch (error) {
+                    console.error("[huopaAPI RUN ERROR] Error with adding class: " + error);
+                }
+                
+            },
+
+            removeClass: async(id, className) => {
+                const el = elementRegistry[id];
+                if (!el) {
+                    console.warn(`removeClass: No element with ID ${id}`);
+                    return;
+                }
+                try {
+                    el.classList.remove(className);
+                } catch (error) {
+                    console.error("[huopaAPI RUN ERROR] Error with removing class: " + error);
+                }
+            },
+
+            getChildren: async (id) => {
+                const parent = elementRegistry[id];
+                if (!parent) {
+                    console.warn(`getChildren: No element with ID ${id}`);
+                    return [];
+                }
+
+                const children = Object.entries(elementRegistry)
+                    .filter(([_, el]) => el.parentElement === parent)
+                    .map(([childId, _]) => childId);
+
+                return children;
             }
 
 
@@ -1288,6 +1330,7 @@ const createRoturLoginWindow = async (app) => {
     const createMainGUI = async () => {
         if (killSwitch) return;
         try {
+            sessionType = "graphical";
             docked = await internalFS.getFile("/system/env/systemconfig/settings/customization/dockedTaskbar.txt");
             importLib("https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js");
             const mainDiv = quantum.document.getElementById("termDiv");
