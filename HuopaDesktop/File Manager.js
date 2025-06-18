@@ -1,5 +1,12 @@
 let fileListDiv;
 let pathSelected;
+let fileSelectorMode = false;
+let returnId;
+
+if (typeof loadParams === "object" && loadParams.mode === "fileSelector") {
+    fileSelectorMode = true;
+    returnId = loadParams.returnId;
+}
 async function renderFileList(path) {
     if (fileListDiv) {
         await huopaAPI.deleteElement(fileListDiv);
@@ -88,8 +95,20 @@ async function renderFileList(path) {
                         pathSelected = undefined;
                         await huopaAPI.removeClass(fileDiv, "file-selected");
                         await huopaAPI.removeClass(deleteButton, "disable");
+                        
                         if (file.endsWith(".js") && notDir) {
+                            if (fileSelectorMode) {
+                                await huopaAPI.log("a");
+                                await huopaAPI.returnToHost(returnId, file);
+                                return;
+                            }
                             await huopaAPI.runApp(file);
+                        } else if (notDir) {
+                            if (fileSelectorMode) {
+                                await huopaAPI.returnToHost(returnId, file); 
+                                return;
+                            }
+                            await huopaAPI.runApp("/home/applications/Text Editor.js", file);
                         } else {
                             await renderFileList(file)
                         }
@@ -112,32 +131,7 @@ async function renderFileList(path) {
             await huopaAPI.append(fileListDiv, fileDiv);
         }
     } else {
-        const textEditorField = await huopaAPI.createElement("textarea");
-        const code = await huopaAPI.getFile(path) || ""
-        if (code === "[HuopaDesktop FS Security]: No permissions") {
-            const alert = await huopaAPI.createElement("p");
-            await setAttrs(alert, {
-                "textContent":"Not right permissions. Unable to read file.",
-                "style":"color: white; text-align: center;"
-            })
-            await huopaAPI.append(fileListDiv, alert);
-        } else {
-            const saveButton = await huopaAPI.createElement("button");
-            await setAttrs(saveButton, {
-                "innerHTML":'<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-save-icon lucide-save"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/></svg>',
-                "style":"margin: 0.5em; display: inline; opacity: 1; padding: 0.5em;",
-                "onclick": async() => {
-                    await huopaAPI.writeFile(path, "file", await huopaAPI.getAttribute(textEditorField, "value"));
-                }
-            });
-            await huopaAPI.append(topBarList, saveButton)
-            await huopaAPI.setAttribute(textEditorField, "value", code);
-            await huopaAPI.setCertainStyle(textEditorField, "flexGrow", "1");
-            await huopaAPI.setCertainStyle(textEditorField, "width", "95%");
-            await huopaAPI.append(fileListDiv, textEditorField);
-            
-        }
-        
+        await huopaAPI.runApp("/home/applications/Text Editor.js", path);
     }
     
 

@@ -3,7 +3,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "0.8.2";
+    const version = "0.8.3";
     // Priv Sys Funcs
 
     const mainInstaller = async () => {
@@ -38,6 +38,11 @@ window.huopadesktop = (() => {
                 if (!await internalFS.getFile("/home/applications/File Manager.js.icon")) {
                     await internalFS.createPath("/home/applications/File Manager.js.icon", "file", `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder-closed-icon lucide-folder-closed"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/><path d="M2 10h20"/></svg>`);
                 }
+                await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaDesktop/Text%20Editor.js`, "/home/applications/Text Editor.js");
+                if (!await internalFS.getFile("/home/applications/Text Editor.js.icon")) {
+                    await internalFS.createPath("/home/applications/Text Editor.js.icon", "file", `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square-pen-icon lucide-square-pen"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"/></svg>`);
+                }
+                
                 await sys.addLine("[line=blue]Downloading and installing wallpapers...[/line]")
                 let wallpaper1Success;
                 let wallpaper2Success;
@@ -265,7 +270,7 @@ const createRoturLoginWindow = async (app) => {
         return true;
     }
 
-    const runAppSecure = async (appCode, appId) => {
+    const runAppSecure = async (appCode, appId, startParams) => {
         if (killSwitch) return null;
 
         const iframe = quantum.document.createElement('iframe');
@@ -408,6 +413,7 @@ const createRoturLoginWindow = async (app) => {
                                 await huopaAPI.setAttribute(element, key, value);
                             }
                         }
+                        const loadParams = ${JSON.stringify(startParams)};
                         ${safeAppCode}
                     } catch (e) {
                         try {
@@ -481,7 +487,7 @@ const createRoturLoginWindow = async (app) => {
 
     const huopaAPIMap = new WeakMap();
 
-    const runApp = async (appId, appCodeString, appPath) => {
+    const runApp = async (appId, appCodeString, appPath, startData) => {
         if (killSwitch) return;
 
         const container = await createAppContainer(appId, appPath);
@@ -501,7 +507,7 @@ const createRoturLoginWindow = async (app) => {
         });
 
 
-        const iframe = await runAppSecure(appCodeString, appId);
+        const iframe = await runAppSecure(appCodeString, appId, startData);
 
         if (iframe && iframe.contentWindow) {
             huopaAPIMap.set(iframe.contentWindow, huopaAPI);
@@ -511,6 +517,33 @@ const createRoturLoginWindow = async (app) => {
     };
     const elementRegistry = {}
     let elementIdCounter = 0;
+    let _returnCallbacks;
+    const runAppWithReturn = async function(path, param) {
+        if (!path || typeof path !== "string") {
+            throw new Error("runAppWithReturn: invalid path");
+        }
+        let digits = "";
+        for (let i = 0; i < 10; i++) {
+        digits += Math.floor(Math.random() * 10);
+        }
+        const uid = digits;
+        _returnCallbacks ??= {};
+        
+        _returnCallbacks[uid] = "";
+
+        const params = { mode: param, returnId: uid };
+        const code = await internalFS.getFile(path);
+        const normalized = path.replace(/\/+$/, "");
+        const last = normalized.split("/").pop();
+        if (!last) throw new Error(`runAppWithReturn: '${path}' yielded empty filename`);
+
+        const lastSegment = last.replace(/\.js$/, "");
+        await runApp(lastSegment, code, path, params);
+        await waitUntil(() => _returnCallbacks[uid]);
+        const data = _returnCallbacks[uid];
+        delete _returnCallbacks[uid];
+        return data
+    };
 
     const huopaAPIHandlers = (appContainer) => {
 
@@ -799,7 +832,7 @@ const createRoturLoginWindow = async (app) => {
                     return el[type];
                 } catch (error) {
                     console.error("[huopaAPI RUN ERROR] Error with getting attribute: " + type);
-                    console.error("Error: " + e);
+                    console.error("Error: " + error);
                 }
             },
 
@@ -837,7 +870,7 @@ const createRoturLoginWindow = async (app) => {
                 return await internalFS.getFile("/system/env/appconfig/"+ appId.replace(".js", "") + "/" + path);
             },
 
-            runApp: async(path) => {
+            runApp: async(path, startParams) => {
                 if (!path || !path.endsWith(".js")) {
                     if (!path) {
                         console.warn("No path given for app execution. Request cancelled.");
@@ -849,7 +882,7 @@ const createRoturLoginWindow = async (app) => {
                 }
                 const appName = path.split("/").pop().slice(0, -3);
                 const code = await internalFS.getFile(path);
-                await runApp(appName, code, path);
+                await runApp(appName, code, path, startParams);
             },
 
             addClass: async(id, className) => {
@@ -891,8 +924,23 @@ const createRoturLoginWindow = async (app) => {
                     .map(([childId, _]) => childId);
 
                 return children;
-            }
+            },
 
+            openFileDialog: async (options = {}, appName) => {
+                    try {
+                        const data = await runAppWithReturn("/home/applications/File Manager.js", "fileSelector");
+                        return data;
+                    } catch (e) {
+                        throw new Error(e);
+                    }
+
+            },
+
+            returnToHost: function(returnId, data) {
+                if (_returnCallbacks) {
+                    _returnCallbacks[returnId] = (data);
+                }
+            }
 
         };
 
@@ -925,23 +973,24 @@ const createRoturLoginWindow = async (app) => {
                 }
                 
 
-                if (id) {
-                    event.source.postMessage({ type: "apiResponse", id, result: true }, "*");
-                }
-            } else {
-                if (id) {
-                    console.warn(`Element ${elementId} not found in elementRegistry.`);
-                    event.source.postMessage({ type: "apiResponse", id, error: "Element not found" }, "*");
-                }
+            if (id) {
+                event.source.postMessage({ type: "apiResponse", id, result: true }, "*");
             }
-            return;
+        } else {
+            if (id) {
+                console.warn(`Element ${elementId} not found in elementRegistry.`);
+                event.source.postMessage({ type: "apiResponse", id, error: "Element not found" }, "*");
+            }
         }
-        const huopaAPI = huopaAPIMap.get(event.source);
-        if (!huopaAPI || typeof huopaAPI[type] !== "function") {
-            console.warn(`No handler for huopaAPI method '${type}'`);
-            createBugAlertWindow(appId, `Error: No handler for huopaAPI method ${prop}`);
-            return;
-        }
+        return;
+    }
+
+    const huopaAPI = huopaAPIMap.get(event.source);
+    if (!huopaAPI || typeof huopaAPI[type] !== "function") {
+        console.warn(`No handler for huopaAPI method '${type}'`);
+        createBugAlertWindow(appId, `Error: No handler for huopaAPI method ${type}`);
+        return;
+    }
 
         try {
             let result;

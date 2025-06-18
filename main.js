@@ -232,7 +232,7 @@ textInput.addEventListener('keydown', function(event) {
         .split(' ')
         .slice(1);
     
-  const replaced = arr.map(str =>
+  const replaced = params.map(str =>
     str.replace(/\\@/g, "@")
       .replace(/(?<!\\)@/g, "#")
   );
