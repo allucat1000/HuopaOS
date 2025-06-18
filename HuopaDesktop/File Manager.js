@@ -35,36 +35,43 @@ async function renderFileList(path) {
             renderFileList(parentPath);
         });
     }
-    await huopaAPI.setAttribute(deleteButton, "onclick", async() => {
-            if (!pathSelected) {
-                let corePaths = await huopaAPI.getFile("/system/manifest.json");
-                if (corePaths) {
-                    corePaths = JSON.parse(corePaths).corePaths
-                    if (corePaths.includes(path)) {
-                        await huopaAPI.warn("User tried deleting protected path!");
-                        return;
+    if (!fileSelectorMode) {
+  
+        await huopaAPI.setAttribute(deleteButton, "onclick", async() => {
+                if (!pathSelected) {
+                    let corePaths = await huopaAPI.getFile("/system/manifest.json");
+                    if (corePaths) {
+                        corePaths = JSON.parse(corePaths).corePaths
+                        if (corePaths.includes(path)) {
+                            await huopaAPI.warn("User tried deleting protected path!");
+                            return;
+                        }
                     }
+                    await huopaAPI.deleteFile(path)
+                    let parentPath = path.split("/").slice(0, -1).join("/");
+                    if (!parentPath) parentPath = "/";
+                    renderFileList(parentPath);
+                } else {
+                    await huopaAPI.deleteFile(pathSelected)
+                    pathSelected = undefined;
+                    for (const child of await huopaAPI.getChildren(fileListDiv)) {
+                        await huopaAPI.removeClass(child, "file-selected");
+                    }
+                    await huopaAPI.addClass(deleteButton, "disable");
+                    renderFileList(path);
                 }
-                await huopaAPI.deleteFile(path)
-                let parentPath = path.split("/").slice(0, -1).join("/");
-                if (!parentPath) parentPath = "/";
-                renderFileList(parentPath);
-            } else {
-                await huopaAPI.deleteFile(pathSelected)
-                pathSelected = undefined;
-                for (const child of await huopaAPI.getChildren(fileListDiv)) {
-                    await huopaAPI.removeClass(child, "file-selected");
-                }
-                await huopaAPI.addClass(deleteButton, "disable");
-                renderFileList(path);
-            }
+                
             
-        
-    });
+        });
+
+    }
     await huopaAPI.setCertainStyle(backButton, "padding", "0.5em");
     await huopaAPI.setCertainStyle(deleteButton, "padding", "0.5em");
     await huopaAPI.append(topBarList, backButton);
-    await huopaAPI.append(topBarList, deleteButton);
+    if (!fileSelectorMode) {
+        await huopaAPI.append(topBarList, deleteButton);
+    }
+    
     const currentPathTitle = await huopaAPI.createElement("p");
     await huopaAPI.setAttribute(currentPathTitle, "style", "color: white; display: inline; text-align: left; margin: 0.5em; font-size: 1.5em;")
     await huopaAPI.setAttribute(currentPathTitle, "textContent", path);
@@ -74,7 +81,9 @@ async function renderFileList(path) {
     const styleTag = await huopaAPI.createElement("style");
     await huopaAPI.setAttribute(styleTag, "textContent", ".file-selected { filter: brightness(1.25); } .disabled { opacity: 0.5; } ");
     await huopaAPI.appendToApp(styleTag);
-    await huopaAPI.addClass(deleteButton, "disable");
+    if (!fileSelectorMode) {
+        await huopaAPI.addClass(deleteButton, "disable");
+    }
     const match = path.match(/\.[a-zA-Z0-9]+$/);
     if (await isDir(path) && !match) {
         let perms = true;
@@ -94,7 +103,9 @@ async function renderFileList(path) {
                     if (pathSelected === file) {
                         pathSelected = undefined;
                         await huopaAPI.removeClass(fileDiv, "file-selected");
-                        await huopaAPI.removeClass(deleteButton, "disable");
+                        if (!fileSelectorMode) {
+                            await huopaAPI.removeClass(deleteButton, "disable");
+                        }
                         
                         if (file.endsWith(".js") && notDir) {
                             if (fileSelectorMode) {
@@ -117,7 +128,10 @@ async function renderFileList(path) {
                         for (const child of await huopaAPI.getChildren(fileListDiv)) {
                             await huopaAPI.removeClass(child, "file-selected");
                         }
-                        await huopaAPI.addClass(deleteButton, "disable");
+                        if (!fileSelectorMode) {
+                            await huopaAPI.addClass(deleteButton, "disable");
+                        }
+                        
                         await huopaAPI.addClass(fileDiv, "file-selected");
                         pathSelected = file;
                     }
