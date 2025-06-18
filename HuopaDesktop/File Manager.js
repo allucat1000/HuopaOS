@@ -99,12 +99,14 @@ async function renderFileList(path) {
                         if (file.endsWith(".js") && notDir) {
                             if (fileSelectorMode) {
                                 await huopaAPI.returnToHost(returnId, file);
+                                await huopaAPI.closeApp();
                                 return;
                             }
                             await huopaAPI.runApp(file);
                         } else if (notDir) {
                             if (fileSelectorMode) {
                                 await huopaAPI.returnToHost(returnId, file); 
+                                await huopaAPI.closeApp();
                                 return;
                             }
                             await huopaAPI.runApp("/home/applications/Text Editor.js", file);

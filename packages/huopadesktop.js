@@ -3,7 +3,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "0.8.3";
+    const version = "0.8.4";
     // Priv Sys Funcs
 
     const mainInstaller = async () => {
@@ -270,12 +270,13 @@ const createRoturLoginWindow = async (app) => {
         return true;
     }
 
-    const runAppSecure = async (appCode, appId, startParams) => {
+    const runAppSecure = async (appCode, appId, startParams, container) => {
         if (killSwitch) return null;
 
         const iframe = quantum.document.createElement('iframe');
         iframe.id = `code-${appId}`;
-
+        const digits = container.parentElement.id;  
+        iframe.dataset.digitId = digits;
         iframe.sandbox = "allow-scripts";
         iframe.style.display = "none";
         quantum.document.body.appendChild(iframe);
@@ -507,7 +508,7 @@ const createRoturLoginWindow = async (app) => {
         });
 
 
-        const iframe = await runAppSecure(appCodeString, appId, startData);
+        const iframe = await runAppSecure(appCodeString, appId, startData, container);
 
         if (iframe && iframe.contentWindow) {
             huopaAPIMap.set(iframe.contentWindow, huopaAPI);
@@ -546,7 +547,7 @@ const createRoturLoginWindow = async (app) => {
     };
 
     const huopaAPIHandlers = (appContainer) => {
-
+        console.log(appContainer);
         
         return {
             createElement: function(tag) {
@@ -936,12 +937,25 @@ const createRoturLoginWindow = async (app) => {
 
             },
 
-            returnToHost: function(returnId, data) {
+            returnToHost: (returnId, data) => {
                 if (_returnCallbacks) {
                     _returnCallbacks[returnId] = (data);
                 }
-            }
+            },
 
+            closeApp: () => {
+                const digitId = appContainer.parentElement.id;
+                const codeElem = quantum.document.querySelector(`[data-digit-9d="${digitId}"]`);
+                if (codeElem) {
+                    codeElem.remove();
+                }
+                appContainer.parentElement.remove();
+                const appToDock = quantum.document.querySelector(`[data-dock-digit-id="${digitId}"]`);
+                if (appToDock) {
+                    appToDock.remove();
+                }
+            }
+ 
         };
 
     };
@@ -1229,7 +1243,12 @@ const createRoturLoginWindow = async (app) => {
         appToDockImg.draggable = "false";
         appToDockImg.style = "border-radius: 0.5em; width: 2em; height: 2em; user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;";
         appToDockImg.src = appIcon.src;
+        let digits = "";
+        for (let i = 0; i < 10; i++) {
+            digits += Math.floor(Math.random() * 10);
+        }
         appToDock.append(appToDockImg);
+        appToDock.dataset.dockDigitId = digits;
         appBar.append(appToDock);
         appToDock.onclick = async() => {
             appZIndex = appZIndex + 10;
@@ -1244,9 +1263,11 @@ const createRoturLoginWindow = async (app) => {
             outerContainer.remove();
             appToDock.remove();
         });
-        
+
         const topBarSplitter = quantum.document.createElement("div");
         topBarSplitter.style = "width: 100%; height: 2px; background-color:rgba(128, 128, 128, 0.5); position: fixed; left: 0; top: 41px;"
+
+        outerContainer.id = digits;
         container.id = `app-${appId}`;
         quantum.document.getElementById("desktop").appendChild(outerContainer);
         titleBar.append(appIcon);
