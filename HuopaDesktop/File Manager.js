@@ -98,7 +98,6 @@ async function renderFileList(path) {
                         
                         if (file.endsWith(".js") && notDir) {
                             if (fileSelectorMode) {
-                                await huopaAPI.log("a");
                                 await huopaAPI.returnToHost(returnId, file);
                                 return;
                             }

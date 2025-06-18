@@ -21,7 +21,7 @@ if (code === "[HuopaDesktop FS Security]: No permissions") {
         "textContent":"Not right permissions. Unable to read file.",
         "style":"color: white; text-align: center;"
     })
-    await huopaAPI.append(fileListDiv, alert);
+    await huopaAPI.appendToApp(alert);
 } else {
     const saveButton = await huopaAPI.createElement("button");
     await setAttrs(saveButton, {
