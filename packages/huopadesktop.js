@@ -1191,7 +1191,8 @@ const createRoturLoginWindow = async (app) => {
             align-content: flex-start;
         `;
         const appIcon = quantum.document.createElement("img");
-        appIcon.style.marginLeft = "0.75em";
+        appIcon.draggable = "false";
+        appIcon.style = "margin-left: 0.75em; user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;";
         const appIconSrc = await internalFS.getFile(appPath + ".icon");
         if (!appIconSrc) {
             const defaultSVG = `
@@ -1225,7 +1226,8 @@ const createRoturLoginWindow = async (app) => {
         const appToDock = quantum.document.createElement("div");
         appToDock.style = "height: 2em; width: 2em; display: flex; align-items: center; justify-content: center; background-color: rgba(75, 75, 75, 0.3); border-radius: 25%; padding: 0.5em; margin-right: 0.5em; cursor: pointer;";
         const appToDockImg = quantum.document.createElement("img");
-        appToDockImg.style = "border-radius: 0.5em; width: 2em; height: 2em;";
+        appToDockImg.draggable = "false";
+        appToDockImg.style = "border-radius: 0.5em; width: 2em; height: 2em; user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;";
         appToDockImg.src = appIcon.src;
         appToDock.append(appToDockImg);
         appBar.append(appToDock);
@@ -1345,7 +1347,8 @@ const createRoturLoginWindow = async (app) => {
                 appTitle.textContent = cleanedAppName.replace(/\.js$/, "");
                 appButton.style = "color: white; background-color: rgba(45, 45, 45, 0.7); border-color: rgba(105, 105, 105, 0.6); border-style: solid; border-radius: 0.5em; padding: 0.5em; width: 35em; height: 3em; margin: 0.2em 0.5em; text-align: left; cursor: pointer; display: flex; flex-wrap: wrap; align-content: flex-start;"
                 const appIcon = quantum.document.createElement("img");
-                appIcon.style = "display: inline; padding-right: 0.2em;"
+                appIcon.draggable = "false";
+                appIcon.style = "display: inline; padding-right: 0.2em; user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;"
                 appTitle.style = "display: inline;"
                 const appIconSrc = await internalFS.getFile(appList[i] + ".icon");
                 if (!appIconSrc) {

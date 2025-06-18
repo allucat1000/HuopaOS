@@ -34,7 +34,7 @@ if (code === "[HuopaDesktop FS Security]: No permissions") {
     await huopaAPI.appendToApp(saveButton)
     await huopaAPI.setAttribute(textEditorField, "value", code);
     await huopaAPI.setCertainStyle(textEditorField, "height", "calc(100% - 83px)");
-    await huopaAPI.setCertainStyle(textEditorField, "width", "95%");
+    await huopaAPI.setCertainStyle(textEditorField, "width", "calc(100% - 17px)");
     const currentPathTitle = await huopaAPI.createElement("p");
     await huopaAPI.setAttribute(currentPathTitle, "style", "color: white; display: inline; text-align: left; margin: 0.5em; font-size: 1.5em; margin-top: 1em;")
     await huopaAPI.setAttribute(currentPathTitle, "textContent", path);
