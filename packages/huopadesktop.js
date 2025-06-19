@@ -3,7 +3,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "0.9.4";
+    const version = "0.9.5";
     // Priv Sys Funcs
 
     const mainInstaller = async () => {
@@ -85,25 +85,33 @@ window.huopadesktop = (() => {
                 if (!await internalFS.getFile("/system/env/systemconfig/settings/customization/dockedTaskbar.txt")) {
                     await internalFS.createPath("/system/env/systemconfig/settings/customization/dockedTaskbar.txt", "file", false)
                 }
-                const styleDownloadSuccess = await new Promise(async (resolve, reject) => {
-                    try {
-                        const response = await fetch(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaDesktop/_systemStyles.css`);
-                        if (response.ok) {
-                            const text = await response.text();
-                            await internalFS.createPath("/system/env/systemStyles.css", "file", text);
-                            resolve(true);
-                        } else {
-                            console.error("Failed to fetch styles! Response: " + response.status);
-                            resolve(false);
+                const skipStyles = await internalFS.getFile("/system/env/noStyleUpdate.txt");
+                if (!skipStyles) {
+                    await internalFS.createPath("/system/env/noStyleUpdate.txt", "file", "false");
+                }
+                let styleDownloadSuccess
+                if (!skipStyles || skipStyles !== "true" ) {
+                    styleDownloadSuccess = await new Promise(async (resolve, reject) => {
+                        try {
+                            const response = await fetch(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaDesktop/_systemStyles.css`);
+                            if (response.ok) {
+                                const text = await response.text();
+                                await internalFS.createPath("/system/env/systemStyles.css", "file", text);
+                                resolve(true);
+                            } else {
+                                console.error("Failed to fetch styles! Response: " + response.status);
+                                resolve(false);
+                            }
+                        } catch (e) {
+                            console.error("Error during style download:", e);
+                            reject(e);
+
                         }
-                    } catch (e) {
-                        console.error("Error during style download:", e);
-                        reject(e);
+                    });
+                }
+                
 
-                    }
-                });
-
-                if (styleDownloadSuccess) {  
+                if (styleDownloadSuccess || skipStyles === "true") {  
                     await sys.addLine("Styles fetched and installed!")                
                     await internalFS.runUnsandboxed(bootConfig.path);
                     await new Promise(resolve => setTimeout(resolve, 500));
