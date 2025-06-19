@@ -547,7 +547,6 @@ const createRoturLoginWindow = async (app) => {
     };
 
     const huopaAPIHandlers = (appContainer) => {
-        console.log(appContainer);
         
         return {
             createElement: function(tag) {
@@ -945,7 +944,7 @@ const createRoturLoginWindow = async (app) => {
 
             closeApp: () => {
                 const digitId = appContainer.parentElement.id;
-                const codeElem = quantum.document.querySelector(`[data-digit-9d="${digitId}"]`);
+                const codeElem = quantum.document.querySelector(`[data-digit-id="${digitId}"]`);
                 if (codeElem) {
                     codeElem.remove();
                 }
@@ -954,6 +953,12 @@ const createRoturLoginWindow = async (app) => {
                 if (appToDock) {
                     appToDock.remove();
                 }
+            },
+
+            setTitle: (content) => {
+                const digitId = appContainer.parentElement.id;
+                const title = quantum.document.querySelector(`[data-title-digit-id="${digitId}"]`);
+                title.textContent = content;
             }
  
         };
@@ -1271,6 +1276,7 @@ const createRoturLoginWindow = async (app) => {
         container.id = `app-${appId}`;
         quantum.document.getElementById("desktop").appendChild(outerContainer);
         titleBar.append(appIcon);
+        appTitle.dataset.titleDigitId = digits;
         titleBar.append(appTitle);
         titleBar.appendChild(closeButton);
         outerContainer.append(titleBar);

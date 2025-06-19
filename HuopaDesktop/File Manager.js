@@ -4,6 +4,7 @@ let fileSelectorMode = false;
 let returnId;
 
 if (typeof loadParams === "object" && loadParams.mode === "fileSelector") {
+    await huopaAPI.setTitle("File Selector - Choose a file");
     fileSelectorMode = true;
     returnId = loadParams.returnId;
 }
