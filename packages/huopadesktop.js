@@ -3,7 +3,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "0.9.0";
+    const version = "0.9.1";
     // Priv Sys Funcs
 
     const mainInstaller = async () => {
@@ -1199,22 +1199,13 @@ const createRoturLoginWindow = async (app) => {
         const blur = await internalFS.getFile("/system/env/systemconfig/settings/customization/bgblur.txt");
         const opacity = await internalFS.getFile("/system/env/systemconfig/settings/customization/bgopac.txt");
         const borderColor = await internalFS.getFile("/system/env/systemconfig/settings/customization/windowbordercolor.txt");
-        outerContainer.style = `
-            position: absolute;
-            width: 700px;
-            height: 500px;
-            top: 100px;
-            left: ${winSpawnX}px;
-            overflow: hidden;
-            border: 2px solid ${borderColor};
-            border-radius: 0.5em;
-            background: rgba(30, 30, 30, ${opacity});
-            margin: 0;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.15s ease, transform 0.15s ease;
-            backdrop-filter: blur(${blur}px);
-        `;
+        outerContainer.class = "appContainer";
+
+        outerContainer.style.left = `${winSpawnX}px`;
+        outerContainer.style.border = `border: 2px solid ${borderColor}`;
+        outerContainer.style.backgroundColor = `rgba(30, 30, 30, ${opacity})`;
+        outerContainer.style.backdropFilter = `blur(${blur}px)`;
+
         const resizers = [
             { dir: 'top',    cursor: 'ns-resize',   style: { top: '-2px', left: '0', width: '100%', height: '5px' }},
             { dir: 'right',  cursor: 'ew-resize',   style: { top: '0', right: '-2px', width: '5px', height: '100%' }},
