@@ -976,6 +976,28 @@ const createRoturLoginWindow = async (app) => {
                 title.textContent = content;
             },
 
+            playAudio: (url) => {
+                if (typeof url !== "string") throw new Error("Content must be a string!");
+                const appId = appContainer.parentElement.id;
+                const existing = document.querySelector(`audio[data-app-id="${appId}"]`);
+                if (existing) {
+                    existing.src = url;
+                    existing.play();
+                    return;
+                }
+
+                const audio = document.createElement("audio");
+                audio.src = url;
+                audio.controls = true;
+                audio.autoplay = true;
+                audio.dataset.appId = appId;
+                audio.display = "none";
+                audio.style.zIndex = "9999";
+                appContainer.appendChild(audio);
+
+                return;
+            }
+
  
         };
 

@@ -86,20 +86,35 @@ async function createPostSendDiv() {
                     const post = response.body[0];
                     const postDiv = await huopaAPI.createElement("div");
                     const author = await huopaAPI.createElement("h3");
+                    const pfp = await huopaAPI.createElement("img");
+                    await setAttrs(pfp, {
+                        "src":"https://avatars.rotur.dev/" + post.user,
+                        "style":"border-radius: 50%; width: 1.5em; height: 1.5em;"
+                    })
                     const postContent = await huopaAPI.createElement("p");
 
                     await huopaAPI.setAttribute(author, "textContent", post.user);
                     await huopaAPI.setAttribute(postContent, "textContent", post.content);
-
-                    await huopaAPI.append(postDiv, author);
+                    const userBar = await huopaAPI.createElement("div");
+                    await huopaAPI.setAttribute(userBar, "style", "display: flex; align-items: center; margin: 0; margin-bottom: 1em;");
+                    await huopaAPI.append(userBar, pfp);
+                    await huopaAPI.append(userBar, author);
+                    await huopaAPI.append(postDiv, userBar);
                     await huopaAPI.append(postDiv, postContent);
 
                     await huopaAPI.setAttribute(
                         postDiv,
                         "style",
-                        "margin: 1em; border-radius: 0.5em; background-color: rgba(65, 65, 65, 0.5); border-style: solid; border-color: rgba(105, 105, 105, 0.65); text-align: left; color: white; padding: 1em;"
+                        "margin: 1em; border-radius: 0.5em; background-color: rgba(65, 65, 65, 0.5); border-style: solid; border-color: rgba(105, 105, 105, 0.65); text-align: left; color: white; padding: 1em; overflow: hidden; position: relative;"
                     );
-                    await huopaAPI.setCertainStyle(author, "margin", "0 0 1em 0");
+                    await huopaAPI.setCertainStyle(author, "margin", "0 0.5em");
+                    await huopaAPI.setCertainStyle(author, "paddingBottom", "0.15em");
+                    const osSendInfo = await huopaAPI.createElement("p");
+                    if (post.os) {
+                        await huopaAPI.setAttribute(osSendInfo, "style", "position: absolute; right: 0.5em; top: 0.5em; color: rgba(255, 255, 255, 0.3); text-align: right; font-size: 0.5em;");
+                        await huopaAPI.setAttribute(osSendInfo, "textContent", post.os);
+                        await huopaAPI.append(postDiv, osSendInfo);
+                    }
                     await huopaAPI.prepend(postList, postDiv);
                 }
             } else {
@@ -122,12 +137,20 @@ if (response.ok) {
         for (const post of feed) {
             const postDiv = await huopaAPI.createElement("div");
             const author = await huopaAPI.createElement("h3");
+            const pfp = await huopaAPI.createElement("img");
+            await setAttrs(pfp, {
+                "src":"https://avatars.rotur.dev/" + post.user,
+                "style":"border-radius: 50%; width: 1.5em; height: 1.5em;"
+            })
             const postContent = await huopaAPI.createElement("p");
 
             await huopaAPI.setAttribute(author, "textContent", post.user);
             await huopaAPI.setAttribute(postContent, "textContent", post.content);
-
-            await huopaAPI.append(postDiv, author);
+            const userBar = await huopaAPI.createElement("div");
+            await huopaAPI.setAttribute(userBar, "style", "display: flex; align-items: center; margin: 0; margin-bottom: 1em;");
+            await huopaAPI.append(userBar, pfp);
+            await huopaAPI.append(userBar, author);
+            await huopaAPI.append(postDiv, userBar);
             await huopaAPI.append(postDiv, postContent);
 
             await huopaAPI.setAttribute(
@@ -135,7 +158,8 @@ if (response.ok) {
                 "style",
                 "margin: 1em; border-radius: 0.5em; background-color: rgba(65, 65, 65, 0.5); border-style: solid; border-color: rgba(105, 105, 105, 0.65); text-align: left; color: white; padding: 1em; overflow: hidden; position: relative;"
             );
-            await huopaAPI.setCertainStyle(author, "margin", "0 0 1em 0");
+            await huopaAPI.setCertainStyle(author, "margin", "0 0.5em");
+            await huopaAPI.setCertainStyle(author, "paddingBottom", "0.15em");
             const osSendInfo = await huopaAPI.createElement("p");
             if (post.os) {
                 await huopaAPI.setAttribute(osSendInfo, "style", "position: absolute; right: 0.5em; top: 0.5em; color: rgba(255, 255, 255, 0.3); text-align: right; font-size: 0.5em;");
