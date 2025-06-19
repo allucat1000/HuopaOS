@@ -3,7 +3,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "0.9.2";
+    const version = "0.9.3";
     // Priv Sys Funcs
 
     const mainInstaller = async () => {
@@ -1201,8 +1201,8 @@ const createRoturLoginWindow = async (app) => {
         const borderColor = await internalFS.getFile("/system/env/systemconfig/settings/customization/windowbordercolor.txt");
         outerContainer.classList.add("appContainer");
         outerContainer.style.left = `${winSpawnX}px`;
-        outerContainer.style.border = `2px solid ${borderColor}`;
-        outerContainer.style.backgroundColor = `rgba(30, 30, 30, ${opacity})`;
+        outerContainer.style.borderColor = borderColor;
+        outerContainer.style.backgroundColor = `${outerContainer.style.backgroundColor.slice(0, -1)}, ${opacity})`;
         outerContainer.style.backdropFilter = `blur(${blur}px)`;
 
         const resizers = [

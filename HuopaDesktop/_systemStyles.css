@@ -167,7 +167,8 @@ input[type="checkbox"]:checked {
   height: 500px;
   top: 100px;
   overflow: hidden;
-  border-radius: 0.5em;
+  background-color: rgba(35, 35, 35);
+  border: 2px solid #fff;
   margin: 0;
   opacity: 0;
   transform: translateY(20px);
