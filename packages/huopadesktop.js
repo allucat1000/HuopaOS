@@ -801,7 +801,22 @@ const createRoturLoginWindow = async (app) => {
             setAttribute: async(id, type, content) => {
                 const el = elementRegistry[id];
                 if (!el) return;
+                if (el.tagName.toLowerCase() === "iframe" && type.toLowerCase() === "src") {
+                    if (!typeof content) {
+                        console.warn("[huopaAPI SAFETY] Invalid content type.");
+                        return;
+                    }
 
+                    // Currently for safety reasons, only http(s) content is allowed in iFrames
+
+                    if (content.startsWith("http://") || content.startsWith("https://")) {
+                        el.src = content;
+                        return;
+                    } else {
+                        console.warn("[huopaAPI SAFETY] Currently only http(s) content is allowed to be rendered in an iFrame");
+                        return;
+                    }
+                }
                 if (type === "onclick") {
                     setOnClick(id);
                     return;
@@ -959,7 +974,8 @@ const createRoturLoginWindow = async (app) => {
                 const digitId = appContainer.parentElement.id;
                 const title = quantum.document.querySelector(`[data-title-digit-id="${digitId}"]`);
                 title.textContent = content;
-            }
+            },
+
  
         };
 
@@ -968,6 +984,9 @@ const createRoturLoginWindow = async (app) => {
 
     window.addEventListener("message", async (event) => {
         if (killSwitch) return;
+        if (!event.source || !huopaAPIMap.has(event.source)) {
+            return;
+        }
         const { type, data, id, appId} = event.data || {};
         if (event.data?.type === "iframeError") {
             console.error("[APP ERROR]:", event.data);
