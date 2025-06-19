@@ -3,7 +3,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "0.8.4";
+    const version = "0.9.0";
     // Priv Sys Funcs
 
     const mainInstaller = async () => {
@@ -1349,24 +1349,6 @@ const createRoturLoginWindow = async (app) => {
             if (!startMenuDiv) {
                 startMenuDiv = quantum.document.createElement("div");
                 startMenuDiv.id = "startMenuDiv";
-                startMenuDiv.style.cssText = `
-                    width: 30em;
-                    height: 385px;
-                    background: rgba(30, 30, 30, 0.65);
-                    position: absolute;
-                    border-radius: 1em;
-                    border: 2.5px;
-                    border-style: solid;
-                    border-color: #99999989;
-                    left: 3%;
-                    bottom: 7.5em;
-                    opacity: 0;
-                    transform: translateY(10px);
-                    transition: opacity 0.3s ease, transform 0.3s ease;
-                    z-index: 99999;
-                    backdrop-filter: blur(2px);
-                    padding: 0.25em;
-                `;
                 if (docked) {
                     startMenuDiv.style.left = "1.5%";
                     startMenuDiv.style.bottom = "5em";
@@ -1540,10 +1522,15 @@ const createRoturLoginWindow = async (app) => {
             dock.id = "dock";
             const blur = await internalFS.getFile("/system/env/systemconfig/settings/customization/bgblur.txt");
             if (docked && docked === true) {
-                dock.style = `position: absolute; bottom: 0; width: 100%; height: 4em; background: rgba(30, 30, 30, 0.65); border-top: rgba(65, 65, 65, 0.65) 1.5px solid; border-radius: 0; left: 50%; transform: translateX(-50%); display: flex; align-items: center; border-color: #99999989; z-index: 15000; backdrop-filter: blur(${blur}px);`;
-            } else {
-                dock.style = `position: absolute; bottom: 20px; width: 96%; height: 4em; background: rgba(30, 30, 30, 0.65); border: rgba(65, 65, 65, 0.65) 1.5px solid; border-radius: 2em; left: 50%; transform: translateX(-50%); display: flex; align-items: center; border-color: #99999989; z-index: 15000; backdrop-filter: blur(${blur}px);`;
+                dock.style.width = "100%";
+                dock.style.bottom = "0";
+                dock.style.border = "";
+                dock.style.borderStyle = "none";  
+                dock.style.borderTop = "rgba(65, 65, 65, 0.65) 1.5px solid";   
+                dock.style.borderRadius = "0";
+
             }
+            dock.style.backdropFilter = `bluck(${blur}px)`;
             
 
             await desktop.append(dock);

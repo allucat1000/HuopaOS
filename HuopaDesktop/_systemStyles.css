@@ -135,3 +135,28 @@ input[type="checkbox"]:checked {
   background-color: rgba(60, 160, 20, 0.5);
   border-color: rgba(90, 190, 50, 0.65);
 }
+
+/* Many system elements */
+
+#dock {
+  position: absolute; bottom: 20px; width: 96%; height: 4em; background: rgba(30, 30, 30, 0.65); border: rgba(65, 65, 65, 0.65) 1.5px solid; border-radius: 2em; left: 50%; transform: translateX(-50%); display: flex; align-items: center; border-color: #99999989; z-index: 15000;
+}
+
+#startMenuDiv {
+  width: 30em;
+  height: 385px;
+  background: rgba(30, 30, 30, 0.65);
+  position: absolute;
+  border-radius: 1em;
+  border: 2.5px;
+  border-style: solid;
+  border-color: #99999989;
+  left: 3%;
+  bottom: 7.5em;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  z-index: 99999;
+  backdrop-filter: blur(2px);
+  padding: 0.25em;
+}
