@@ -987,14 +987,14 @@ const createRoturLoginWindow = async (app) => {
             playAudio: (url) => {
                 if (typeof url !== "string") throw new Error("Content must be a string!");
                 const appId = appContainer.parentElement.id;
-                const existing = document.querySelector(`audio[data-app-id="${appId}"]`);
+                const existing = quantum.document.querySelector(`audio[data-app-id="${appId}"]`);
                 if (existing) {
                     existing.src = url;
                     existing.play();
                     return;
                 }
 
-                const audio = document.createElement("audio");
+                const audio = quantum.document.createElement("audio");
                 audio.src = url;
                 audio.controls = true;
                 audio.autoplay = true;
@@ -1004,6 +1004,16 @@ const createRoturLoginWindow = async (app) => {
                 appContainer.appendChild(audio);
 
                 return;
+            },
+
+            stopAudio: () => {
+                const appId = appContainer.parentElement.id;
+                const audio = quantum.document.querySelector(`audio[data-app-id="${appId}"]`);
+                if (!audio) {
+                    console.warn("stopAudio: No audio element found!");
+                    return
+                }
+                audio.remove();
             }
 
  
