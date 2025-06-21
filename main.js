@@ -580,20 +580,20 @@ async function callCMD(input, params) {
         
         for (let i = 0; i < packageList.length; i++) {
           if (packageList[i].endsWith(".config")) return;
-          const oldManifest = await internalFS.getFile(`${packageList[i]}.config`);
+          let oldManifest = await internalFS.getFile(`${packageList[i]}.config`);
           let updatePackage = false;
           const manifestFetch = await fetch(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/packages/${packageList[i].replace("/system/packages/","")}.config?v=${Date.now()}`);
           if (manifestFetch.ok) {
             let data = await manifestFetch.text()
+            data = JSON.parse(data);
             if (oldManifest) {
               if (data?.version && data.version > oldManifest.version) {
                 await internalFS.createPath(`/system/packages/${data.name}.js.config`, "file", data);
                 updatePackage = true;
               }
             } else {
-            
-              data = JSON.parse(data);
               await internalFS.createPath(`/system/packages/${data.name}.js.config`, "file", data);
+              updatePackage = true;
             }
           } else {
               console.error("Failed to fetch package manifest file!");
