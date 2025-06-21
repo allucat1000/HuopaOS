@@ -18,7 +18,7 @@ if (code === "[HuopaDesktop FS Security]: No permissions") {
     const alert = await huopaAPI.createElement("p");
     await setAttrs(alert, {
         "textContent":"Not right permissions. Unable to read file.",
-        "style":"color: white; text-align: center;"
+        "style":"color: white; text-align: center; margin: 1em;"
     })
     await huopaAPI.appendToApp(alert);
 } else {
@@ -47,8 +47,9 @@ if (code === "[HuopaDesktop FS Security]: No permissions") {
     await huopaAPI.setCertainStyle(textEditorField, "height", "calc(100% - 83px)");
     await huopaAPI.setCertainStyle(textEditorField, "width", "calc(100% - 17px)");
     const currentPathTitle = await huopaAPI.createElement("p");
-    await huopaAPI.setAttribute(currentPathTitle, "style", "color: white; display: inline; text-align: left; margin: 0.5em; font-size: 1.5em; margin-top: 1em;")
-    await huopaAPI.setAttribute(currentPathTitle, "textContent", path);
+    await huopaAPI.setAttribute(currentPathTitle, "style", "color: white; display: inline; text-align: left; margin: 0.5em; font-size: 1em; margin-top: 1.15em;");
+    const dynamicPath = path.split("/").pop();
+    await huopaAPI.setAttribute(currentPathTitle, "textContent", dynamicPath);
     await huopaAPI.appendToApp(currentPathTitle);
 
     await huopaAPI.appendToApp(textEditorField);

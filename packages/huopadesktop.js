@@ -1299,7 +1299,7 @@ const createRoturLoginWindow = async (app) => {
         }
         const appTitle = quantum.document.createElement("h3");
         appTitle.textContent = appId.replace(/\.js$/, "");;
-        appTitle.style = "font-family: sans-serif; margin: 0.5em;"
+        appTitle.style = "font-family: sans-serif; margin: 0.5em; font-weight: normal"
         titleBar.className = "titlebar";
         const container = quantum.document.createElement("div");
         container.className = "app-container";

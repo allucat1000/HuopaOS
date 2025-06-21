@@ -196,12 +196,10 @@ const termDiv = document.getElementById("termDiv");
 let inputAnswerActive = false;
 let keysLocked = false;
 let inputAnswer = undefined;
-sys.addLine("## Booting system...")
-sys.addLine("### [color=rgb(100, 175, 255)]HuopaOS [/color] beta build.")
-sys.addLine("### Made by [color=rgb(100, 175, 255)]Allucat1000.[/color]")
-sys.addLine("Thank you for trying this demo! If you have any suggestions or bugs, make sure to let me know!")
+sys.addLine("## Booting system...");
+sys.addLine("### Made by [color=rgb(100, 175, 255)]Allucat1000.[/color]");
 sys.addLine("Use the \"hpkg install\" to install a package. \n Make sure to update your packages often using \"hpkg update\".")
-const currentVer = "0.4.0"
+const currentVer = "0.5.0"
 const verBranch = "main";
 if (verBranch === "dev") {
   sys.addLine("### [line=yellow]Hold up![/line]")
@@ -813,7 +811,7 @@ async function bootMGR() {
           
     await sys.addLine(`[line=green]${packageAmount} package(s) found[/line]`)
     if (packageAmount > 0) {
-      await sys.addLine("### Package loading available. Use the command \"listpkgs\" to view your packages.")
+      await sys.addLine("### Package loading available. Use the command \"hpkg list\" to view your packages.")
     }
     await new Promise(resolve => setTimeout(resolve, 500));
     keysLocked = false;
