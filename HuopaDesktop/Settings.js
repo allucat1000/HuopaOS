@@ -90,10 +90,7 @@ async function wallpapersTabLoad() {
 
     const backButton = await huopaAPI.createElement("button");
     await huopaAPI.setAttribute(backButton, "innerHTML", '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left-icon lucide-arrow-left"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>');
-    await huopaAPI.setCertainStyle(backButton, "padding", "1em");
-    await huopaAPI.setCertainStyle(backButton, "position", "fixed");
-    await huopaAPI.setCertainStyle(backButton, "left", "0.5em");
-    await huopaAPI.setCertainStyle(backButton, "bottom", "0.5em");
+    await huopaAPI.setAttribute(backButton, "style", "padding: 1em; position: fixed; left: 0.5em; bottom: 0.5em; display: flex; width: 45px; height: 45px; align-items: center; justify-content: center;");
 
     await huopaAPI.append(mainScreenDiv, backButton);
     await huopaAPI.setAttribute(backButton, "onclick", async () => {
@@ -182,10 +179,7 @@ async function customizationTabLoad() {
 
     const backButton = await huopaAPI.createElement("button");
     await huopaAPI.setAttribute(backButton, "innerHTML", '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left-icon lucide-arrow-left"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>');
-    await huopaAPI.setCertainStyle(backButton, "padding", "1em");
-    await huopaAPI.setCertainStyle(backButton, "position", "fixed");
-    await huopaAPI.setCertainStyle(backButton, "left", "0.5em");
-    await huopaAPI.setCertainStyle(backButton, "bottom", "0.5em");
+    await huopaAPI.setAttribute(backButton, "style", "padding: 1em; position: fixed; left: 0.5em; bottom: 0.5em; display: flex; width: 45px; height: 45px; align-items: center; justify-content: center;");
 
     await huopaAPI.append(mainScreenDiv, backButton);
     await huopaAPI.setAttribute(backButton, "onclick", async () => {
@@ -281,11 +275,7 @@ async function dockTabLoad() {
 
     const backButton = await huopaAPI.createElement("button");
     await huopaAPI.setAttribute(backButton, "innerHTML", '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left-icon lucide-arrow-left"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>');
-    await huopaAPI.setCertainStyle(backButton, "padding", "1em");
-    await huopaAPI.setCertainStyle(backButton, "position", "fixed");
-    await huopaAPI.setCertainStyle(backButton, "left", "0.5em");
-    await huopaAPI.setCertainStyle(backButton, "bottom", "0.5em");
-
+    await huopaAPI.setAttribute(backButton, "style", "padding: 1em; position: fixed; left: 0.5em; bottom: 0.5em; display: flex; width: 45px; height: 45px; align-items: center; justify-content: center;");
     await huopaAPI.append(mainScreenDiv, backButton);
     await huopaAPI.setAttribute(backButton, "onclick", async () => {
         await huopaAPI.deleteElement(mainScreenDiv);

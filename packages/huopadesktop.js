@@ -3,7 +3,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "0.9.8";
+    const version = "0.9.9";
     // Priv Sys Funcs
     const dataURIToBlob = async (dataURI) => {
         const [meta, base64Data] = dataURI.split(',');
@@ -201,7 +201,7 @@ const createRoturLoginWindow = async (app) => {
                 
                 if (data.error) {
                     resultText.textContent = "Failed to login to Rotur! Error: " + data.error;
-                    return reject(data.error); // reject only, don't throw after
+                    return reject(data.error);
                 }
 
                 resultText.textContent = "Logged into Rotur! You may close this window.";
