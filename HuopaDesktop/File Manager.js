@@ -37,7 +37,6 @@ async function renderFileList(path) {
         });
     }
     if (!fileSelectorMode) {
-  
         await huopaAPI.setAttribute(deleteButton, "onclick", async() => {
                 if (!pathSelected) {
                     let corePaths = await huopaAPI.getFile("/system/manifest.json");
@@ -64,10 +63,16 @@ async function renderFileList(path) {
                 
             
         });
-
     }
-    await huopaAPI.setCertainStyle(backButton, "padding", "0.5em");
-    await huopaAPI.setCertainStyle(deleteButton, "padding", "0.5em");
+    const buttonCss = async (button) => {
+        await huopaAPI.setCertainStyle(button, "width", "30px");
+        await huopaAPI.setCertainStyle(button, "height", "30px");
+        await huopaAPI.setCertainStyle(button, "padding", "0.5em");
+    }
+
+    await buttonCss(backButton);
+    await buttonCss(deleteButton);
+
     await huopaAPI.append(topBarList, backButton);
     if (!fileSelectorMode) {
         await huopaAPI.append(topBarList, deleteButton);
