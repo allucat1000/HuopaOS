@@ -170,9 +170,6 @@ async function renderFileList(path) {
     } else {
         await huopaAPI.runApp("/home/applications/Preview.js", path);
     }
-    
-
-
 }
 
 async function isDir(path) {
@@ -201,8 +198,5 @@ async function isDir(path) {
         return false;
     }
 }
-
-
-
 
 renderFileList("/");
