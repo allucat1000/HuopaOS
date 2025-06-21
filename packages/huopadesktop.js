@@ -1674,7 +1674,7 @@ const createRoturLoginWindow = async (app) => {
                 console.error(`Failed to initialize Quantum. Error: ${e}`);
                 return;
             }
-            if (false) {
+            if (true) {
                 await importLib("https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js");
                 await new Promise(resolve => setTimeout(resolve, 500));
                 const code = await internalFS.getFile("/system/packages/huopadesktop.js");
