@@ -3,7 +3,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "0.9.9";
+    const version = "0.9.91";
     // Priv Sys Funcs
     const dataURIToBlob = async (dataURI) => {
         const [meta, base64Data] = dataURI.split(',');
@@ -1237,15 +1237,18 @@ const createRoturLoginWindow = async (app) => {
         const borderColor = await internalFS.getFile("/system/env/systemconfig/settings/customization/windowbordercolor.txt");
         outerContainer.classList.add("appContainer");
         outerContainer.style.left = `${winSpawnX}px`;
+        outerContainer.style.display = "none";
+        quantum.document.getElementById("desktop").appendChild(outerContainer);
         const computed = getComputedStyle(outerContainer);
         outerContainer.style.borderColor = borderColor;
         const baseColor = computed.backgroundColor;
-        const rgbaMatch = baseColor.match(/rgba?\((\d+), (\d+), (\d+)/);
+        console.log(`basecolor: ${baseColor}`);
+        const rgbaMatch = baseColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
         if (rgbaMatch) {
             const [_, r, g, b] = rgbaMatch;
+            console.log(`rgba(${r}, ${g}, ${b}, ${opacity})`)
             outerContainer.style.backgroundColor = `rgba(${r}, ${g}, ${b}, ${opacity})`;
         }
-        outerContainer.style.backgroundColor = `${outerContainer.style.backgroundColor.replace(";","").slice(0, -1)}, ${opacity});`;
 
         outerContainer.style.backdropFilter = `blur(${blur}px)`;
 
@@ -1349,7 +1352,6 @@ const createRoturLoginWindow = async (app) => {
 
         outerContainer.id = digits;
         container.id = `app-${appId}`;
-        quantum.document.getElementById("desktop").appendChild(outerContainer);
         titleBar.append(appIcon);
         appTitle.dataset.titleDigitId = digits;
         titleBar.append(appTitle);
@@ -1357,6 +1359,7 @@ const createRoturLoginWindow = async (app) => {
         outerContainer.append(titleBar);
         container.append(topBarSplitter);
         outerContainer.append(container);
+        outerContainer.style.display = "block";
         createDraggableWindow(outerContainer);
 
         requestAnimationFrame(() => {
