@@ -93,11 +93,26 @@ async function renderFileList(path) {
         
         for (const file of fileList) {
             const fileDiv = await huopaAPI.createElement("div");
-            await huopaAPI.setAttribute(fileDiv, "style", "width: calc(100% - 20px); background-color: rgba(65, 65, 65, 0.5); margin: 0em auto; border-radius: 0.5em; cursor: pointer; border: rgba(105, 105, 105, 0.65) 2.5px solid; margin: 0.25em;");
-            const fileName = await huopaAPI.createElement("p");
+            await huopaAPI.setAttribute(fileDiv, "style", "width: calc(100% - 20px); background-color: rgba(65, 65, 65, 0.5); margin: 0em auto; border-radius: 0.5em; border: rgba(105, 105, 105, 0.65) 2.5px solid; margin: 0.25em; display: flex; cursor: pointer;");
+            const fileName = await huopaAPI.createElement("label");
             const dynamicFilePath = file.replace(path + "/", "")
+            const fileIcon = await huopaAPI.createElement("img");
+            let fileIconSrc;
+            if (file.endsWith(".js")) {
+                fileIconSrc = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-code-icon lucide-file-code"><path d="M10 12.5 8 15l2 2.5"/><path d="m14 12.5 2 2.5-2 2.5"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/></svg>';
+            } else if (file.endsWith(".json")) {
+                fileIconSrc = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-json-icon lucide-file-json"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 12a1 1 0 0 0-1 1v1a1 1 0 0 1-1 1 1 1 0 0 1 1 1v1a1 1 0 0 0 1 1"/><path d="M14 18a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1 1 1 0 0 1-1-1v-1a1 1 0 0 0-1-1"/></svg>';
+            } else if (file.endsWith(".png") || file.endsWith(".jpg") || file.endsWith(".jpeg") || file.endsWith(".webp")){
+                fileIconSrc = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-image-icon lucide-file-image"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><circle cx="10" cy="12" r="2"/><path d="m20 17-1.296-1.296a2.41 2.41 0 0 0-3.408 0L9 22"/></svg>'
+            } else if (isDir(file)) {
+                fileIconSrc = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder-icon lucide-folder"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>';
+            } else {
+                fileIconSrc = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-icon lucide-file"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>';
+            }
+            await huopaAPI.setAttribute(fileIcon, "src", "data:image/svg+xml;utf8," + encodeURIComponent(fileIconSrc));
+            await huopaAPI.setAttribute(fileIcon, "style", "display: inline; margin: 0 0.5em; width: 16px");
             await huopaAPI.setAttribute(fileName, "textContent", dynamicFilePath.startsWith("/") ? dynamicFilePath.slice(1) : dynamicFilePath);
-            await huopaAPI.setAttribute(fileName, "style", "color: white; display: block; text-align: left; padding: 0.6em;");
+            await huopaAPI.setAttribute(fileName, "style", "color: white; display: block; text-align: left; padding: 0.6em 0; cursor: pointer;");
             if (perms) {
                 const notDir = !await isDir(file)
                 await huopaAPI.setAttribute(fileDiv, "onclick", async () => {
@@ -142,7 +157,7 @@ async function renderFileList(path) {
                 await huopaAPI.setCertainStyle(fileDiv, "opacity", "0.5");
             }
             
-
+            await huopaAPI.append(fileDiv, fileIcon);
             await huopaAPI.append(fileDiv, fileName);
             await huopaAPI.append(fileListDiv, fileDiv);
         }

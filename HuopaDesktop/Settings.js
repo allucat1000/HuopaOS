@@ -1,6 +1,7 @@
 mainScreen();
 
 async function mainScreen() {
+    await huopaAPI.setTitle("Settings");
     const mainScreenDiv = await huopaAPI.createElement("div");
     const title = await huopaAPI.createElement("h1");
     await huopaAPI.setAttribute(title, "textContent", "Settings");
@@ -9,7 +10,18 @@ async function mainScreen() {
     await huopaAPI.append(mainScreenDiv, title);
 
     const wallpapersTab = await huopaAPI.createElement("button");
-    await huopaAPI.setAttribute(wallpapersTab, "textContent", "Wallpapers");
+
+    const wallpapersTabIcon = await huopaAPI.createElement("img");
+    const wTabIconSrc = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-wallpaper-icon lucide-wallpaper"><circle cx="8" cy="9" r="2"/><path d="m9 17 6.1-6.1a2 2 0 0 1 2.81.01L22 15V5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>';
+    await huopaAPI.setAttribute(wallpapersTabIcon, "style", "margin-right: 0.33em;")
+    await huopaAPI.setAttribute(wallpapersTabIcon, "src", "data:image/svg+xml;utf8," + encodeURIComponent(wTabIconSrc));
+    const wTabLabel = await huopaAPI.createElement("label");
+    await huopaAPI.setAttribute(wTabLabel, "textContent", "Wallpapers")
+    await huopaAPI.append(wallpapersTab, wallpapersTabIcon);
+    await huopaAPI.append(wallpapersTab, wTabLabel);
+    await huopaAPI.setCertainStyle(wallpapersTab, "display", "flex");
+    await huopaAPI.setCertainStyle(wallpapersTab, "justifyContent", "center");
+
     await huopaAPI.setCertainStyle(wallpapersTab, "padding", "1.25em");
     await huopaAPI.setCertainStyle(wallpapersTab, "margin", "1em auto");
     await huopaAPI.setCertainStyle(wallpapersTab, "width", "65%");
@@ -21,7 +33,18 @@ async function mainScreen() {
 
 
     const customizationTab = await huopaAPI.createElement("button");
-    await huopaAPI.setAttribute(customizationTab, "textContent", "Customization");
+
+    const customizationTabIcon = await huopaAPI.createElement("img");
+    const cTabIconSrc = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings2-icon lucide-settings-2"><path d="M14 17H5"/><path d="M19 7h-9"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg>';
+    await huopaAPI.setAttribute(customizationTabIcon, "style", "margin-right: 0.2em;")
+    await huopaAPI.setAttribute(customizationTabIcon, "src", "data:image/svg+xml;utf8," + encodeURIComponent(cTabIconSrc));
+    const cTabLabel = await huopaAPI.createElement("label");
+    await huopaAPI.setAttribute(cTabLabel, "textContent", "Customization")
+    await huopaAPI.append(customizationTab, customizationTabIcon);
+    await huopaAPI.append(customizationTab, cTabLabel);
+    await huopaAPI.setCertainStyle(customizationTab, "display", "flex");
+    await huopaAPI.setCertainStyle(customizationTab, "justifyContent", "center");
+
     await huopaAPI.setCertainStyle(customizationTab, "padding", "1.25em");
     await huopaAPI.setCertainStyle(customizationTab, "margin", "1em auto");
     await huopaAPI.setCertainStyle(customizationTab, "width", "65%");
@@ -32,7 +55,18 @@ async function mainScreen() {
     });
 
     const dockTab = await huopaAPI.createElement("button");
-    await huopaAPI.setAttribute(dockTab, "textContent", "Dock");
+
+    const dockTabIcon = await huopaAPI.createElement("img");
+    const dTabIconSrc = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dock-icon lucide-dock"><path d="M2 8h20"/><rect width="20" height="16" x="2" y="4" rx="2"/><path d="M6 16h12"/></svg>';
+    await huopaAPI.setAttribute(dockTabIcon, "style", "margin-right: 0.33em;")
+    await huopaAPI.setAttribute(dockTabIcon, "src", "data:image/svg+xml;utf8," + encodeURIComponent(dTabIconSrc));
+    const dTabLabel = await huopaAPI.createElement("label");
+    await huopaAPI.setAttribute(dTabLabel, "textContent", "Dock")
+    await huopaAPI.append(dockTab, dockTabIcon);
+    await huopaAPI.append(dockTab, dTabLabel);
+    await huopaAPI.setCertainStyle(dockTab, "display", "flex");
+    await huopaAPI.setCertainStyle(dockTab, "justifyContent", "center");
+
     await huopaAPI.setCertainStyle(dockTab, "padding", "1.25em");
     await huopaAPI.setCertainStyle(dockTab, "margin", "1em auto");
     await huopaAPI.setCertainStyle(dockTab, "width", "65%");
@@ -43,6 +77,7 @@ async function mainScreen() {
     });
 }
 async function wallpapersTabLoad() {
+    await huopaAPI.setTitle("Settings — Wallpapers");
     const mainScreenDiv = await huopaAPI.createElement("div");
     const title = await huopaAPI.createElement("h1");
     await huopaAPI.setAttribute(title, "textContent", "Wallpapers");
@@ -104,7 +139,12 @@ async function wallpapersTabLoad() {
             await huopaAPI.writeFile("/system/env/systemconfig/settings/customization/wallpaperchosen.txt", "file", wallpaperPath);
         });
     }
-
+    const iconSrc = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up-from-line-icon lucide-arrow-up-from-line"><path d="m18 9-6-6-6 6"/><path d="M12 3v14"/><path d="M5 21h14"/></svg>';
+    const importImg = await huopaAPI.createElement("img");
+    await huopaAPI.setCertainStyle(importImg, "margin-bottom", "0.25em;")
+    const importText = await huopaAPI.createElement("p");
+    await huopaAPI.setAttribute(importText, "textContent", "Add wallpaper from computer");
+    await huopaAPI.setAttribute(importImg, "src", "data:image/svg+xml;utf8," + encodeURIComponent(iconSrc))
     const importButton = await huopaAPI.createElement("button");
     await huopaAPI.setCertainStyle(importButton, "width", "25%");
     await huopaAPI.setCertainStyle(importButton, "margin", "1em");
@@ -114,7 +154,8 @@ async function wallpapersTabLoad() {
     await huopaAPI.setCertainStyle(importButton, "maxWidth", "200px");
     await huopaAPI.setCertainStyle(importButton, "aspectRatio", "16 / 9");
 
-    await huopaAPI.setAttribute(importButton, "textContent", "Add wallpaper from computer");
+    await huopaAPI.append(importButton, importImg);
+    await huopaAPI.append(importButton, importText);
     await huopaAPI.append(wallpaperListDiv, importButton);
     await huopaAPI.setAttribute(importButton, "onclick", async () => {
         const file = await huopaAPI.openFileImport(".png,.jpg,.webp,.jpeg", "dataURL");
@@ -128,6 +169,7 @@ async function wallpapersTabLoad() {
     await huopaAPI.append(mainScreenDiv, wallpaperListDiv);
 }
 async function customizationTabLoad() {
+    await huopaAPI.setTitle("Settings — Customization");
     const mainScreenDiv = await huopaAPI.createElement("div");
     const title = await huopaAPI.createElement("h1");
     await huopaAPI.setAttribute(title, "textContent", "Customization");
@@ -226,6 +268,7 @@ async function customizationTabLoad() {
 }
 
 async function dockTabLoad() {
+    await huopaAPI.setTitle("Settings — Dock");
     const mainScreenDiv = await huopaAPI.createElement("div");
     const title = await huopaAPI.createElement("h1");
     await huopaAPI.setAttribute(title, "textContent", "Dock");
