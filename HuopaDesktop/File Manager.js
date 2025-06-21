@@ -136,7 +136,7 @@ async function renderFileList(path) {
                                 await huopaAPI.closeApp();
                                 return;
                             }
-                            await huopaAPI.runApp("/home/applications/Text Editor.js", file);
+                            await huopaAPI.runApp("/home/applications/Preview.js", file);
                         } else {
                             await renderFileList(file)
                         }
@@ -162,7 +162,7 @@ async function renderFileList(path) {
             await huopaAPI.append(fileListDiv, fileDiv);
         }
     } else {
-        await huopaAPI.runApp("/home/applications/Text Editor.js", path);
+        await huopaAPI.runApp("/home/applications/Preview.js", path);
     }
     
 
