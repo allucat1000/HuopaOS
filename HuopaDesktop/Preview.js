@@ -9,7 +9,6 @@ if (loadParams) {
     });
     await huopaAPI.appendToApp(chooseTitle);
     path = await huopaAPI.openFileDialog();
-    console.log(path);
     await huopaAPI.deleteElement(chooseTitle);
 }
 
@@ -27,6 +26,7 @@ if (code === "[HuopaDesktop FS Security]: No permissions") {
         const imgPreview = await huopaAPI.createElement("img");
         await huopaAPI.setAttribute(imgPreview, "src", code);
         await huopaAPI.setCertainStyle(imgPreview, "margin", "0 auto");
+        await huopaAPI.setCertainStyle(imgPreview, "display", "block");
         await huopaAPI.setCertainStyle(imgPreview, "borderRadius", "0.5em");
         await huopaAPI.appendToApp(imgPreview);
         return;

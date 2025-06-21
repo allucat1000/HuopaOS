@@ -3,7 +3,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "0.9.7";
+    const version = "0.9.71";
     // Priv Sys Funcs
 
     const mainInstaller = async () => {
