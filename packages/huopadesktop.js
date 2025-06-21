@@ -3,9 +3,23 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "0.9.71";
+    const version = "0.9.8";
     // Priv Sys Funcs
+    const dataURIToBlob = async (dataURI) => {
+        const [meta, base64Data] = dataURI.split(',');
 
+        const mimeMatch = meta.match(/:(.*?);/);
+        const mime = mimeMatch ? mimeMatch[1] : 'application/octet-stream';
+
+        const binary = atob(base64Data);
+
+        const array = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) {
+            array[i] = binary.charCodeAt(i);
+        }
+
+        return new Blob([array], { type: mime });
+    }
     const mainInstaller = async () => {
         try {
                     await sys.import("quantum");
@@ -1475,7 +1489,6 @@ const createRoturLoginWindow = async (app) => {
         if (killSwitch) return;
         try {
             docked = await internalFS.getFile("/system/env/systemconfig/settings/customization/dockedTaskbar.txt");
-            importLib("https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js");
             const mainDiv = quantum.document.getElementById("termDiv");
             mainDiv.innerHTML = "";
             const desktop = quantum.document.createElement("div");
@@ -1483,7 +1496,9 @@ const createRoturLoginWindow = async (app) => {
             importStylesheet("https://fonts.googleapis.com/css?family=Figtree", false)
             const dock = quantum.document.createElement("div");
             const wallpaperChosen = await internalFS.getFile("/system/env/systemconfig/settings/customization/wallpaperchosen.txt");
-            const imageData = await internalFS.getFile(wallpaperChosen);
+            const imageDataURI = await internalFS.getFile(wallpaperChosen);
+            const blob = await dataURIToBlob(imageDataURI);
+            const imageData = URL.createObjectURL(blob);
             quantum.document.body.style.margin = "0";
             desktop.style = `width: 100%; height: 100%; background-image: url(${imageData}); background-size: cover; background-position: center; font-family: sans-serif; opacity: 0; transition: 0.2s; font-family: "Figtree", sans-serif;`;
             quantum.document.body.style.userSelect = "none";
@@ -1555,7 +1570,9 @@ const createRoturLoginWindow = async (app) => {
 
             await desktop.append(dock);
 
-            const huopalogo = await internalFS.getFile("/system/env/assets/huopalogo.png");
+            const huopalogoURI = await internalFS.getFile("/system/env/assets/huopalogo.png");
+            const huopalogoBlob = await dataURIToBlob(huopalogoURI);
+            const huopalogo = URL.createObjectURL(huopalogoBlob);
             const startMenuButton = quantum.document.createElement("button");
             startMenuButton.style = `outline: none; background-image: url(${huopalogo}); background-size: contain; background-repeat: no-repeat; background-position: center; width: 4em; height: 4em; border: none; background-color: transparent; border-radius: 50%; margin: 0.66em; transition: 0.15s;cursor: pointer; transform-origin: center;`;
             const appBar = quantum.document.createElement("div");
@@ -1593,7 +1610,7 @@ const createRoturLoginWindow = async (app) => {
 
             clockDiv.append(clockCurrentTime);
             clockDiv.append(clockCurrentDate);
-            appBar.style = `width: 100%; height: 90%; border-radius: 0.7em;   display: flex; align-items: center; overflow-x: auto; overflow-y: hidden; position: relative;`
+            appBar.style = `width: 100%; height: 90%; border-radius: 0.7em; display: flex; align-items: center; overflow-x: auto; overflow-y: hidden; position: relative;`
             appBar.id = "appBar";
             await dock.append(startMenuButton);
             await dock.append(appBar);
@@ -1634,6 +1651,7 @@ const createRoturLoginWindow = async (app) => {
             }
 
             await sys.addLine("Boot config found! Attempting to boot from specified path.");
+            
             if (!bootConfig.path) {
                 await sys.addLine("Incorrect boot config!");
                 await sys.addLine("Please reinstall HuopaDesktop!");
@@ -1656,6 +1674,24 @@ const createRoturLoginWindow = async (app) => {
                 console.error(`Failed to initialize Quantum. Error: ${e}`);
                 return;
             }
+            if (false) {
+                await importLib("https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js");
+                await new Promise(resolve => setTimeout(resolve, 500));
+                const code = await internalFS.getFile("/system/packages/huopadesktop.js");
+                const checksum = await CryptoJS.MD5(code).toString()
+
+                const response = await fetch(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/packages/huopadesktop.js`);
+                if (response.ok) {
+                    const newCode = await response.text();
+                    const newChecksum = CryptoJS.MD5(newCode).toString();
+                    if (checksum !== newChecksum) {
+                        await internalFS.createPath("/system/packages/huopadesktop.js", "file", newCode);
+                        await mainInstaller();
+                        return;
+                    }
+                }
+            }
+
             await sys.addLine("Loading HuopaDesktop...");
             await new Promise(resolve => setTimeout(resolve, 100));
 

@@ -28,6 +28,9 @@ if (code === "[HuopaDesktop FS Security]: No permissions") {
         await huopaAPI.setCertainStyle(imgPreview, "margin", "0 auto");
         await huopaAPI.setCertainStyle(imgPreview, "display", "block");
         await huopaAPI.setCertainStyle(imgPreview, "borderRadius", "0.5em");
+        await huopaAPI.setCertainStyle(imgPreview, "width", "100%");
+        await huopaAPI.setCertainStyle(imgPreview, "height", "100%");
+        await huopaAPI.setCertainStyle(imgPreview, "objectFit", "contain");
         await huopaAPI.appendToApp(imgPreview);
         return;
     }

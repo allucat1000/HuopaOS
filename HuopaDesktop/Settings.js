@@ -16,9 +16,10 @@ async function mainScreen() {
     await huopaAPI.setAttribute(wallpapersTabIcon, "style", "margin-right: 0.33em;")
     await huopaAPI.setAttribute(wallpapersTabIcon, "src", "data:image/svg+xml;utf8," + encodeURIComponent(wTabIconSrc));
     const wTabLabel = await huopaAPI.createElement("label");
-    await huopaAPI.setAttribute(wTabLabel, "textContent", "Wallpapers")
+    await huopaAPI.setAttribute(wTabLabel, "textContent", "Wallpapers");
     await huopaAPI.append(wallpapersTab, wallpapersTabIcon);
     await huopaAPI.append(wallpapersTab, wTabLabel);
+    await huopaAPI.setCertainStyle(wTabLabel, "cursor", "pointer");
     await huopaAPI.setCertainStyle(wallpapersTab, "display", "flex");
     await huopaAPI.setCertainStyle(wallpapersTab, "justifyContent", "center");
 
@@ -42,6 +43,7 @@ async function mainScreen() {
     await huopaAPI.setAttribute(cTabLabel, "textContent", "Customization")
     await huopaAPI.append(customizationTab, customizationTabIcon);
     await huopaAPI.append(customizationTab, cTabLabel);
+    await huopaAPI.setCertainStyle(cTabLabel, "cursor", "pointer");
     await huopaAPI.setCertainStyle(customizationTab, "display", "flex");
     await huopaAPI.setCertainStyle(customizationTab, "justifyContent", "center");
 
@@ -64,6 +66,7 @@ async function mainScreen() {
     await huopaAPI.setAttribute(dTabLabel, "textContent", "Dock")
     await huopaAPI.append(dockTab, dockTabIcon);
     await huopaAPI.append(dockTab, dTabLabel);
+    await huopaAPI.setCertainStyle(dTabLabel, "cursor", "pointer");
     await huopaAPI.setCertainStyle(dockTab, "display", "flex");
     await huopaAPI.setCertainStyle(dockTab, "justifyContent", "center");
 
