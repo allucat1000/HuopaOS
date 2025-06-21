@@ -624,16 +624,6 @@ async function callCMD(input, params) {
             await sys.addLine(`[line=red]Failed to fetch terminal commands.[/line]`);
             await sys.addLine(`Error: ${e}`);
         }
-      } else if (params[0].toLowerCase() === "list") {
-        const packagesArray = JSON.parse(await internalFS.getFile("/system/packages") || "[]");
-        const cleanedPackages = packagesArray.map(pkg => pkg.replace(/^\/system\/packages\//, ""));
-        const packagesString = cleanedPackages.join(" ");
-
-        if (packagesString) {
-          sys.addLine(`[line=palevioletred]Packages: ${packagesString}[/line]`);
-        } else {
-          sys.addLine("[line=red]No packages installed![/line]");
-        }
       } else {
         sys.addLine(`[line=red]Unknown hPKG command: ${params[0]}[/line]`)
       }
@@ -811,13 +801,6 @@ async function bootMGR() {
       return;
   }
 
-    sys.addLine("Loading packages...")
-    const packageAmount = JSON.parse(await internalFS.getFile("/system/packages") || []).length;
-          
-    await sys.addLine(`[line=green]${packageAmount} package(s) found[/line]`)
-    if (packageAmount > 0) {
-      await sys.addLine("### Package loading available. Use the command \"hpkg list\" to view your packages.")
-    }
     await new Promise(resolve => setTimeout(resolve, 500));
     keysLocked = false;
 
