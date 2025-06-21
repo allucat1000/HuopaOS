@@ -564,11 +564,45 @@ async function callCMD(input, params) {
           return;
         }
         if (params[1].toLowerCase())
-        await internalFS.downloadPackage(params[1].toLowerCase())
+        await internalFS.downloadPackage(params[1].toLowerCase());
+        const manifestFetch = await fetch(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/packages/${params[1].toLowerCase}.js.config?v=${Date.now()}`);
+        if (manifestFetch.ok) {
+          let data = await manifestFetch.text()
+          data = JSON.parse(data);
+          await internalFS.createPath(`/system/packages/${data.name}.js.config`, "file", data);
+        } else {
+          console.error("Failed to fetch package manifest file!");
+          await sys.addLine("[line=red]Failed to fetch package manifest file![/line]")
+        }
+
       } else if (params[0].toLowerCase() === "update") {
         const packageList = JSON.parse(await internalFS.getFile("/system/packages") || []);
+        
         for (let i = 0; i < packageList.length; i++) {
-          await internalFS.downloadPackage(packageList[i].replace("/system/packages/","").replace(".js",""));
+          if (packageList[i].endsWith(".config")) return;
+          const oldManifest = await internalFS.getFile(`${packageList[i]}.config`);
+          let updatePackage = false;
+          const manifestFetch = await fetch(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/packages/${packageList[i].replace("/system/packages/","")}.config?v=${Date.now()}`);
+          if (manifestFetch.ok) {
+            let data = await manifestFetch.text()
+            if (oldManifest) {
+              if (data?.version && data.version > oldManifest.version) {
+                await internalFS.createPath(`/system/packages/${data.name}.js.config`, "file", data);
+                updatePackage = true;
+              }
+            } else {
+            
+              data = JSON.parse(data);
+              await internalFS.createPath(`/system/packages/${data.name}.js.config`, "file", data);
+            }
+          } else {
+              console.error("Failed to fetch package manifest file!");
+              await sys.addLine("[line=red]Failed to fetch package manifest file![/line]")
+          }
+          if (updatePackage === true) {
+            await internalFS.downloadPackage(packageList[i].replace("/system/packages/","").replace(".js",""));
+          }
+          
         }
         try {
             const url = `https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/system/terminalcmd.js?v=${Date.now()}`;
@@ -586,6 +620,16 @@ async function callCMD(input, params) {
         } catch (e) {
             await sys.addLine(`[line=red]Failed to fetch terminal commands.[/line]`);
             await sys.addLine(`Error: ${e}`);
+        }
+      } else if (params[0].toLowerCase() === "list") {
+        const packagesArray = JSON.parse(await internalFS.getFile("/system/packages") || "[]");
+        const cleanedPackages = packagesArray.map(pkg => pkg.replace(/^\/system\/packages\//, ""));
+        const packagesString = cleanedPackages.join(" ");
+
+        if (packagesString) {
+          sys.addLine(`[line=palevioletred]Packages: ${packagesString}[/line]`);
+        } else {
+          sys.addLine("[line=red]No packages installed![/line]");
         }
       } else {
         sys.addLine(`[line=red]Unknown hPKG command: ${params[0]}[/line]`)

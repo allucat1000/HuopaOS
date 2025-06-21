@@ -1277,7 +1277,7 @@ const createRoturLoginWindow = async (app) => {
         titleBar.style = `
             height: 30px;
             width: 100%;
-            background: rgba(0, 0, 0, 0);
+            background: rgba(0, 0, 0, 0.15);
             z-index: ${appZIndex + 1};
             padding-bottom: 12px;
             display: flex;
