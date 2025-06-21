@@ -563,14 +563,19 @@ async function callCMD(input, params) {
         }
         if (params[1].toLowerCase())
         await internalFS.downloadPackage(params[1].toLowerCase());
-        const manifestFetch = await fetch(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/packages/${params[1].toLowerCase}.js.config?v=${Date.now()}`);
+        const manifestFetch = await fetch(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/packages/${params[1].toLowerCase()}.js.config?v=${Date.now()}`);
+        let data
         if (manifestFetch.ok) {
-          let data = await manifestFetch.text()
+          data = await manifestFetch.text()
           data = JSON.parse(data);
           await internalFS.createPath(`/system/packages/${data.name}.js.config`, "file", data);
         } else {
           console.error("Failed to fetch package manifest file!");
-          await sys.addLine("[line=red]Failed to fetch package manifest file![/line]")
+          await sys.addLine("[line=red]Failed to fetch package manifest file![/line]");
+          return
+        }
+        if (data.installcmd) {
+          callCMD(params[1].toLowerCase(), `["${installcmd}"]`);
         }
 
       } else if (params[0].toLowerCase() === "update") {
