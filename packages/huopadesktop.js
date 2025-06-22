@@ -3,7 +3,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "0.9.91";
+    const version = "1.0.0";
     // Priv Sys Funcs
     const dataURIToBlob = async (dataURI) => {
         const [meta, base64Data] = dataURI.split(',');
@@ -1242,11 +1242,9 @@ const createRoturLoginWindow = async (app) => {
         const computed = getComputedStyle(outerContainer);
         outerContainer.style.borderColor = borderColor;
         const baseColor = computed.backgroundColor;
-        console.log(`basecolor: ${baseColor}`);
         const rgbaMatch = baseColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
         if (rgbaMatch) {
             const [_, r, g, b] = rgbaMatch;
-            console.log(`rgba(${r}, ${g}, ${b}, ${opacity})`)
             outerContainer.style.backgroundColor = `rgba(${r}, ${g}, ${b}, ${opacity})`;
         }
 
