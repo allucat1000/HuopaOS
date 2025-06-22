@@ -306,11 +306,6 @@ const createRoturLoginWindow = async (app) => {
         iframe.sandbox = "allow-scripts";
         iframe.style.display = "none";
         quantum.document.body.appendChild(iframe);
-        const safeAppCode = appCode
-        .replace(/\\/g, '\\\\')
-        .replace(/`/g, '\\`')
-        .replace(/\$\{/g, '\\${');
-
         const iframeHTML = `
             <script>
                 const appName = ${JSON.stringify(appId)};
@@ -441,7 +436,9 @@ const createRoturLoginWindow = async (app) => {
                             }
                         }
                         const loadParams = ${JSON.stringify(startParams)};
-                        ${safeAppCode}
+                        const AsyncFunction = Object.getPrototypeOf(async function() {}).constructor;
+                        const fn = new AsyncFunction(${JSON.stringify(appCode)});
+                        await fn();
                     } catch (e) {
                         try {
                             huopaAPI.error?.("Runtime Error: " + e.message);
