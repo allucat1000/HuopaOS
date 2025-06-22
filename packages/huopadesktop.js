@@ -3,7 +3,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "0.9.92";
+    const version = "0.9.93";
     // Priv Sys Funcs
     const dataURIToBlob = async (dataURI) => {
         const [meta, base64Data] = dataURI.split(',');
@@ -436,9 +436,7 @@ const createRoturLoginWindow = async (app) => {
                             }
                         }
                         const loadParams = ${JSON.stringify(startParams)};
-                        const AsyncFunction = Object.getPrototypeOf(async function() {}).constructor;
-                        const fn = new AsyncFunction(${JSON.stringify(appCode)});
-                        await fn();
+                        await eval("(async () => {" + ${JSON.stringify(appCode)} + "})()");
                     } catch (e) {
                         try {
                             huopaAPI.error?.("Runtime Error: " + e.message);
