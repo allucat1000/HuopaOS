@@ -3,7 +3,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "0.9.93";
+    const version = "0.9.94";
     // Priv Sys Funcs
     const dataURIToBlob = async (dataURI) => {
         const [meta, base64Data] = dataURI.split(',');
@@ -38,7 +38,7 @@ window.huopadesktop = (() => {
                 };
                 await internalFS.createPath("/system/env/config.json", "file", JSON.stringify(bootConfig));
                 await sys.addLine("Boot config created!");
-                await sys.addLine("Attempting to install example app...")
+                await sys.addLine("Installing system apps...");
                 await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaDesktop/Settings.js`, "/home/applications/Settings.js");
                 if (!await internalFS.getFile("/home/applications/Settings.js.icon")) {
                     await internalFS.createPath("/home/applications/Settings.js.icon", "file", `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings-icon lucide-settings"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>`);
@@ -60,7 +60,11 @@ window.huopadesktop = (() => {
                     await internalFS.delDir("/home/applications/Text Editor.js");
                     await internalFS.delDir("/home/applications/Text Editor.js.icon");
                 }
-                
+                await sys.addLine("Installing app modules...");
+                const response = await fetch(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaDesktop/huopaAPIModules/rwl.js`);
+                if (response.ok) {
+                    await internalFS.createPath("/system/env/modules/rwl.js", "file", response.text());
+                }
                 await sys.addLine("[line=blue]Downloading and installing wallpapers...[/line]")
                 let wallpaper1Success;
                 let wallpaper2Success;
@@ -1027,6 +1031,16 @@ const createRoturLoginWindow = async (app) => {
                     return
                 }
                 audio.remove();
+            },
+
+            import: async(name) => {
+                const dataRaw = await internalFS.getFile(`/system/env/modules/${name}.js`);
+                const data = data.text()
+                if (data) {
+                    return data;
+                } else {
+                    console.warn(`import: Failed to import module with name: '${name}'.`);
+                }
             }
 
  
@@ -1670,7 +1684,7 @@ const createRoturLoginWindow = async (app) => {
                 console.error(`Failed to initialize Quantum. Error: ${e}`);
                 return;
             }
-            if (true) {
+            if (false) {
                 await importLib("https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js");
                 await new Promise(resolve => setTimeout(resolve, 500));
                 const code = await internalFS.getFile("/system/packages/huopadesktop.js");
