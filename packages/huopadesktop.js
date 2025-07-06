@@ -3,7 +3,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "0.9.94";
+    const version = "0.9.95";
     // Priv Sys Funcs
     const dataURIToBlob = async (dataURI) => {
         const [meta, base64Data] = dataURI.split(',');
@@ -63,7 +63,15 @@ window.huopadesktop = (() => {
                 await sys.addLine("Installing app modules...");
                 const response = await fetch(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaDesktop/huopaAPIModules/rwl.js`);
                 if (response.ok) {
-                    await internalFS.createPath("/system/env/modules/rwl.js", "file", response.text());
+                    const data = await response.text();
+                    await internalFS.createPath("/system/env/modules/rwl.js", "file", data);
+                }
+                const response2 = await fetch("https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaDesktop/moduleSrc/rwlSrc.js");
+                // RWL is mainly made by Flufi (GH: @ThePandaDever).
+                // Integrated into HuopaOS by me, Allucat1000.
+                if (response2.ok) {
+                    const data = await response2.text();
+                    await internalFS.createPath("/system/env/moduleSrc/rwlSrc.js", "file", data);
                 }
                 await sys.addLine("[line=blue]Downloading and installing wallpapers...[/line]")
                 let wallpaper1Success;
@@ -325,7 +333,7 @@ const createRoturLoginWindow = async (app) => {
                     const data = event.data;
                     if (data?.type === "click" && data?.elementId) {
                         const handler = localEventHandlers[data.elementId];
-                        if (handler) handler();
+                        if (handler) handler()
                     } else if (data?.type === "input" && data?.elementId) {
                         const handler = localEventHandlers[data.elementId];
                         if (handler) handler();
@@ -438,6 +446,11 @@ const createRoturLoginWindow = async (app) => {
                             for (const [key, value] of Object.entries(attrs)) {
                                 await huopaAPI.setAttribute(element, key, value);
                             }
+                        }
+                        async function importModule(moduleName) {
+                            const moduleCode = await huopaAPI.getFile("/system/env/modules/" + moduleName.toLowerCase() + ".js");
+                            const module = eval("(() => { " + moduleCode + " })()");
+                            return module;
                         }
                         const loadParams = ${JSON.stringify(startParams)};
                         await eval("(async () => {" + ${JSON.stringify(appCode)} + "})()");
@@ -735,10 +748,20 @@ const createRoturLoginWindow = async (app) => {
             setCertainStyle: function(id, styleName, content) {
                 const el = elementRegistry[id];
                 if (!el) {
+                    console.warn(styleName, content);
                     console.warn(`setCertainStyle: Element with ID: '${id}' not found.`);
                     return;
                 }
                 el.style[styleName] = content;
+            },
+
+            getCertainStyle: function(id, styleName) {
+                const el = elementRegistry[id];
+                if (!el) {
+                    console.warn(`getCertainStyle: Element with ID: '${id}' not found.`);
+                    return;
+                }
+                return el.style[styleName]
             },
 
             openFileImport: async function(accept = "*", type = "text", allowMultiple = false) {
@@ -827,7 +850,7 @@ const createRoturLoginWindow = async (app) => {
                 const el = elementRegistry[id];
                 if (!el) return;
                 if (el.tagName.toLowerCase() === "iframe" && type.toLowerCase() === "src") {
-                    if (!typeof content) {
+                    if (typeof content !== String) {
                         console.warn("[huopaAPI SAFETY] Invalid content type.");
                         return;
                     }
@@ -1033,16 +1056,26 @@ const createRoturLoginWindow = async (app) => {
                 audio.remove();
             },
 
-            import: async(name) => {
-                const dataRaw = await internalFS.getFile(`/system/env/modules/${name}.js`);
-                const data = data.text()
-                if (data) {
-                    return data;
-                } else {
-                    console.warn(`import: Failed to import module with name: '${name}'.`);
+            getRenderedSize: (id, type) => {
+                const el = elementRegistry[id];
+                if (!el) {
+                    console.warn(`getRenderedSize: Element with ID: '${id}' not found.`);
+                    return;
                 }
+                if (type === "height" || type === "width" || type === "top") {
+                    return new Promise(resolve => {
+                        requestAnimationFrame(() => {
+                            const size = el.getBoundingClientRect()[type];
+                            resolve(size);
+                        });
+                    });
+                } else {
+                    console.warn(`getRenderedSize: Invalid type '${type}'`);
+                    return;
+                }
+                            
+                
             }
-
  
         };
 

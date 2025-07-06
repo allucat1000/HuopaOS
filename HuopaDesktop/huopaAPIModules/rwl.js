@@ -1,585 +1,272 @@
+let root;
+let xPointer = "50%";
+let yPointer = "50%";
+let xPointerNum;
+let yPointerNum;
+let anchorX = "c";
+let anchorY = "c";
+let rootEl;
+let lastWindowWidth;
+let lastWindowHeight;
+let frameOrientation = "Horizontal";
+
 return {
-    render: async (code) => {
-        const parsed = parseCode(code);
-        await huopaAPI.log(parsed);
+    render: async(code) => {
+        const rwlSrc = await huopaAPI.getFile("/system/env/moduleSrc/rwlSrc.js");
+        const injectedCodeLine = `const injectedCode = ${JSON.stringify(code)};\n`;
+        const fullSrc = injectedCodeLine + rwlSrc;
+        const dataURL = "data:text/javascript;charset=utf-8," + convToDataURL(fullSrc);
+
+        const scriptEl = await huopaAPI.createElement("script");
+        await huopaAPI.setAttribute(scriptEl, "type", "module");
+        await huopaAPI.setAttribute(scriptEl, "src", dataURL);
+        await huopaAPI.appendToApp(scriptEl);
+        const module = await import(dataURL);
+        await renderElemSetup(module.parseData.data);
+        lastWindowWidth = await huopaAPI.getRenderedSize(rootEl, "width");
+        lastWindowHeight = await huopaAPI.getRenderedSize(rootEl, "height");
     }
 }
 
-function parseCode(code) {
-    function split(text, type, name) {
-        let text2 = text.split("\n").filter(t => t !== "").join("\n");
-        text = text.trim();
-        const tokens = [];
-        let current = "";
-
-        let curlyDepth = 0,
-            squareDepth = 0;
-        let hasSplit = false;
-        let inSingle = false,
-            inDouble = false,
-            inTick = false;
+function convToDataURL(source) {
+  return encodeURIComponent(source);
+}
+async function renderElemSetup(rawData) {
+    if (rawData) {
+        const data = JSON.parse(rawData);
+        root = data.elements[0];
+        rootEl = await huopaAPI.createElement("div");
+        await huopaAPI.setAttribute(rootEl, "style", `
+            width: 100%;
+            position: relative;   
+            height: 100%;
+            width: 100%;
+            color: white;
+            opacity: 0;
+            text-align: center;
+        `);
+        await huopaAPI.appendToApp(rootEl);
+        await huopaAPI.log(JSON.stringify(root.data.content.elements));
+        await renderElems(root.data.content.elements, rootEl);
+        await huopaAPI.setCertainStyle(rootEl, "opacity", "1");
         
-        const brackets = {"curly":["{","}"],"square":["[","]"]}[type] ?? ["",""]; // get the bracket pairs
-        const open = brackets[0],
-            close = brackets[1];
-        const splitChar = type.length === 1 ? type : "";
-        
-        for (let i = 0; i < text.length; i++) {
-            const char = text[i];
-
-            if (char == "\\") { current += char; continue; }
-
-            if (char == "'" && !(inDouble || inTick))
-                inSingle = !inSingle;
-            if (char == "\"" && !(inSingle || inTick))
-                inDouble = !inDouble;
-            if (char == "`" && !(inSingle || inDouble))
-                inTick = !inTick;
-
-            const inQuotes = inSingle || inDouble || inTick;
-
-            if (inQuotes) {
-                current += char;
-                continue;
-            }
-
-            if (char === "{")
-                curlyDepth ++;
-            if (char === "}")
-                curlyDepth --;
-            if (char === "[")
-                squareDepth ++;
-            if (char === "]")
-                squareDepth --;
-            
-            if (char === open && curlyDepth == (type == "curly" ? 1 : 0) && squareDepth == (type == "square" ? 1 : 0) && !hasSplit) {
-                tokens.push(current.trim());
-                if (text[i+1] == close)
-                    tokens.push("");
-                current = "";
-                continue;
-            }
-            if (char === close && curlyDepth == 0 && squareDepth == 0 && !hasSplit) {
-                hasSplit = true;
-                continue;
-            }
-
-            if (char === splitChar && curlyDepth == 0 && squareDepth == 0) {
-                tokens.push(current);
-                current = "";
-                continue;
-            }
-
-            if (hasSplit) {
-                throw Error(`Unexpected text after ${name}: \n` + text.substring(i).trim().split("\n").map(t => "    " + t).join("\n") + "\nin:\n" + text2.split("\n").map(t => "    " + t).join("\n") + "\n");
-            }
-
-            current += char;
-        }
-
-        if (current) {
-            tokens.push(current.trim());
-        }
-
-        return tokens;
+    } else {
+        await huopaAPI.warn("No data returned from rwlSrc!")
     }
+}
 
-    const splitBlock = (text) => split(text, "curly", "block");
-    const splitHeader = (text) => split(text, "square", "header");
-    const splitSegment = (text) => split(text, ",");
-    const splitKey = (text) => split(text, "=");
-
-    const removeStr = (str) => str.replace(/\\(.)|["'`]/g, (_match, escaped) => escaped === 'n' ? '\n' : escaped || '');
-    const removeComments = (str) => str.replace(/(["'`])(?:(?=(\\?))\2.)*?\1|\/\/.*|\/\*[\s\S]*?\*\//g,((t,e)=>e?t:""))
-
-    class AstSegment {
-        constructor(code = null) {
-            this.elements = [];
-            this.parse(code ?? "");
-        }
-        parse(code) {
-            this.elements = splitSegment(removeComments(code)).map(n => new AstNode(n));
-        }
-        stringify() {
-            return `Segment{${this.elements.map(n => n.stringify()).join(",")}}`
-        }
-        solve(frame, extData) {
-            frame ??= Frame.zero();
-            let lastEnt = null;
-            return this.elements.map(e => {
-                let solved = e.solve(frame, lastEnt, extData);
-                lastEnt = e ? solved : lastEnt;
-                return e ? solved : null;
-            });
-        }
-        getPanel(frame) {
-            return this.solve(frame).map(e => AstNode.getPanel(e, false));
-        }
-    }
-
-    class Ast extends AstSegment {
-        stringify() {
-            return `Ast{${this.elements.map(n => n.stringify()).join(",")}}`
-        }
-    }
-
-    class AstNode {
-        constructor(code = null, data = null) {
-            this.kind = "unknown";
-            this.data = code;
-
-            this.parse(code);
-        }
-        stringify() {
-            return `Node<${this.kind}>{${{
-                block: () => `header:${this.data.header.stringify()},contents:${this.data.content.stringify()}`,
-                element: () => `header:${this.data.header.stringify("element")},value:${this.data.value.stringify()}`,
-            }[this.kind]() ?? this.data.toString().trim()}}`
-        }
-        parse(code) {
-            if (code.trim() === "") {
-                this.kind = "empty";
-                this.data = {};
-                return;
+async function renderElems(parentPath, parentId) {
+    const children = parentPath;
+    for (childIndex in children) {
+        const child = children[childIndex];
+        let childEl;
+        let key;
+        if (child.kind === "element") {
+            childEl = await huopaAPI.createElement("p");
+            await huopaAPI.setAttribute(childEl, "textContent", child.data.value.value);
+        } else if (child.kind === "block") {
+            key = child?.data?.header?.key.toLowerCase()
+            childEl = await huopaAPI.createElement("div");
+            if (key === "button") {
+                await huopaAPI.setAttribute(childEl, "style", "padding: 0.5em; border-radius: 0.5em; background-color: rgba(65, 65, 65, 0.5); border-color: rgba(105, 105, 105, 0.65); border-style: solid; cursor: pointer;");
             }
-            
-            const block = splitBlock(code);
-            const header = new AstHeader(block[0]);
-            /* block */ {
-                if (block.length == 2) {
-                    const content = header.key === "script" ? new AstScriptSegment(block[1]) : new AstSegment(block[1]);
-                    this.kind = "block";
-                    this.data = {
-                        header: header,
-                        content: content
-                    };
-                    return;
-                }
+            await huopaAPI.log(key);
+            if (key === "frame" || key === "section") {
+                await huopaAPI.setAttribute(childEl, "style", `width: 100%; height: 100%; border-style: solid; border-color: white;`);
             }
-            /* element */ {
-                const value = new AstValue(header.key, null, code);
-                this.kind = "element";
-                this.data = {
-                    value: value,
-                    header: header
-                };
-                return;
-            }
+
         }
-        solve(frame, last, inData) {
-            frame ??= Frame.zero();
-            let data = {};
-            const headerData = this.data.header.getData();
-            if (this.data.content) {
-                if (headerData.key === "script")
-                    return;
-                let extData = undefined;
-                if (headerData.key === "frame") {
-                    const Axes = [];
-                    for (let i = 0; i < headerData.flags.length; i++) {
-                        const flag = headerData.flags[i];
-                        if (["Horizontal","Vertical"].includes(flag)) {
-                            Axes.push({"Horizontal":"x","Vertical":"y"}[flag])
-                        } else {
-                            throw Error("unexpected flag " + flag);
-                        }
+        await huopaAPI.setCertainStyle(childEl, "position", "absolute");
+        let padding = "5px"; // Default padding
+        if (child.data?.header?.attributes) {
+            const attrList = child.data.header.attributes;
+            for (attrIndex in attrList) {
+                const attr = attrList[attrIndex];
+                const attrType = attr.key;
+                const value = attr?.value?.value;
+                if (key === "frame" || key === "section") {
+                    if (attrType === "Horizontal" || attrType === "Vertical") {
+                        frameOrientation = attrType;
                     }
-                    if (!Axes.length) Axes.push("x");
-                    extData = {"axes":Axes};
-                }
-                if (headerData.key === "section") {
-                    if (inData && inData["axes"]) {
-                        const sizeP = AstValue.expect(["num","percentage"], headerData.data.size, null, "size");
-                        const widthP = AstValue.expect(["num","percentage"], headerData.data.width, null, "width");
-                        const heightP = AstValue.expect(["num","percentage"], headerData.data.height, null, "height");
+                } else {
+                    if (attrType === "onclick") {
+                        await huopaAPI.setAttribute(childEl, "onclick", async() => {
+                            await huopaAPI.log("buton clik");
+                        });
+                    }
+                    if (attrType === "id") {
+                        await huopaAPI.setAttribute(childEl, "id", value);
+                    }
+                    if (attrType === "anchor" && key !== "frame" && key !== "section") {
                         
-                        const fSize = frame.getSize();
-                        const width = !inData["axes"].length ? sizeP : (inData["axes"].includes("x") ? (widthP ?? sizeP) : null);
-                        const height = !inData["axes"].length ? sizeP : (inData["axes"].includes("y") ? (heightP ?? sizeP) : null);
-                        const inFrame = frame.clone();
-                        if (width && inData["axes"].includes("x")) {
-                            let change = 0;
-                            if (width.type == "num")
-                                change = width.value;
-                            if (width.type == "percentage")
-                                change = (frame.b.x - frame.a.x) * (width.value * .01);
-                            
-                            inFrame.b.x = frame.a.x + change;
-                            inFrame.update()
-                            frame.a.x += change;
-                            frame.update();
+                        xPointer = "50%";
+                        yPointer = "50%";
+
+                        xPointerNum = await resolvePosition("50%", "width", parentId);
+                        yPointerNum = await resolvePosition("50%", "height", parentId);
+
+                        const val = value.toLowerCase();
+                        const pNum = parseFloat(padding);
+
+                        if (val === "c") {
+                            anchorX = "c";
+                            anchorY = "c";
+                        } else if (val === "l") {
+                            anchorX = "l";
+                            anchorY = "c";
+                            xPointer = padding;
+                            xPointerNum = pNum;
+                        } else if (val === "r") {
+                            anchorX = "r";
+                            anchorY = "c";
+                            xPointer = `calc(100% - ${padding})`;
+                            xPointerNum = -1;
+                        } else if (val.startsWith("t")) {
+                            anchorY = "t";
+                            yPointer = padding;
+                            yPointerNum = pNum;
+                            if (val.endsWith("l")) {
+                                anchorX = "l";
+                                xPointer = padding;
+                                xPointerNum = pNum;
+                            } else if (val.endsWith("r")) {
+                                anchorX = "r";
+                                xPointer = `calc(100% - ${padding})`;
+                                xPointerNum = -1;
+                            } else {
+                                anchorX = "c";
+                                xPointer = "50%";
+                                xPointerNum = resolvePosition("50%", "width", parentId);
+                            }
+                        } else if (val.startsWith("b")) {
+                            anchorY = "b";
+                            yPointer = `calc(100% - 50px - ${padding})`;
+                            yPointerNum = -1;
+                            if (val.endsWith("l")) {
+                                anchorX = "l";
+                                xPointer = padding;
+                                xPointerNum = pNum;
+                            } else if (val.endsWith("r")) {
+                                anchorX = "r";
+                                xPointer = `calc(100% - ${padding})`;
+                                xPointerNum = -1;
+                            } else {
+                                anchorX = "c";
+                                xPointer = "50%";
+                                xPointerNum = resolvePosition("50%", "width", parentId);
+                            }
                         }
-                        if (height && inData["axes"].includes("y")) {
-                            let change = 0;
-                            if (height.type == "num")
-                                change = height.value;
-                            if (height.type == "percentage")
-                                change = (frame.b.y - frame.a.y) * (height.value * .01);
-                            
-                            inFrame.b.y = inFrame.a.y + change;
-                            inFrame.update()
-                            frame.a.y += change;
-                            frame.update();
+                        
+                        
+                    }
+                    if (attrType === "padding") {
+                        const paddingSanitize = await huopaAPI.createElement("div");
+                        await huopaAPI.setCertainStyle(paddingSanitize, "padding", value + "px");
+    
+                        if (await huopaAPI.getCertainStyle(paddingSanitize, "padding")) {
+                            padding = value + "px";
+                        } else {
+                            await huopaAPI.warn("RWL.js Interpretor: Invalid padding value, ignored.");
                         }
-
-                        data["inFrame"] = inFrame;
-                        data["frame"] = frame;
-
-
-                        data["content"] = this.data.content.solve(inFrame, extData);
-                        data["type"] = headerData.key;
-                        data["flags"] = headerData.flags;
-                        data["keys"] = headerData.data;
-
-                        return data;
-                    } else {
-                        throw Error("section outside frame");
+                        await huopaAPI.deleteElement(paddingSanitize)
+                        
+                    }
+                    if (attrType === "size") {
+                        if (child.kind === "element") {
+                            await huopaAPI.setCertainStyle(childEl, "fontSize", value * 1.6 + "px");
+                        }  
                     }
                 }
-                data["content"] = this.data.content.solve(frame, extData);
-                data["type"] = headerData.key;
-                data["flags"] = headerData.flags;
-                data["keys"] = headerData.data;
+                
+            }      
+        }
+        if (anchorX === "c") {
+            if (anchorY === "c") {
+                await huopaAPI.setCertainStyle(childEl, "transform", "translate(-50%, -50%)");
             } else {
-                const size = AstValue.expect("num", headerData.data.size, new AstValue("num",10), "size").value;
-                const spacing = AstValue.expect("num", headerData.data.spacing, new AstValue("num",1), "spacing").value;
-                const line_height = AstValue.expect("num", headerData.data.line_height, new AstValue("num",1), "line_height").value;
-                const anchor = AstValue.expect("str", headerData.data.anchor, new AstValue("str","c"), "anchor").value;
-                const alignment = AstValue.expect("str", headerData.data.alignment, new AstValue("str","c"), "alignment").value;
-                const padding = AstValue.expect("num", headerData.data.padding, new AstValue("num",10), "padding").value;
-                const isPositioned = headerData.data.anchor || headerData.data.padding;
-
-                const text = this.data.value.format();
-                const width = text.split("\n").reduce((max, str) => Math.max(max, str.length), 0) * size * spacing;
-                const height = text.split("\n").length * size * 2.3 * line_height;
-
-                const position = isPositioned || !(last && last["nextPos"]) ? this.getAlignment(alignment, frame.getAnchor(anchor, padding), new Vec2(width, height)) : last["nextPos"];
-                data["position"] = position;
-                data["data"] = this.data.value.toObj();
-                data["size"] = size;
-                data["width"] = width;
-                data["height"] = height;
-                data["line_height"] = line_height;
-                const lines = AstValue.toStr(this.data.value).split("\n");
-                const lineCount = lines.length;
-                data["nextPos"] = new Vec2(position.x + (lines[lines.length-1].length) * size * spacing, position.y - ((lineCount - 1) * line_height * size * 2.3))
+                await huopaAPI.setCertainStyle(childEl, "transform", "translateX(-50%)");
             }
-
-            return data;
+        } else if (anchorY === "c") {
+            await huopaAPI.setCertainStyle(childEl, "transform", "translateY(-50%)");
         }
-        static getPanel(e, isntRoot = false) {
-            if (e["data"]) {
-                const data = AstValue.toStr(e.data);
-                const lines = data.split("\n");
-                const x = e.position.x - (e.width * .5);
-                const panelLines = [];
-                for (let i = 0; i < lines.length; i++) {
-                    const l = lines[i];
-                    panelLines.push({"id":"text","text":l,"pos":[x,e.position.y - (i * e.line_height * e.size * 2.3)],"size":e.size});
-                }
-                if (panelLines.length == 1) return panelLines[0];
-                return {"id":"panel","panel":panelLines,"pos":[0,0],"size":1};
+        await huopaAPI.append(parentId, childEl);
+        yPointerNum = await resolvePosition(yPointer, "height", parentId);
+        if (!yPointer.includes("%")) {
+            let yCalc;
+            if (anchorY === "t" || anchorY === "c") {
+                yCalc = yPointer;
+            } else if (anchorY === "b") {
+                const pointerValue = parseFloat(yPointerNum);
+                const rootHeight = parseFloat(await huopaAPI.getRenderedSize(parentId, "height"));
+                const offset = rootHeight - pointerValue;
+                yCalc = `calc(100% - 10px - ${offset}px)`;
+                yPointer = yCalc;
             }
-            if (e["content"] && (!isntRoot || e.type === "root")) {
-                return {"id":"panel","panel":e.content.map(e => AstNode.getPanel(e)),"pos":[0,0],"size":1};
-            }
-            return e;
+            yPointer = yCalc;
+            yPointerNum = await resolvePosition(yPointer, "height", parentId);
         }
-
-
-        getAlignment(alignmentName, position, size) {
-            const alignment = AstNode.getAlignments()[alignmentName];
-            if (!alignment) throw Error("unknown alignment \"" + alignmentName.toString() + "\"")
-            position ??= Vec2.zero();
-            size ??= Vec2.zero();
-            return new Vec2(
-                size.x * alignment.x * .5 + position.x,
-                size.y * alignment.y * .5 + position.y
-            );
+        await huopaAPI.setCertainStyle(childEl, "left", xPointer);
+        await huopaAPI.setCertainStyle(childEl, "top", yPointer);
+        
+        if (child.data?.content?.elements) {
+            await renderElems(child.data.content.elements, childEl)
+        }
+        const elHeight = await huopaAPI.getRenderedSize(childEl, "height");
+        const rootHeight = await huopaAPI.getRenderedSize(parentId, "height");
+        const paddingNum = parseFloat(padding);
+        const totalHeight = elHeight + paddingNum;
+        if (!isNaN(yPointerNum) && !isNaN(totalHeight) && !isNaN(rootHeight)) {
+            const divAmount = paddingNum / 20 + 1;
+            let newY = yPointerNum + totalHeight / divAmount + paddingNum + "px";
+            if (parseFloat(newY) + 50 < rootHeight) {
+                yPointer = parseFloat(newY) + "px";
+            } else {
+                yPointer = ((yPointerNum) - totalHeight) + "px";
+            }
+        } else {
+            await huopaAPI.warn("RWL.js Interpreter: One or more dimensions could not be calculated.");
         }
         
-        static getAlignments() {
-            return Object.fromEntries(
-                Object.entries(Frame.getAnchors()).map(([key, value]) => [key, new Vec2(value.x * -1,value.y * -1)]) // Modify values as needed
-            );
-        }
+        
     }
+}
+async function resolvePosition(value, axis, parentId) {
 
+    if (value.startsWith("calc(")) {
+        const expr = value.slice(5, -1).trim();
 
-    class AstHeader {
-        constructor(code = "") {
-            this.attributes = [];
-            this.parse(code);
+        const parts = expr.match(/([\d.]+)(px|%)|[+-]/g);
+        if (!parts) {
+            await huopaAPI.warn(`resolvePosition: Invalid calc expression "${value}"`);
+            return NaN;
         }
-        parse(code) {
-            const header = splitHeader(code);
 
-            this.key = header[0];
-            if (header.length == 2) {
-                this.attributes = splitSegment(header[1]).map(a => new AstAttribute(a));
+        const rootSize = await huopaAPI.getRenderedSize(parentId, axis);
+
+        let total = 0;
+        let currentOp = "+";
+
+        for (const part of parts) {
+            if (part === "+" || part === "-") {
+                currentOp = part;
+            } else {
+                const match = part.match(/([\d.]+)(px|%)/);
+                if (!match) continue;
+                let [ , num, unit ] = match;
+                num = parseFloat(num);
+                const pxValue = unit === "%" ? (num / 100) * rootSize : num;
+                total = currentOp === "+" ? total + pxValue : total - pxValue;
             }
         }
-        stringify(type="block") {
-            if (type === "element")
-                return `Header${this.attributes.length > 0 ? "{" + this.attributes.map(a => a.stringify()).join(",") + "}" : ""}`;
-            return `Header<${this.key}>${this.attributes.length > 0 ? "{" + this.attributes.map(a => a.stringify()).join(",") + "}" : ""}`;
-        }
-        getData() {
-            let out = {"data":{},"flags":[],"key":this.key};
-            for (let i = 0; i < this.attributes.length; i++) {
-                const attr = this.attributes[i];
-                if (attr["kind"] == "key")
-                    out["data"][attr["key"]] = attr["value"];
-                if (attr["kind"] == "flag")
-                    out["flags"].push(attr["data"]);
-            }
-            return out;
-        }
+
+        return total;
+    } else if (value.endsWith("%")) {
+        const rootSize = await huopaAPI.getRenderedSize(parentId, axis);
+        const percent = parseFloat(value) / 100;
+        return percent * rootSize;
+    } else if (value.endsWith("px")) {
+        return parseFloat(value);
+    } else {
+        return parseFloat(value);
     }
-
-    class AstAttribute {
-        constructor(code = "") {
-            this.parse(code);
-        }
-        parse(code) {
-            const tokens = splitKey(code);
-
-            /* key */ {
-                if (tokens.length == 2) {
-                    this.kind = "key";
-                    this.key = tokens[0].trim();
-                    this.value = new AstValue(tokens[1], null, code);
-                    return;
-                }
-            }
-            /* flag */ {
-                if (/^[A-Za-z0-9_]+$/.test(code)) {
-                    this.kind = "flag";
-                    this.data = code;
-                    return;
-                }
-            }
-
-            throw Error("Unknown attribute syntax: " + code);
-        }
-        stringify() {
-            return `Attribute<${this.kind}>{${this.kind == "flag" ? this.data : this.kind == "key" ? this.key + "=" + this.value.stringify() : "?"}}`;
-        }
-    }
-
-    class AstValue {
-        constructor(code = "", value = null, code2 = null) {
-            if (value) {
-                this.type = code;
-                this.value = value;
-                return;
-            }
-            this.code = code2 ? code2 : code;
-            this.parse(code.trim());
-        }
-        parse(code) {
-            /* string */ {
-                if (
-                    (code[0] === "\"" && code[code.length-1] === "\"") || 
-                    (code[0] === "'" && code[code.length-1] === "'") || 
-                    (code[0] === "`" && code[code.length-1] === "`")
-                ) {
-                    this.type = "str";
-                    this.value = removeStr(code);
-                    return;
-                }
-            }
-            
-            /* number / percentage */ {
-                const num = Number(code.replace("%",""));
-                if (!isNaN(num)) {
-                    if (code[code.length-1] == "%") {
-                        this.type = "percentage";
-                        this.value = num;
-                        return;
-                    } else {
-                        this.type = "num";
-                        this.value = num;
-                        return;
-                    }
-                }
-            }
-
-            /* color */ {
-                if (code[0] == "#" && [4,7].includes(code.length)) {
-                    this.type = "color";
-                    this.value = code;
-                    return;
-                }
-            }
-            
-            /* property */ {
-                if (/\w+:\w+/.test(code)) {
-                    const parts = code.match(/(\w+):(\w+)/);
-                    this.type = "property";
-                    this.source = parts[1];
-                    this.name = parts[2];
-                    return;
-                }
-            }
-
-            throw Error("Unknown value syntax: " + code);
-        }
-        stringify() {
-            if (this.type == "property") return `Property{source:${this.source},key:${this.name}}`;
-            return `Value<${this.type}>${this.value ?? "" !== "" ? `{${({
-                str: () => JSON.stringify(this.value),
-                num: () => this.value.toString(),
-                percentage: () => this.value.toString() + "%",
-                color: () => this.value.toString()
-            }[this.type] ?? (()=>null))()}}` : ""}`;
-        }
-        format() {
-            return this.value.toString();
-        }
-        toObj() {
-            return {type:this.type,value:this.value};
-        }
-        static toStr(v) {
-            const type = v.type,
-                value = v.value;
-            return (
-                type == "str" ? value :
-                type == "num" ? value.toString() :
-                "?"
-            );
-        }
-        static expect(type,value,defaultValue,name) {
-            return value ? ((Array.isArray(type) ? type.includes(value.type) : (value.type === type || type === "any")) ? value : (() => { throw Error(`expected ${Array.isArray(type) ? type.join(" or ") : type} got ${value.type} ${name ? `for ${name}` : ""} ${value.code ? `in ${value.code}` : ""}`) })()) : defaultValue;
-        }
-    }
-
-    class AstScriptSegment {
-        constructor(code = "") {
-            this.data = code;
-        }
-        stringify() {
-            return `Segment<Script>`;
-        }
-    }
-
-    class Frame {
-        constructor(a,b) {
-            this.a = Vec2.toVec(a) ?? Vec2.zero();
-            this.b = Vec2.toVec(b) ?? Vec2.zero();
-            this.update();
-        }
-        update() {
-            this.size = this.getSize();
-        }
-
-        getCenter() {
-            return new Vec2((this.a.x + this.b.x) * .5, (this.a.y + this.b.y) * .5);
-        }
-        getSize() {
-            return new Vec2(this.b.x - this.a.x, this.b.y - this.a.y);
-        }
-
-        clone() {
-            return new Frame(
-                new Vec2(this.a.x, this.a.y),
-                new Vec2(this.b.x, this.b.y)
-            )
-        }
-
-        getAnchor(anchorName, padding) {
-            const anchor = Frame.getAnchors()[anchorName];
-            if (!anchor) throw Error("unknown anchor \"" + anchorName.toString() + "\"")
-            padding ??= 0;
-
-            const vecPadding = new Vec2(anchor.x * padding, anchor.y * padding);
-            const size = this.getSize();
-            const position = this.getCenter();
-            
-            return new Vec2(
-                size.x * anchor.x * .5 + position.x - vecPadding.x,
-                size.y * anchor.y * .5 + position.y - vecPadding.y
-            );
-        }
-
-        static zero() {
-            return new Frame();
-        }
-        static getAnchors() {
-            return {
-                "top": new Vec2(0,1), "t": new Vec2(0,1),
-                "bottom": new Vec2(0,-1), "b": new Vec2(0,-1),
-                "left": new Vec2(-1,0), "l": new Vec2(-1,0),
-                "right": new Vec2(1,0), "r": new Vec2(1,0),
-                "top left": new Vec2(-1,1), "tl": new Vec2(-1,1),
-                "top right": new Vec2(1,1), "tr": new Vec2(1,1),
-                "bottom left": new Vec2(-1,-1), "bl": new Vec2(-1,-1),
-                "bottom right": new Vec2(1,-1), "br": new Vec2(1,-1),
-                "center": Vec2.zero(), "c": Vec2.zero(),
-            };
-        }
-    }
-    class Vec2 {
-        constructor(x,y) {
-            this.x = x ?? 0;
-            this.y = y ?? 0;
-        }
-        static toVec(v) {
-            if (!v) return Vec2.zero();
-
-            if (v instanceof Vec2)
-                return v;
-            if (Array.isArray(v))
-                return new Vec2(v[0],v[1]);
-            if (typeof v === "object")
-                return new Vec2(v["x"],v["y"]);
-            
-            throw Error("cannot make " + typeof v + " a vec2: " + JSON.stringify(v));
-        }
-        static zero() {
-            return new Vec2();
-        }
-    }
-
-    class RWL {
-        constructor (data) {
-            if (typeof data !== "object" && Array.isArray(data)) data = {}
-
-            const code = data["code"] ?? "";
-            this.ast = new Ast(code);
-
-            this.frame ??= data["frame"] ?? Frame.zero();
-
-            //this.solved = this.solve(this.frame);
-        }
-        stringify() {
-            return `RWL{ast:${this.ast.stringify()}}`;
-        }
-        getObject() {
-            return JSON.parse(JSON.stringify(this));
-        }
-        solve(frame) {
-            frame ??= this.frame;
-            frame ??= Frame.zero();
-            return this.ast.solve(frame);
-        }
-        getPanel(frame) {
-            frame ??= this.frame;
-            frame ??= Frame.zero();
-            return this.ast.getPanel(frame);
-        }
-    }
-
-    // is being run directly
-    if (require.main === module) {
-        const rwl = new RWL({
-            code: code,
-            frame: new Frame(new Vec2(-100,-100), new Vec2(100,100))
-        })
-        //console.log(rwl.ast.stringify());
-        console.log(/*JSON.stringify(rwl.getPanel(rwl.frame),null,"  "),*/JSON.stringify(rwl.ast,null,"  "), rwl.ast.stringify());
-    }
-    module.exports = { RWL, Frame, Vec2 }
-    const urAst = new RWL({code}).ast;
-    return urAst;
 }
