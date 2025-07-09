@@ -39,20 +39,20 @@ window.huopadesktop = (() => {
                 await internalFS.createPath("/system/env/config.json", "file", JSON.stringify(bootConfig));
                 await sys.addLine("Boot config created!");
                 await sys.addLine("Installing system apps...");
-                await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaDesktop/Settings.js`, "/home/applications/Settings.js");
+                await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/Settings.js`, "/home/applications/Settings.js");
                 if (!await internalFS.getFile("/home/applications/Settings.js.icon")) {
                     await internalFS.createPath("/home/applications/Settings.js.icon", "file", `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings-icon lucide-settings"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>`);
                 }
                 
-                await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaDesktop/App%20Store.js`, "/home/applications/App Store.js");
+                await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/App%20Store.js`, "/home/applications/App Store.js");
                 if (!await internalFS.getFile("/home/applications/App Store.js.icon")) {
                     await internalFS.createPath("/home/applications/App Store.js.icon", "file", `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-cart-icon lucide-shopping-cart"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>`);
                 }
-                await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaDesktop/File%20Manager.js`, "/home/applications/File Manager.js");
+                await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/File%20Manager.js`, "/home/applications/File Manager.js");
                 if (!await internalFS.getFile("/home/applications/File Manager.js.icon")) {
                     await internalFS.createPath("/home/applications/File Manager.js.icon", "file", `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder-closed-icon lucide-folder-closed"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/><path d="M2 10h20"/></svg>`);
                 }
-                await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaDesktop/Preview.js`, "/home/applications/Preview.js");
+                await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/Preview.js`, "/home/applications/Preview.js");
                 if (!await internalFS.getFile("/home/applications/Preview.js.icon")) {
                     await internalFS.createPath("/home/applications/Preview.js.icon", "file", `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-image-icon lucide-image"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>`);
                 }
@@ -61,12 +61,12 @@ window.huopadesktop = (() => {
                     await internalFS.delDir("/home/applications/Text Editor.js.icon");
                 }
                 await sys.addLine("Installing app modules...");
-                const response = await fetch(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaDesktop/huopaAPIModules/rwl.js`);
+                const response = await fetch(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/huopaAPIModules/rwl.js`);
                 if (response.ok) {
                     const data = await response.text();
                     await internalFS.createPath("/system/env/modules/rwl.js", "file", data);
                 }
-                const response2 = await fetch("https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaDesktop/moduleSrc/rwlSrc.js");
+                const response2 = await fetch("https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/moduleSrc/rwlSrc.js");
                 // RWL is mainly made by Flufi (GH: @ThePandaDever).
                 // Integrated into HuopaOS by me, Allucat1000.
                 if (response2.ok) {
@@ -79,19 +79,19 @@ window.huopadesktop = (() => {
                 let wallpaper3Success;
                 let wallpaper4Success;
                 if (!await internalFS.getFile("/system/env/wallpapers/Chilly Mountain.png")) {
-                    wallpaper1Success = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/Wallpapers/Chilly%20Mountain.png`, "/system/env/wallpapers/Chilly Mountain.png");
+                    wallpaper1Success = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/Wallpapers/Chilly%20Mountain.png`, "/system/env/wallpapers/Chilly Mountain.png");
                 }
                 if (!await internalFS.getFile("/system/env/wallpapers/Peaceful Landscape.png")) {
-                    wallpaper2Success = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/Wallpapers/Peaceful%20Landscape.png`, "/system/env/wallpapers/Peaceful Landscape.png");
+                    wallpaper2Success = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/Wallpapers/Peaceful%20Landscape.png`, "/system/env/wallpapers/Peaceful Landscape.png");
                 }
                 if (!await internalFS.getFile("/system/env/wallpapers/Chaotic Creek.png")) {
-                    wallpaper3Success = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/Wallpapers/Chaotic%20Creek.png`, "/system/env/wallpapers/Chaotic Creek.png");
+                    wallpaper3Success = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/Wallpapers/Chaotic%20Creek.png`, "/system/env/wallpapers/Chaotic Creek.png");
                 }
                 if (!await internalFS.getFile("/system/env/wallpapers/Forest Landscape.png")) {
-                    wallpaper4Success = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/Wallpapers/Forest%20Landscape.png`, "/system/env/wallpapers/Forest Landscape.png");
+                    wallpaper4Success = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/Wallpapers/Forest%20Landscape.png`, "/system/env/wallpapers/Forest Landscape.png");
                 }
                 
-                const logoSuccess = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaLogo.png`, "/system/env/assets/huopalogo.png");
+                const logoSuccess = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaLogo.png`, "/system/env/assets/huopalogo.png");
                 if (wallpaper1Success && wallpaper2Success && wallpaper3Success && wallpaper4Success && logoSuccess) {
                     await sys.addLine("Wallpapers and logo fetched and installed!");
                 }
@@ -123,7 +123,7 @@ window.huopadesktop = (() => {
                 if (!skipStyles || skipStyles !== "true" ) {
                     styleDownloadSuccess = await new Promise(async (resolve, reject) => {
                         try {
-                            const response = await fetch(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/HuopaDesktop/_systemStyles.css`);
+                            const response = await fetch(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/_systemStyles.css`);
                             if (response.ok) {
                                 const text = await response.text();
                                 await internalFS.createPath("/system/env/systemStyles.css", "file", text);
@@ -1757,13 +1757,13 @@ const createRoturLoginWindow = async (app) => {
                 console.error(`Failed to initialize Quantum. Error: ${e}`);
                 return;
             }
-            if (false) {
+            if (true) {
                 await importLib("https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js");
                 await new Promise(resolve => setTimeout(resolve, 500));
                 const code = await internalFS.getFile("/system/packages/huopadesktop.js");
                 const checksum = await CryptoJS.MD5(code).toString()
 
-                const response = await fetch(`https://raw.githubusercontent.com/allucat1000/HuopaOS/${verBranch}/packages/huopadesktop.js`);
+                const response = await fetch(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/packages/huopadesktop.js`);
                 if (response.ok) {
                     const newCode = await response.text();
                     const newChecksum = CryptoJS.MD5(newCode).toString();
