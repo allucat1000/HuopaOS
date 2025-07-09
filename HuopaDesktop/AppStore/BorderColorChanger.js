@@ -10,9 +10,9 @@ if (!colors) {
         "#FF0000"
     ];
     await huopaAPI.writeFile("/home/applications/BorderColorChanger/colors.json", "file", JSON.stringify(colors));
-    await huopaAPI.createNotification("BorderColorChanger", "Thanks for trying out this border color changer!");
+    huopaAPI.createNotification("BorderColorChanger", "Thanks for trying out this border color changer!");
 } else {
-    await huopaAPI.createNotification("BorderColorChanger", "The border color changer has started!");
+    huopaAPI.createNotification("BorderColorChanger", "The border color changer has started!");
     colors = JSON.parse(colors);
 }
 
