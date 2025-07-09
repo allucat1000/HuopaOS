@@ -3,7 +3,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "0.9.95";
+    const version = "0.9.96";
     // Priv Sys Funcs
     const dataURIToBlob = async (dataURI) => {
         const [meta, base64Data] = dataURI.split(',');
@@ -1075,6 +1075,36 @@ const createRoturLoginWindow = async (app) => {
                 }
                             
                 
+            },
+
+            hideWindow: () => {
+                appContainer.parentElement.style.display = "none";
+            },
+
+            showWindow: () => {
+                appContainer.parentElement.style.display = "block";
+            },
+            
+            createNotification: async (title, content) => {
+                const notifEl = quantum.document.createElement("div");
+                notifEl.style = "border-radius: 0.5em; background-color: rgba(35, 35, 35, 0.65); border-style: solid; border-color: rgba(65, 65, 65, 0.85); width: 20em; position: absolute; top: 0.5em; right: -22em; transition: right ease 1s;";
+                const titleEl = quantum.document.createElement("h3");
+                const descEl = quantum.document.createElement("p");
+                titleEl.style = "color: white; padding: 0.75em; margin: 0;";
+                titleEl.textContent = title;
+                descEl.style = "color: white; padding: 0 0.75em; padding-bottom: 0.75em;";
+                descEl.textContent = content;
+                const desktop = quantum.document.getElementById("desktop");
+                await notifEl.append(titleEl, descEl);
+                await desktop.append(notifEl);
+                requestAnimationFrame(() => {
+                    notifEl.style.right = "0.5em";
+                })
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                notifEl.style.right = "-22em";
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                await notifEl.remove();
+                
             }
  
         };
@@ -1205,8 +1235,8 @@ const createRoturLoginWindow = async (app) => {
             quantum.document.removeEventListener("mouseup", onMouseUp);
         }
     }
-    const minWidth = 200;
-    const minHeight = 30;
+    const minWidth = 375;
+    const minHeight = 42;
     const onResizeStart = (e) => {
         e.preventDefault();
         const dir = e.target.dataset.direction;
@@ -1276,19 +1306,26 @@ const createRoturLoginWindow = async (app) => {
         const winSpawnX = window.innerWidth / 2;
         const blur = await internalFS.getFile("/system/env/systemconfig/settings/customization/bgblur.txt");
         const opacity = await internalFS.getFile("/system/env/systemconfig/settings/customization/bgopac.txt");
-        const borderColor = await internalFS.getFile("/system/env/systemconfig/settings/customization/windowbordercolor.txt");
         outerContainer.classList.add("appContainer");
         outerContainer.style.left = `${winSpawnX}px`;
         outerContainer.style.display = "none";
         quantum.document.getElementById("desktop").appendChild(outerContainer);
         const computed = getComputedStyle(outerContainer);
-        outerContainer.style.borderColor = borderColor;
         const baseColor = computed.backgroundColor;
         const rgbaMatch = baseColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
         if (rgbaMatch) {
             const [_, r, g, b] = rgbaMatch;
             outerContainer.style.backgroundColor = `rgba(${r}, ${g}, ${b}, ${opacity})`;
         }
+        await createSysDaemon("appContBordUpdater", () => {
+            const loop = async () => {
+                const borderColor = await internalFS.getFile("/system/env/systemconfig/settings/customization/windowbordercolor.txt");
+                outerContainer.style.borderColor = borderColor;
+                setTimeout(loop, 200);
+            }
+            loop()
+            
+        })
 
         outerContainer.style.backdropFilter = `blur(${blur}px)`;
 
@@ -1375,6 +1412,7 @@ const createRoturLoginWindow = async (app) => {
         appBar.append(appToDock);
         appToDock.onclick = async() => {
             appZIndex = appZIndex + 10;
+            outerContainer.style.display = "block";
             outerContainer.style.zIndex = appZIndex;
         }
         closeButton.addEventListener("click", () => {
@@ -1468,33 +1506,35 @@ const createRoturLoginWindow = async (app) => {
             appListDiv.style = "height: 18em; overflow: auto; position: relative;"
             startMenuDiv.append(appListDiv);
             for (let i = 0; i < appList.length; i++) {
-                const appButton = quantum.document.createElement("button");
-                const cleanedAppName = appList[i].replace("/home/applications/", "");
-                const appTitle = quantum.document.createElement("p");
-                appTitle.textContent = cleanedAppName.replace(/\.js$/, "");
-                appButton.style = "color: white; background-color: rgba(45, 45, 45, 0.7); border-color: rgba(105, 105, 105, 0.6); border-style: solid; border-radius: 0.5em; padding: 0.5em; width: 35em; height: 3em; margin: 0.2em 0.5em; text-align: left; cursor: pointer; display: flex; flex-wrap: wrap; align-content: flex-start;"
-                const appIcon = quantum.document.createElement("img");
-                appIcon.draggable = "false";
-                appIcon.style = "display: inline; padding-right: 0.2em; user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;"
-                appTitle.style = "display: inline;"
-                const appIconSrc = await internalFS.getFile(appList[i] + ".icon");
-                if (!appIconSrc) {
-                    const defaultSVG = `
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-code-icon lucide-file-code"><path d="M10 12.5 8 15l2 2.5"/><path d="m14 12.5 2 2.5-2 2.5"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/></svg>
-                    `;
+                if (appList[i].endsWith(".js")) {
+                    const appButton = quantum.document.createElement("button");
+                    const cleanedAppName = appList[i].replace("/home/applications/", "");
+                    const appTitle = quantum.document.createElement("p");
+                    appTitle.textContent = cleanedAppName.replace(/\.js$/, "");
+                    appButton.style = "color: white; background-color: rgba(45, 45, 45, 0.7); border-color: rgba(105, 105, 105, 0.6); border-style: solid; border-radius: 0.5em; padding: 0.5em; width: 35em; height: 3em; margin: 0.2em 0.5em; text-align: left; cursor: pointer; display: flex; flex-wrap: wrap; align-content: flex-start;"
+                    const appIcon = quantum.document.createElement("img");
+                    appIcon.draggable = "false";
+                    appIcon.style = "display: inline; padding-right: 0.2em; user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;"
+                    appTitle.style = "display: inline;"
+                    const appIconSrc = await internalFS.getFile(appList[i] + ".icon");
+                    if (!appIconSrc) {
+                        const defaultSVG = `
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-code-icon lucide-file-code"><path d="M10 12.5 8 15l2 2.5"/><path d="m14 12.5 2 2.5-2 2.5"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/></svg>
+                        `;
 
-                    appIcon.src = `data:image/svg+xml;utf8,${encodeURIComponent(defaultSVG)}`;
-                } else {
-                    appIcon.src = "data:image/svg+xml;utf8," + encodeURIComponent(appIconSrc);
+                        appIcon.src = `data:image/svg+xml;utf8,${encodeURIComponent(defaultSVG)}`;
+                    } else {
+                        appIcon.src = "data:image/svg+xml;utf8," + encodeURIComponent(appIconSrc);
+                    }
+                    appButton.onclick = async () => {
+                        const code = await internalFS.getFile(appList[i]);
+                        await runApp(cleanedAppName, code, appList[i]);
+                        await openStartMenu()
+                    };
+                    appButton.append(appIcon);
+                    appButton.append(appTitle);
+                    appListDiv.append(appButton);
                 }
-                appButton.onclick = async () => {
-                    const code = await internalFS.getFile(appList[i]);
-                    await runApp(cleanedAppName, code, appList[i]);
-                    await openStartMenu()
-                };
-                appButton.append(appIcon);
-                appButton.append(appTitle);
-                appListDiv.append(appButton);
             }
             requestAnimationFrame(() => {
                 startMenuDiv.style.opacity = "1";
