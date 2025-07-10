@@ -162,7 +162,7 @@ async function wallpapersTabLoad() {
         if (file) {
             await huopaAPI.writeFile("/system/env/wallpapers/" + file.name, "file", file.content);
             await huopaAPI.deleteElement(mainScreenDiv);
-            await customizationTabLoad();
+            await wallpapersTabLoad();
         }
     });
 

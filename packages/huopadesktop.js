@@ -193,6 +193,7 @@ window.huopadesktop = (() => {
                         console.error(`Failed to initialize Quantum. Error: ${e}`);
                         return;
                     }
+                    await importLib("https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js");
                     await sys.addLine("Loading HuopaDesktop...");
                     await new Promise(resolve => setTimeout(resolve, 100));
                     createMainGUI();
@@ -376,6 +377,17 @@ const createRoturLoginWindow = async (app) => {
                     } else if (data?.type === "input" && data?.elementId) {
                         const handler = localEventHandlers[data.elementId];
                         if (handler) handler();
+                    } else if (data?.type === "eventListener" && data?.elementId) {
+                        const handler = localEventHandlers[data.elementId];
+                        if (handler) handler();
+                    } else if (data?.type === "keypress" && data?.elementId) {
+                        const key = data.key;
+                        const handler = localEventHandlers[data.elementId];
+                        if (typeof handler === "function") {
+                            handler(key);
+                        } else {
+                            console.warn("Handler not found or not a function for:", data.elementId);
+                        }
                     }
                 });
 
@@ -404,7 +416,7 @@ const createRoturLoginWindow = async (app) => {
                         get(_, prop) {
                             if (prop === "setAttribute") {
                                 return async (elementId, attrName, handler) => {
-                                    const customAttrList = ["onclick", "oninput"];
+                                    const customAttrList = ["onclick", "oninput", "onkeypress"];
                                     if (customAttrList.includes(attrName)) {
                                         localEventHandlers[elementId] = handler;
                                         return new Promise((resolve, reject) => {
@@ -452,6 +464,33 @@ const createRoturLoginWindow = async (app) => {
                                         });
                                     }
                                 };
+                            } else if (prop === "addEventListener") {
+                                return async (elementId, listenerName, handler) => {
+                                    localEventHandlers[elementId] = handler;
+                                    return new Promise((resolve, reject) => {
+                                        const id = "msg_" + msgId++;
+                                        callbacks.set(id, { resolve, reject });
+                                        try {
+                                            window.parent.postMessage({
+                                                type: "bindEventForward",
+                                                data: [elementId, listenerName],
+                                                id,
+                                                appName,
+                                            }, "*");
+                                        } catch (e) {
+                                            window.parent.postMessage({
+                                                type: "iframeError",
+                                                message: e?.message || "Unknown error",
+                                                stack: e?.stack || null,
+                                                name: e?.name || "Error",
+                                                appName
+                                            }, "*");   
+                                            return;
+                                        }
+                                    });
+                                }
+                            
+                            
                             }
 
                             // Other methods
@@ -706,10 +745,14 @@ const createRoturLoginWindow = async (app) => {
 
             clearTimeout,
 
-            fetch: async (url) => {
-                const response = await window.fetch(url);
-                const contentType = response.headers.get("content-type");
-                const body = contentType?.includes("application/json")
+            fetch: async (url, headers = {}, method = "GET") => {
+                const response = await window.fetch(url, {
+                    method,
+                    headers
+                });
+
+                const contentType = response.headers.get("content-type") || "";
+                const body = contentType.includes("application/json")
                     ? await response.json()
                     : await response.text();
 
@@ -737,6 +780,19 @@ const createRoturLoginWindow = async (app) => {
                     sandboxWindow.postMessage({
                         type: "event",
                         event: "click",
+                        elementId: id
+                    }, "*");
+                });
+            },
+
+            setOnKeyPress: function(id) {
+                const el = elementRegistry[id];
+                if (!el) return;
+
+                el.addEventListener("keydown", () => {
+                    sandboxWindow.postMessage({
+                        type: "event",
+                        event: "keypress",
                         elementId: id
                     }, "*");
                 });
@@ -1144,8 +1200,20 @@ const createRoturLoginWindow = async (app) => {
                 await new Promise(resolve => setTimeout(resolve, 1500));
                 await notifEl.remove();
                 
-            }
+            },
  
+            addEventListener: async(id, type) => {
+                const el = elementRegistry[id];
+                if (!el) return;
+
+                el.addEventListener(type, () => {
+                    sandboxWindow.postMessage({
+                        type: "event",
+                        event: "eventListener",
+                        elementId: id
+                    }, "*");
+                });
+            }
         };
 
     };
@@ -1177,6 +1245,16 @@ const createRoturLoginWindow = async (app) => {
                         event.source.postMessage({ type: "input", elementId }, "*");
                     };
                     el.addEventListener("input", inputHandler);
+                } else if (attrName === "onkeypress") {
+                    const keyHandler = (e) => {
+                        event.source.postMessage({ type: "keypress", elementId, key: e.key}, "*");
+                    };
+                    el.addEventListener("keydown", keyHandler);
+                } else {
+                    const eventHandler = () => {
+                        event.source.postMessage({ type: "eventListener", elementId }, "*");
+                    };
+                    el.addEventListener(attrName, eventHandler);
                 }
                 
 
