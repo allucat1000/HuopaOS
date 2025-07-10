@@ -216,6 +216,7 @@ async function registerFuncs() {
                 "style":"padding: 0; width: 100%; margin: 0.5em; background-color: rgba(45, 45, 45, 0.5); border-radius: 0.25em; border: rgba(105, 105, 105, 0.65) 1px solid; cursor: pointer;",
             });
             const channelSave = channel;
+            channelPerms = channelSave.permissions;
             await huopaAPI.setAttribute(channelDiv, "onclick", async() => {
                 let viewAllowed
                 for (const role of roles) {
@@ -232,7 +233,7 @@ async function registerFuncs() {
                 }
                 
                 openedChannel = channelSave.name;
-                channelPerms = channelSave.permissions;
+                
                 let sendAllowed = false;
                 for (const role of roles) {
                     if (channelPerms.send.includes(role)) {
