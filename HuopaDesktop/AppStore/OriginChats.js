@@ -12,8 +12,13 @@ async function loop() {
     }
     serverList = JSON.parse(serverList);
     let url = serverList[serverToOpen];
-    ws = new WebSocket("wss://" + url);
-    ws.onerror = async() => {
+    try {
+        ws = new WebSocket("wss://" + url);
+    } catch (error) {
+        connectError();
+        return;
+    }
+    async function connectError() {
         const icon = await huopaAPI.getFile(`/home/applications/OriginChats/serverIconStore/${url}`);
         if (!icon) {
             serverList.splice(serverToOpen, 1);
@@ -31,6 +36,10 @@ async function loop() {
         await new Promise((res) => setTimeout(res, 3000));
         await huopaAPI.deleteElement(errorMsg);
         loop();
+        return;
+    }
+    ws.onerror = async() => {
+        connectError();
         return;
     }
     let connectedToWS;
@@ -203,19 +212,23 @@ async function loop() {
                 await huopaAPI.setAttribute(serverUrlInput, "onkeypress", async (key) => {
                     if (key === "Enter") {
                         const value = await huopaAPI.getAttribute(serverUrlInput, "value")
-                        if (!value) return;
-                        if (serverList.includes(value)) {
-                            await huopaAPI.writeFile("/home/applications/OriginChats/currentServerOpen.txt", "file", serverList.indexOf(value))
+                        if (value) {
+                            if (serverList.includes(value)) {
+                                await huopaAPI.writeFile("/home/applications/OriginChats/currentServerOpen.txt", "file", serverList.indexOf(value))
+                            } else {
+                                serverList.push(value);
+                                await huopaAPI.writeFile("/home/applications/OriginChats/serverlist.json", "file", JSON.stringify(serverList));
+                                await huopaAPI.writeFile("/home/applications/OriginChats/currentServerOpen.txt", "file", serverList.length - 1)
+                            }
+                            
+                            await huopaAPI.deleteElement(mainArea);
+                            await huopaAPI.deleteElement(sidebarEl);
+                            ws.close();
+                            loop();
                         } else {
-                            serverList.push(value);
-                            await huopaAPI.writeFile("/home/applications/OriginChats/serverlist.json", "file", JSON.stringify(serverList));
-                            await huopaAPI.writeFile("/home/applications/OriginChats/currentServerOpen.txt", "file", serverList.length - 1)
+                            await huopaAPI.deleteElement(serverUrlInput);
                         }
                         
-                        await huopaAPI.deleteElement(mainArea);
-                        await huopaAPI.deleteElement(sidebarEl);
-                        ws.close();
-                        loop();
                     }
                 });
                 await huopaAPI.append(sidebarEl, serverUrlInput);
@@ -306,13 +319,16 @@ async function loop() {
         wsHandlers.set("message_delete", async(data) => {
             if (data.channel !== openedChannel) return;
             const msg = messageTable[data.id];
-            await huopaAPI.deleteElement(msg);
+            const children = await huopaAPI.getChildren(msg)
+            const textEl = children[1];
+            await huopaAPI.setCertainStyle(textEl, "color", "red");
         });
 
         wsHandlers.set("message_edit", async(data) => {
             if (data.channel !== openedChannel) return;
             const msg = messageTable[data.id];
-            const textEl = await huopaAPI.getChildren(msg)[1];
+            const children = await huopaAPI.getChildren(msg)
+            const textEl = children[1];
             await huopaAPI.setAttribute(textEl, "textContent", msg.content);
         });
 
@@ -400,13 +416,18 @@ async function loop() {
                         if (msg.user === userObj.username) {
                             changeButtons = true
                             await setAttrs(deleteButton, {
-                                "style":"position: absolute; top: -0.5em; color: red; right: 0.5em; padding: 0.5em 0.75em;",
+                                "style":"position: absolute; top: -0.5em; color: red; right: 0.5em; padding: 0.5em 0.75em; display: none;",
                                 "textContent":"x",
                                 "onclick": async() => {
                                     ws.send(`{"cmd":"message_delete", "id":"${msg.id}", "channel":"${openedChannel}"}`)
                                 }
                             });
-                            
+                            await huopaAPI.addEventListener(msgDiv, "mouseenter", async() => {
+                                await huopaAPI.setCertainStyle(deleteButton, "display", "block");
+                            });
+                            await huopaAPI.addEventListener(msgDiv, "mouseleave", async() => {
+                                await huopaAPI.setCertainStyle(deleteButton, "display", "none");
+                            });
                         }
                         await setAttrs(user, {
                             "style":`position: absolute; left: 0.5em; top: 0.5em; padding: 0em; color: ${userColors[msg.user]}; text-align: left; text-wrap: wrap;`,

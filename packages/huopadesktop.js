@@ -378,8 +378,13 @@ const createRoturLoginWindow = async (app) => {
                         const handler = localEventHandlers[data.elementId];
                         if (handler) handler();
                     } else if (data?.type === "eventListener" && data?.elementId) {
-                        const handler = localEventHandlers[data.elementId];
-                        if (handler) handler();
+                        const elId = data.elementId;
+                        const listenerName = data.listener;
+                        const id = elId + listenerName;
+                        const handler = localEventHandlers[id];
+                        if (handler) {
+                            handler();
+                        }
                     } else if (data?.type === "keypress" && data?.elementId) {
                         const key = data.key;
                         const handler = localEventHandlers[data.elementId];
@@ -466,7 +471,7 @@ const createRoturLoginWindow = async (app) => {
                                 };
                             } else if (prop === "addEventListener") {
                                 return async (elementId, listenerName, handler) => {
-                                    localEventHandlers[elementId] = handler;
+                                    localEventHandlers[elementId + listenerName] = handler;
                                     return new Promise((resolve, reject) => {
                                         const id = "msg_" + msgId++;
                                         callbacks.set(id, { resolve, reject });
@@ -715,7 +720,6 @@ const createRoturLoginWindow = async (app) => {
 
             getElementById: function(id) {
                 const returnData = idRegistry[id];
-                console.log("returndata", idRegistry)
                 return returnData;
             },
 
@@ -1217,6 +1221,7 @@ const createRoturLoginWindow = async (app) => {
                     sandboxWindow.postMessage({
                         type: "event",
                         event: "eventListener",
+                        listener: type,
                         elementId: id
                     }, "*");
                 });
@@ -1259,7 +1264,7 @@ const createRoturLoginWindow = async (app) => {
                     el.addEventListener("keydown", keyHandler);
                 } else {
                     const eventHandler = () => {
-                        event.source.postMessage({ type: "eventListener", elementId }, "*");
+                        event.source.postMessage({ type: "eventListener", listener: attrName, elementId }, "*");
                     };
                     el.addEventListener(attrName, eventHandler);
                 }
