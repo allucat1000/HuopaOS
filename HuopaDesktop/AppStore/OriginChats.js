@@ -3,6 +3,7 @@ async function loop() {
     let serverList;
     serverList = await huopaAPI.getFile("/home/applications/OriginChats/serverlist.json");
     let serverToOpen = await huopaAPI.getFile("/home/applications/OriginChats/currentServerOpen.txt");
+    let extraConfig = await huopaAPI.getFile("/home/applications/OriginChats/config.json");;
     if (!serverList) {
         firstOpen = true;
         serverList = '["chats.mistium.com"]';
@@ -10,7 +11,12 @@ async function loop() {
         serverToOpen = "0"
         await huopaAPI.writeFile("/home/applications/OriginChats/currentServerOpen.txt", "file", serverToOpen);
     }
+    if (!extraConfig) {
+        extraConfig = '{"messageLogger":false,"notifications":false}';
+        await huopaAPI.writeFile("/home/applications/OriginChats/config.json", "file", extraConfig);
+    }
     serverList = JSON.parse(serverList);
+    extraConfig = JSON.parse(extraConfig);
     let url = serverList[serverToOpen];
     try {
         ws = new WebSocket("wss://" + url);
@@ -76,8 +82,12 @@ async function loop() {
     let messageTable = {};
     const sidebarEl = await huopaAPI.createElement("div");
     await setAttrs(sidebarEl, {
-        "style":"position: absolute; width: 50px; height: 100%; left: 0; top: 0; display: flex; flex-direction: column; align-items: center;"
-    })
+        "style":"position: absolute; width: 50px; height: calc(100% - 5em); left: 0; top: 0; display: flex; flex-direction: column; align-items: center;"
+    });
+    const userArea = await huopaAPI.createElement("div");
+    await setAttrs(userArea, {
+        "style":""
+    }) 
     const mainArea = await huopaAPI.createElement("div");
     await setAttrs(mainArea, {
         "style":"position: absolute; right: 0; top: 0; width: calc(100% - 50px); height: 100%;"
@@ -296,7 +306,7 @@ async function loop() {
         
         
         await setAttrs(channelListEl, {
-            "style":"width: 250px; height: calc(100%); padding: 0; margin: 0; position: absolute; left: 0; top: 0; background-color: rgba(0, 0, 0, 0.2); padding-right: 1.25em; overflow: scroll; overflow-x: hidden;"
+            "style":"width: 250px; height: calc(100% - 5em;); padding: 0; margin: 0; position: absolute; left: 0; top: 0; background-color: rgba(0, 0, 0, 0.2); padding-right: 1.25em; overflow: scroll; overflow-x: hidden;"
         });
         
         wsHandlers.set("ping", () => {
@@ -319,9 +329,14 @@ async function loop() {
         wsHandlers.set("message_delete", async(data) => {
             if (data.channel !== openedChannel) return;
             const msg = messageTable[data.id];
-            const children = await huopaAPI.getChildren(msg)
-            const textEl = children[1];
-            await huopaAPI.setCertainStyle(textEl, "color", "red");
+            if (extraConfig.messageLogger) {
+                const children = await huopaAPI.getChildren(msg)
+                const textEl = children[1];
+                await huopaAPI.setCertainStyle(textEl, "color", "red");
+            } else {
+                await huopaAPI.deleteElement(msg);
+            }
+           
         });
 
         wsHandlers.set("message_edit", async(data) => {
@@ -475,6 +490,9 @@ async function loop() {
         wsHandlers.set("message_new", async(data) => {
             if (data.channel !== openedChannel) return;
             const msg = data.message;
+            if (msg.user !== userObj.username && extraConfig.notifications) {
+                huopaAPI.createNotification(`${msg.user} - #${data.channel} - ${server.name}`, msg.content);
+            }
             const msgDiv = await huopaAPI.createElement("div");
             await setAttrs(msgDiv, {
                 "style":"width: calc(100% - 1em); padding: 0em; background-color: rgba(35, 35, 35, 0.65); margin: 0.5em; position: relative; border-radius: 0.5em; border: rgba(105, 105, 105, 0.65) 1px solid;"
@@ -487,13 +505,18 @@ async function loop() {
             if (msg.user === userObj.username) {
                 changeButtons = true
                 await setAttrs(deleteButton, {
-                    "style":"position: absolute; top: -0.5em; color: red; right: 0.5em; padding: 0.5em 0.75em;",
+                    "style":"position: absolute; top: -0.5em; color: red; right: 0.5em; padding: 0.5em 0.75em; display: none;",
                     "textContent":"x",
                     "onclick": async() => {
                         ws.send(`{"cmd":"message_delete", "id":"${msg.id}", "channel":"${openedChannel}"}`)
                     }
                 });
-                
+                await huopaAPI.addEventListener(msgDiv, "mouseenter", async() => {
+                    await huopaAPI.setCertainStyle(deleteButton, "display", "block");
+                });
+                await huopaAPI.addEventListener(msgDiv, "mouseleave", async() => {
+                    await huopaAPI.setCertainStyle(deleteButton, "display", "none");
+                });
             }
             await setAttrs(user, {
                 "style":`position: absolute; left: 0.5em; top: 0.5em; padding: 0em; color: ${userColors[msg.user]}; text-align: left; text-wrap: wrap;`,
