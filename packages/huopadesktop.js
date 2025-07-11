@@ -633,6 +633,7 @@ const createRoturLoginWindow = async (app) => {
         }
     };
     const elementRegistry = {}
+    const idRegistry = {};
     let elementIdCounter = 0;
     let _returnCallbacks;
     const runAppWithReturn = async function(path, param) {
@@ -675,6 +676,7 @@ const createRoturLoginWindow = async (app) => {
                 el.dataset.huopaId = id;
                 el.id = id;
                 elementRegistry[id] = el;
+                idRegistry[id] = id;
                 return id;
             },
 
@@ -712,7 +714,9 @@ const createRoturLoginWindow = async (app) => {
             },
 
             getElementById: function(id) {
-                return appContainer.querySelector(`#${id}`);
+                const returnData = idRegistry[id];
+                console.log("returndata", idRegistry)
+                return returnData;
             },
 
             querySelector: function(sel) {
@@ -975,6 +979,9 @@ const createRoturLoginWindow = async (app) => {
                     }
                 } else {
                     try {
+                        if (type === "id") {
+                            idRegistry[content] = id;
+                        }
                         el[type] = content;
                     } catch (e) {
                         console.error("[huopaAPI RUN ERROR] Error with setting attribute: " + type);
