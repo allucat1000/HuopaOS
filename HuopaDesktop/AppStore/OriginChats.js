@@ -57,6 +57,7 @@ async function loop() {
     let auth;
     let appState = "auth"
     let userList;
+    let ratelimited;
     let userObj;
     let userData;
     let server;
@@ -82,7 +83,7 @@ async function loop() {
     let messageTable = {};
     const sidebarEl = await huopaAPI.createElement("div");
     await setAttrs(sidebarEl, {
-        "style":"position: absolute; width: 50px; height: calc(100% - 5em); left: 0; top: 0; display: flex; flex-direction: column; align-items: center;"
+        "style":"position: absolute; width: 50px; height: calc(100%); left: 0; top: 0; display: flex; flex-direction: column; align-items: center;"
     });
     const userArea = await huopaAPI.createElement("div");
     await setAttrs(userArea, {
@@ -305,16 +306,14 @@ async function loop() {
         })
         
         
-        await setAttrs(channelListEl, {
-            "style":"width: 250px; height: calc(100% - 5em;); padding: 0; margin: 0; position: absolute; left: 0; top: 0; background-color: rgba(0, 0, 0, 0.2); padding-right: 1.25em; overflow: scroll; overflow-x: hidden;"
-        });
-        
         wsHandlers.set("ping", () => {
             // Pong!
         });
 
         ws.onclose = async () => {
-            connectedToWS = false;
+            roles = undefined;
+            await new Promise((res) => setTimeout(res, 15000));
+            await checkForDisconnect();
         }
 
         wsHandlers.set("users_list", async(data) => {
@@ -479,8 +478,18 @@ async function loop() {
             };
         });
 
-        wsHandlers.set("error", (data) => {
+        wsHandlers.set("error", async(data) => {
             huopaAPI.error(JSON.stringify(data));
+        });
+
+        wsHandlers.set("rate_limit", async(data) => {
+            ratelimited = true;
+            await huopaAPI.setAttribute(chatBar, "placeholder", `You have been ratelimited! You cannot send a message for ${Math.round(data.length / 1000)} seconds`);
+            await huopaAPI.setAttribute(chatBar, "disabled", true);
+            await new Promise((res) => setTimeout(res, data.length));
+            await huopaAPI.setAttribute(chatBar, "disabled", false);
+            await huopaAPI.setAttribute(chatBar, "placeholder",`Send a message in "#${openedChannel}" | Max message length: ${messageLengthLimit} characters`);
+            ratelimited = false;
         });
 
         wsHandlers.set("messages_get", (data) => {
@@ -512,7 +521,9 @@ async function loop() {
                     }
                 });
                 await huopaAPI.addEventListener(msgDiv, "mouseenter", async() => {
-                    await huopaAPI.setCertainStyle(deleteButton, "display", "block");
+                    if (!ratelimited) {
+                        await huopaAPI.setCertainStyle(deleteButton, "display", "block");
+                    }
                 });
                 await huopaAPI.addEventListener(msgDiv, "mouseleave", async() => {
                     await huopaAPI.setCertainStyle(deleteButton, "display", "none");
@@ -534,6 +545,16 @@ async function loop() {
             await huopaAPI.prepend(messageList, msgDiv);
         });
 
+    }
+    async function checkForDisconnect() {
+        if (!connectedToWS) {
+            await huopaAPI.log(connectedToWS);
+            await huopaAPI.log("Disconnected! Attempting to reconnect...");
+            await huopaAPI.deleteElement(mainDiv);
+            await huopaAPI.deleteElement(sidebarEl);
+            loop();
+            return;
+        }
     }
 
 }
