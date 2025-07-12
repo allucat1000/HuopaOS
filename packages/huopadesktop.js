@@ -1630,7 +1630,14 @@ const createRoturLoginWindow = async (app) => {
                     outerContainer.style.width = "100%";
                     outerContainer.style.height = `calc(50% - 3em)`;
                     break;
-                    
+                case "Enter":
+                    outerContainer.style.left = "0";
+                    outerContainer.style.right = "";
+                    outerContainer.style.top = "0";
+                    outerContainer.style.bottom = "";
+                    outerContainer.style.width = "100%";
+                    outerContainer.style.height = `calc(100% - 6em)`;
+                    break;
                 default:
                     if (e.code === "KeyW") {
                         const codeElem = quantum.document.getElementById(`code-${appId}`);
