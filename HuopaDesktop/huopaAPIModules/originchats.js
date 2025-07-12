@@ -52,7 +52,7 @@ return {
     },
 
     send: (content, channel) => {
-        const messageToSend = `{"cmd":"message_new", "channel":"${channel}", "content":${JSON.stringify(content)}}`
+        const messageToSend = `{"cmd":"message_new", "channel":"${channel}", "content":"${content}"}`
         huopaAPI.log(messageToSend);
         ws.send(messageToSend);
     },
