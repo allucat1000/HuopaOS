@@ -42,7 +42,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "0.9.96";
+    const version = "1.0.0";
     // Priv Sys Funcs
     const dataURIToBlob = async (dataURI) => {
         const [meta, base64Data] = dataURI.split(',');
@@ -100,17 +100,24 @@ window.huopadesktop = (() => {
                     await internalFS.delDir("/home/applications/Text Editor.js.icon");
                 }
                 await sys.addLine("Installing app modules...");
-                const response = await fetch(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/huopaAPIModules/rwl.js`);
+                /* const response = await fetch(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/huopaAPIModules/rwl.js`);
                 if (response.ok) {
                     const data = await response.text();
                     await internalFS.createPath("/system/env/modules/rwl.js", "file", data);
                 }
+                
                 const response2 = await fetch("https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/moduleSrc/rwlSrc.js");
                 // RWL is mainly made by Flufi (GH: @ThePandaDever).
                 // Integrated into HuopaOS by me, Allucat1000.
                 if (response2.ok) {
                     const data = await response2.text();
                     await internalFS.createPath("/system/env/moduleSrc/rwlSrc.js", "file", data);
+                }
+                */
+                const response3 = await fetch(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/huopaAPIModules/originchats.js`);
+                if (response3.ok) {
+                    const data = await response3.text();
+                    await internalFS.createPath("/system/env/modules/originchats.js", "file", data);
                 }
                 await sys.addLine("[line=blue]Downloading and installing wallpapers...[/line]")
                 let wallpaper1Success;
@@ -309,13 +316,15 @@ const createRoturLoginWindow = async (app) => {
         return linkElement;
     }
     async function importLib(content) {
+        return new Promise((resolve, reject) => {
         const scriptElement = quantum.document.createElement('script');
 
         scriptElement.src = content
-
+        scriptElement.onload = () => resolve();
+        scriptElement.onerror = () => reject(new Error("Failed to load library!"));
         quantum.document.head.appendChild(scriptElement);
 
-        return scriptElement;
+        });
     }
     const downloadApp = async (url, savePath) => {
         sys.addLine(`[line=blue]Installing app to path ${savePath}...[/line]`);
@@ -851,7 +860,6 @@ const createRoturLoginWindow = async (app) => {
             setCertainStyle: function(id, styleName, content) {
                 const el = elementRegistry[id];
                 if (!el) {
-                    console.warn(styleName, content);
                     console.warn(`setCertainStyle: Element with ID: '${id}' not found.`);
                     return;
                 }
@@ -1225,6 +1233,11 @@ const createRoturLoginWindow = async (app) => {
                         elementId: id
                     }, "*");
                 });
+            },
+
+            calculate: (expression, scope = {}) => {
+                const result = math.evaluate(expression, scope);
+                return result;
             }
         };
 
@@ -1330,6 +1343,7 @@ const createRoturLoginWindow = async (app) => {
 
         dragHandle.style.cursor = "grab";
         dragHandle.addEventListener("mousedown", (e) => {
+            windowEl.focus();
             isDragging = true;
             const rect = windowEl.getBoundingClientRect();
             offsetX = e.clientX - rect.left;
@@ -1438,6 +1452,9 @@ const createRoturLoginWindow = async (app) => {
         outerContainer.classList.add("appContainer");
         outerContainer.style.left = `${winSpawnX}px`;
         outerContainer.style.display = "none";
+        appZIndex = appZIndex + 10;
+        outerContainer.style.zIndex = appZIndex;
+        outerContainer.style.outlineStyle = "none";
         quantum.document.getElementById("desktop").appendChild(outerContainer);
         const computed = getComputedStyle(outerContainer);
         const baseColor = computed.backgroundColor;
@@ -1567,8 +1584,68 @@ const createRoturLoginWindow = async (app) => {
         container.append(topBarSplitter);
         outerContainer.append(container);
         outerContainer.style.display = "block";
+        outerContainer.tabIndex = "0";
+        outerContainer.focus();
         createDraggableWindow(outerContainer);
+        outerContainer.addEventListener("keydown", (e) => {
+            if (Number(outerContainer.style.zIndex) !== appZIndex) {
+                return;
+            }
+            if (!e.altKey) return;
+            e.preventDefault();
+            e.stopPropagation();
+            switch (e.key) {
+                case "ArrowLeft":
+                    outerContainer.style.left = "0";
+                    outerContainer.style.top = "0";
+                    outerContainer.style.right = "";
+                    outerContainer.style.bottom = "";
+                    outerContainer.style.width = "50%";
+                    outerContainer.style.height = `calc(100% - 6em)`;
+                    break;
+                
+                case "ArrowRight":
+                    outerContainer.style.left = "";
+                    outerContainer.style.right = "0";
+                    outerContainer.style.top = "0";
+                    outerContainer.style.bottom = "";
+                    outerContainer.style.width = "50%";
+                    outerContainer.style.height = `calc(100% - 6em)`;
+                    break;
+               
+                case "ArrowUp":
+                    outerContainer.style.left = "0";
+                    outerContainer.style.right = "";
+                    outerContainer.style.top = "0";
+                    outerContainer.style.bottom = "";
+                    outerContainer.style.width = "100%";
+                    outerContainer.style.height = `calc(50% - 3em)`;
+                    break;
+                
+                case "ArrowDown":
+                    outerContainer.style.left = "0";
+                    outerContainer.style.right = "";
+                    outerContainer.style.top = "calc(100% - 50% - 3em)";
+                    outerContainer.style.bottom = "";
+                    outerContainer.style.width = "100%";
+                    outerContainer.style.height = `calc(50% - 3em)`;
+                    break;
+                    
+                default:
+                    if (e.code === "KeyW") {
+                        const codeElem = quantum.document.getElementById(`code-${appId}`);
+                        if (codeElem) {
+                            codeElem.remove();
+                        }
+                        
+                        outerContainer.remove();
+                        appToDock.remove();
+                    }
+                    break;
+            }
+        }) 
 
+        
         requestAnimationFrame(() => {
             outerContainer.style.opacity = "1";
             outerContainer.style.transform = "translateY(0px)";
@@ -1700,6 +1777,7 @@ const createRoturLoginWindow = async (app) => {
     const createMainGUI = async () => {
         if (killSwitch) return;
         try {
+            await importLib("https://cdn.jsdelivr.net/npm/mathjs@12.4.1/lib/browser/math.min.js");
             docked = await internalFS.getFile("/system/env/systemconfig/settings/customization/dockedTaskbar.txt");
             const mainDiv = quantum.document.getElementById("termDiv");
             mainDiv.innerHTML = "";
@@ -1917,17 +1995,8 @@ const createRoturLoginWindow = async (app) => {
 
         async install() {
             await new Promise(resolve => setTimeout(resolve, 100));
-            await sys.addLine("## [line=blue]HuopaDesktop setup[/line]");
-            await sys.addLine("Do you want to install HuopaDesktop? [Y/n]");
-            await sys.addLine("HuopaDesktop uses the Quantum display manager.");
-            inputAnswerActive = true;
-            await waitUntil(() => !inputAnswerActive);
-            if (inputAnswer.toLowerCase() === "y" || inputAnswer.toLowerCase() === "") {
-                await sys.addLine("[line=blue]Installing HuopaDesktop...[/line]");
-                await mainInstaller()
-            } else {
-                await sys.addLine("[line=red]HuopaDesktop installation has been cancelled.[/line]");
-            }
+            await sys.addLine("## [line=blue]Installing GUI system..[/line]");
+            await mainInstaller();
         },
         
     };

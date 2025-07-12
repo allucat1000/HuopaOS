@@ -731,11 +731,13 @@ async function init(reinstall) {
             await sys.addLine(`[line=red]Failed to fetch terminal commands.[/line]`);
             await sys.addLine(`Error: ${e}`);
         }
-      sys.addLine("[line=green]Terminal commands installed[/line]")
+      sys.addLine("[line=green]Terminal commands installed[/line]");
+      await internalFS.downloadPackage("huopadesktop");
+      await callCMD("huopadesktop", ["install"]);
       
     } else {
         await sys.addLine("**System file creation cancelled.**")
-        await sys.addLine("[line=red]**_You will be unable to use the system, since you don't have a core system files._**[/line]")
+        await sys.addLine("[line=red]**_You will be unable to use the system, since you don't have core system files._**[/line]")
     }
   } else {
     const issues = await checkFileSystemIntegrity();
