@@ -467,8 +467,9 @@ async function loop() {
                                     "style":"padding: 2.5em 0.5em 1em;; color: white; text-align: left; text-wrap: wrap;",
                                     "textContent":msg.content
                                 });
-                                const urlRegex = /(https?:\/\/[^\s]+)/g;
+                                const urlRegex = /(?<!<)https?:\/\/[^\s>]+(?!>)/g;
                                 const match = msg.content.match(urlRegex);
+                                let msgContent = msg.content;
                                 let imgEl;
                                 if (match) {
                                     let url = match[0];
@@ -476,15 +477,34 @@ async function loop() {
                                     const extRegex = /\.(png|jpe?g|gif|bmp|webp|tiff)$/i;
                                     const extMatch = url.match(extRegex);
                                     if (!extMatch) url = url + ".gif";
-                                    imgEl = await huopaAPI.createElement("img");
-                                    await setAttrs(imgEl, {
-                                        "style":"border-radius: 0.5em; margin: 0.5em;",
-                                        "src":`https://proxy.mistium.com/?url=${url}`
-                                    });
+                                    url = "https://proxy.mistium.com/?url=" + url;
+                                    const response = await huopaAPI.fetch(url);
+                                    if (response.ok) {
+                                        if (response.contentType.startsWith("video/") || response.contentType.startsWith("image/")) {
+                                            if (response.contentType.startsWith("video/")) {
+                                                imgEl = await huopaAPI.createElement("video");
+                                            } else {
+                                                imgEl = await huopaAPI.createElement("img");
+                                            }
+                                            await setAttrs(imgEl, {
+                                                "style":"border-radius: 0.5em; margin: 0.5em;",
+                                                "src":url
+                                            });
+                                            msgContent = msgContent.replace(/(https?:\/\/[^\s]+)/, "");
+                                            await huopaAPI.setAttribute(text, "textContent", msgContent)
+                                        }
+                                        
+                                    }
+                                    
+                                    
                                     
                                 }
                                 await huopaAPI.append(msgDiv, user);
-                                await huopaAPI.append(msgDiv, text);
+                                if (msgContent.length > 0) {
+                                    await huopaAPI.append(msgDiv, text);
+                                } else {
+                                    await huopaAPI.setCertainStyle(imgEl, "marginTop", "2.5em");
+                                }
                                 if (imgEl) {await huopaAPI.append(msgDiv, imgEl);}
                                 if (changeButtons) {
                                     await huopaAPI.append(msgDiv, deleteButton);
@@ -575,8 +595,9 @@ async function loop() {
                     "style":"padding: 2.5em 0.5em 1em;; color: white; text-align: left; text-wrap: wrap;",
                     "textContent":msg.content
                 });
-                const urlRegex = /(https?:\/\/[^\s]+)/g;
+                const urlRegex = /(?<!<)https?:\/\/[^\s>]+(?!>)/g;
                 const match = msg.content.match(urlRegex);
+                let msgContent = msg.content;
                 let imgEl;
                 if (match) {
                     let url = match[0];
@@ -584,16 +605,35 @@ async function loop() {
                     const extRegex = /\.(png|jpe?g|gif|bmp|webp|tiff)$/i;
                     const extMatch = url.match(extRegex);
                     if (!extMatch) url = url + ".gif";
-                    imgEl = await huopaAPI.createElement("img");
-                    await setAttrs(imgEl, {
-                        "style":"border-radius: 0.5em; margin: 0.5em;",
-                        "src":url
-                    });
+                    url = "https://proxy.mistium.com/?url=" + url;
+                    const response = await huopaAPI.fetch(url);
+                    if (response.ok) {
+                        if (response.contentType.startsWith("video/") || response.contentType.startsWith("image/")) {
+                            if (response.contentType.startsWith("video/")) {
+                                imgEl = await huopaAPI.createElement("video");
+                            } else {
+                                imgEl = await huopaAPI.createElement("img");
+                            }
+                            await setAttrs(imgEl, {
+                                "style":"border-radius: 0.5em; margin: 0.5em;",
+                                "src":url
+                            });
+                            msgContent = msgContent.replace(/(https?:\/\/[^\s]+)/, "");
+                            await huopaAPI.setAttribute(text, "textContent", msgContent)
+                        }
+                        
+                    }
+                    
+                    
                     
                 }
                 await huopaAPI.append(msgDiv, user);
-                await huopaAPI.append(msgDiv, text);
-                if (imgEl) {await huopaAPI.append(msgDiv, imgEl);}
+                if (msgContent.length > 0) {
+                    await huopaAPI.append(msgDiv, text);
+                } else {
+                    await huopaAPI.setCertainStyle(imgEl, "marginTop", "2.5em");
+                }
+                if (imgEl) await huopaAPI.append(msgDiv, imgEl);
                 if (changeButtons) {
                     await huopaAPI.append(msgDiv, deleteButton);
                 }

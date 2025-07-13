@@ -1235,6 +1235,12 @@ const createRoturLoginWindow = async (app) => {
                 });
             },
 
+            removeEventListener: async(id, type) => {
+                const el = elementRegistry[id];
+                if (!el) return;
+                el.removeEventListener(type);
+            },
+
             calculate: (expression, scope = {}) => {
                 const result = math.evaluate(expression, scope);
                 return result;
@@ -1647,6 +1653,8 @@ const createRoturLoginWindow = async (app) => {
                         
                         outerContainer.remove();
                         appToDock.remove();
+                    } else {
+                        console.log(e.key);
                     }
                     break;
             }
