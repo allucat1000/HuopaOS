@@ -151,7 +151,7 @@ window.huopadesktop = (() => {
                 }
 
                 if (!await internalFS.getFile("/system/env/systemconfig/settings/customization/bgopac.txt")) {
-                    await internalFS.createPath("/system/env/systemconfig/settings/customization/bgopac.txt", "file", "0.65")
+                    await internalFS.createPath("/system/env/systemconfig/settings/customization/bgopac.txt", "file", "0.90")
                 }
 
                 if (!await internalFS.getFile("/system/env/systemconfig/settings/customization/windowbordercolor.txt")) {
@@ -1653,8 +1653,6 @@ const createRoturLoginWindow = async (app) => {
                         
                         outerContainer.remove();
                         appToDock.remove();
-                    } else {
-                        console.log(e.key);
                     }
                     break;
             }

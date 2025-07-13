@@ -205,7 +205,7 @@ async function loop() {
                     if (icon) {
                         await setAttrs(serverIcon, {
                             "src":icon,
-                            "style":"width: 32px; height: 32px; border-radius: 0.25em; margin: 0.5em; cursor: pointer;",
+                            "style":"width: 32px; height: 32px; border-radius: 0.5em; margin: 0.5em; cursor: pointer;",
                             "onclick": async () => {
                                 await huopaAPI.writeFile("/home/applications/OriginChats/currentServerOpen.txt", "file", serverI)
                                 await huopaAPI.deleteElement(mainArea);
@@ -219,8 +219,13 @@ async function loop() {
                     
                 }
                 const addServerButton = await huopaAPI.createElement("button");
+                const addServerImg = await huopaAPI.createElement("img");
+                await setAttrs(addServerImg, {
+                    "innerHTML":'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus-icon lucide-plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>'
+                });
+                await huopaAPI.append(addServerButton, addServerImg);
                 await setAttrs(addServerButton, {
-                    "style":"width: 50px; height: 50px; border-radius: 0.25em; background-color: rgba(35, 35, 35, 0.5); border: rgba(105, 105, 105, 0.65) 1px solid; color: white; padding: 0;",
+                    "style":"width: 36px; height: 36px; border-radius: 0.5em; background-color: rgba(35, 35, 35, 0.5); border: rgba(105, 105, 105, 0.65) 1px solid; color: white; padding: 0;",
                     "textContent":"Add server",
                     "onclick": async() => {
                         const serverUrlInput = await huopaAPI.createElement("input");
@@ -367,7 +372,7 @@ async function loop() {
                 });
                 const serverInfo = await huopaAPI.createElement("div");
                 await setAttrs(serverInfo, {
-                    "style":"background-color: rgba(45, 45, 45, 0.5); border-radius: 0.25em; margin-bottom: 0.5em; width: 100%; margin: 1em 0.5em; margin-top: 0.5em; display: flex; align-items: center; border: rgba(105, 105, 105, 0.65) 1px solid;"
+                    "style":"background-color: rgba(45, 45, 45, 0.5); border-radius: 0.5em; margin-bottom: 0.5em; width: 100%; margin: 1em 0.5em; margin-top: 0.5em; display: flex; align-items: center; border: rgba(105, 105, 105, 0.65) 1px solid;"
                 });
                 const serverName = await huopaAPI.createElement("p");
                 await setAttrs(serverName, {
@@ -377,7 +382,7 @@ async function loop() {
                 const serverIcon = await huopaAPI.createElement("img");
                 await setAttrs(serverIcon, {
                     "src":server.icon,
-                    "style":"display: inline; border-radius: 0.25em; width: 32px; height: 32px; margin-left: 0.66em;"
+                    "style":"display: inline; border-radius: 0.5em; width: 32px; height: 32px; margin-left: 0.66em;"
                 });
                 await huopaAPI.append(serverInfo, serverIcon);
                 await huopaAPI.append(serverInfo, serverName);
@@ -386,7 +391,7 @@ async function loop() {
                 for (channel of channelList) {
                     const channelDiv = await huopaAPI.createElement("div");
                     await setAttrs(channelDiv, {
-                        "style":"padding: 0; width: 100%; margin: 0.5em; background-color: rgba(45, 45, 45, 0.5); border-radius: 0.25em; border: rgba(105, 105, 105, 0.65) 1px solid; cursor: pointer;",
+                        "style":"padding: 0; width: 100%; margin: 0.5em; background-color: rgba(45, 45, 45, 0.5); border-radius: 0.5em; border: rgba(105, 105, 105, 0.65) 1px solid; cursor: pointer;",
                     });
                     const channelSave = channel;
                     const channelPerms = channelSave.permissions;
