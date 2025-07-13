@@ -495,7 +495,7 @@ async function loop() {
                                                 imgEl = await huopaAPI.createElement("img");
                                             }
                                             await setAttrs(imgEl, {
-                                                "style":"border-radius: 0.5em; margin: 0.5em;",
+                                                "style":"border-radius: 0.5em; margin: 0.5em; max-width: calc(100% - 1em);",
                                                 "src":url
                                             });
                                             msgContent = msgContent.replace(/(https?:\/\/[^\s]+)/, "");
@@ -623,7 +623,7 @@ async function loop() {
                                 imgEl = await huopaAPI.createElement("img");
                             }
                             await setAttrs(imgEl, {
-                                "style":"border-radius: 0.5em; margin: 0.5em;",
+                                "style":"border-radius: 0.5em; margin: 0.5em; max-width: calc(100% - 1em);",
                                 "src":url
                             });
                             msgContent = msgContent.replace(/(https?:\/\/[^\s]+)/, "");
