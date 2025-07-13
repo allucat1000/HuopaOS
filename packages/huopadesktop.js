@@ -1722,7 +1722,7 @@ const createRoturLoginWindow = async (app) => {
                 startMenuDiv.append(noAppsText);
             }
             const appListDiv = quantum.document.createElement("div");
-            appListDiv.style = "height: 18em; overflow: auto; position: relative;"
+            appListDiv.style = "height: 18em; overflow: auto; position: relative; overflow-x: hidden;"
             startMenuDiv.append(appListDiv);
             for (let i = 0; i < appList.length; i++) {
                 if (appList[i].endsWith(".js")) {
