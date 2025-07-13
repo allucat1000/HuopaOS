@@ -791,7 +791,6 @@ async function bootMGR() {
           const cmd = window[config.bootname]?.[config.bootcmd];
 
           if (typeof cmd === "function") {
-              sessionType = "graphical";
               await cmd();
           } else {
               sys.addLine(`[line=red]Boot command "${config.bootcmd}" not found in "${config.bootname}".[/line]`);

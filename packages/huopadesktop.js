@@ -1999,6 +1999,7 @@ const createRoturLoginWindow = async (app) => {
             await new Promise(resolve => setTimeout(resolve, 100));
 
             createMainGUI()
+            sessionType = "graphical";
 
         },
 
@@ -2010,6 +2011,7 @@ const createRoturLoginWindow = async (app) => {
             await new Promise(resolve => setTimeout(resolve, 100));
             await sys.addLine("## [line=blue]Installing GUI system..[/line]");
             await mainInstaller();
+            sessionType = "graphical";
         },
         
     };
