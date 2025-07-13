@@ -75,6 +75,7 @@ async function loop() {
     let editingMessage = false; 
     let validatorKey = undefined;
     let messageTable = {};
+    let delAllowed = false;
     const sidebarEl = await huopaAPI.createElement("div");
    
         let connectedToWS;
@@ -409,7 +410,13 @@ async function loop() {
                             
                             openedChannel = channelSave.name;
                             
-                            let sendAllowed = false;
+                            delAllowed = false;
+                            for (const role of roles) {
+                                if (channelPerms.send.includes(role)) {
+                                    delAllowed = true
+                                }
+                            }
+                            let sendAllowed
                             for (const role of roles) {
                                 if (channelPerms.send.includes(role)) {
                                     sendAllowed = true
@@ -442,7 +449,7 @@ async function loop() {
                                 const text = await huopaAPI.createElement("p");
                                 let changeButtons = false;
                                 const deleteButton = await huopaAPI.createElement("button");
-                                if (msg.user === userObj.username) {
+                                if (msg.user === userObj.username || delAllowed) {
                                     changeButtons = true
                                     await setAttrs(deleteButton, {
                                         "style":"position: absolute; top: -0.5em; color: red; right: 0.5em; padding: 0.5em 0.75em; display: none;",
@@ -570,7 +577,7 @@ async function loop() {
                 const text = await huopaAPI.createElement("p");
                 let changeButtons = false;
                 const deleteButton = await huopaAPI.createElement("button");
-                if (msg.user === userObj.username) {
+                if (msg.user === userObj.username || delAllowed) {
                     changeButtons = true
                     await setAttrs(deleteButton, {
                         "style":"position: absolute; top: -0.5em; color: red; right: 0.5em; padding: 0.5em 0.75em; display: none;",

@@ -1598,8 +1598,6 @@ const createRoturLoginWindow = async (app) => {
                 return;
             }
             if (!e.altKey) return;
-            e.preventDefault();
-            e.stopPropagation();
             switch (e.key) {
                 case "ArrowLeft":
                     outerContainer.style.left = "0";
