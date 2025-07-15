@@ -76,6 +76,7 @@ async function loop() {
     let validatorKey = undefined;
     let messageTable = {};
     let delAllowed = false;
+    let loading2 = false;
     const sidebarEl = await huopaAPI.createElement("div");
    
         let connectedToWS;
@@ -361,6 +362,8 @@ async function loop() {
             });
 
             wsHandlers.set("channels_get", async(data) => {
+                if (loading2) return;
+                loading2 = true;
                 channelList = data.val;
                 const newChannelListEl = await huopaAPI.createElement("div");
                 await huopaAPI.deleteElement(channelListEl);
@@ -472,7 +475,7 @@ async function loop() {
                                     "textContent":msg.user
                                 });
                                 await setAttrs(text, {
-                                    "style":"padding: 2.5em 0.5em 1em;; color: white; text-align: left; text-wrap: wrap;",
+                                    "style":"padding: 2.5em 0.5em 1em;; color: white; text-align: left; text-wrap: wrap; user-select: text;",
                                     "textContent":msg.content
                                 });
                                 const urlRegex = /(?<!<)https?:\/\/[^\s>]+(?!>)/g;
@@ -540,6 +543,7 @@ async function loop() {
                     await huopaAPI.append(newChannelListEl, channelDiv);
                     await huopaAPI.append(bg, newChannelListEl);
                     channelListEl = newChannelListEl
+                    loading2 = false;
                 };
             });
 
@@ -600,7 +604,7 @@ async function loop() {
                     "textContent":msg.user
                 });
                 await setAttrs(text, {
-                    "style":"padding: 2.5em 0.5em 1em;; color: white; text-align: left; text-wrap: wrap;",
+                    "style":"padding: 2.5em 0.5em 1em;; color: white; text-align: left; text-wrap: wrap; user-select: text;",
                     "textContent":msg.content
                 });
                 const urlRegex = /(?<!<)https?:\/\/[^\s>]+(?!>)/g;
@@ -651,7 +655,6 @@ async function loop() {
         }
         async function checkForDisconnect() {
             if (!connectedToWS) {
-                await huopaAPI.log(connectedToWS);
                 await huopaAPI.log("Disconnected! Attempting to reconnect...");
                 await huopaAPI.deleteElement(mainDiv);
                 await huopaAPI.deleteElement(sidebarEl);

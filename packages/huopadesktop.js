@@ -87,6 +87,10 @@ window.huopadesktop = (() => {
                 if (!await internalFS.getFile("/home/applications/App Store.js.icon")) {
                     await internalFS.createPath("/home/applications/App Store.js.icon", "file", `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-cart-icon lucide-shopping-cart"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>`);
                 }
+                await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/Calculator.js`, "/home/applications/Calculator.js");
+                if (!await internalFS.getFile("/home/applications/Calculator.js.icon")) {
+                    await internalFS.createPath("/home/applications/Calculator.js.icon", "file", `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calculator-icon lucide-calculator"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>`);
+                }
                 await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/File%20Manager.js`, "/home/applications/File Manager.js");
                 if (!await internalFS.getFile("/home/applications/File Manager.js.icon")) {
                     await internalFS.createPath("/home/applications/File Manager.js.icon", "file", `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder-closed-icon lucide-folder-closed"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/><path d="M2 10h20"/></svg>`);
@@ -961,10 +965,6 @@ const createRoturLoginWindow = async (app) => {
                 const el = elementRegistry[id];
                 if (!el) return;
                 if (el.tagName.toLowerCase() === "iframe" && type.toLowerCase() === "src") {
-                    if (typeof content !== String) {
-                        console.warn("[huopaAPI SAFETY] Invalid content type.");
-                        return;
-                    }
 
                     // Currently for safety reasons, only http(s) content is allowed in iFrames
 
@@ -1242,8 +1242,14 @@ const createRoturLoginWindow = async (app) => {
             },
 
             calculate: (expression, scope = {}) => {
-                const result = math.evaluate(expression, scope);
-                return result;
+                try {
+                    const result = math.evaluate(expression, scope);
+                    return result;
+                } catch (error) {
+                    console.error(`calculate: '${error}'`);
+                    return;
+                }
+                
             }
         };
 
