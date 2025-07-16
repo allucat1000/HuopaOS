@@ -103,6 +103,11 @@ async function runCmd(value) {
             if (values) {
                 const path = values[0];
                 const fullPath = resolvePath(values[0]);
+                const exists = await pathExists(fullPath);
+                if (!exists) {
+                    await addLine(`[line=red]open: Given path doesn't exist![/line]`);
+                    return;
+                }
                 const dir = await isDir(fullPath);
                 if (dir) {
                     await addLine(`[line=red]open: Given path is not supposed to be a directory![/line]`)
@@ -166,6 +171,11 @@ async function runCmd(value) {
             let path = values[0];
             if (!values[0]) path = currentPath;
             let fullPath = resolvePath(path);
+            const exists = await pathExists(fullPath);
+            if (!exists) {
+                await addLine(`[line=red]ls: Given path doesn't exist![/line]`);
+                return;
+            }
             if (isDir(fullPath)) {
                 const list = JSON.parse(await huopaAPI.getFile(fullPath));
                 let listToShow = `Items at path "${fullPath}":
@@ -184,6 +194,11 @@ ${item}
         case "rm":
             if (values) {
                 let fullPath = resolvePath(values[0]);
+                const exists = await pathExists(fullPath);
+                if (!exists) {
+                    await addLine(`[line=red]rm: Given path doesn't exist![/line]`);
+                    return;
+                }
                 await huopaAPI.deleteFile(fullPath);
             } else {
                 await addLine(`[line=red]rm: A parameter is required[/line]`);
@@ -206,13 +221,15 @@ ${item}
                 const parentPath = "/" + parts.slice(0, -1).join("/");
 
                 try {
-                    const children = await huopaAPI.getFile(parentPath);
-                    if (children && children.includes(fullPath)) {
-                        currentPath = fullPath;
-                        await huopaAPI.setAttribute(startText, "textContent", currentPath + " $\u00A0");
-                    } else {
-                        await addLine(`[line=red]cd: Unknown path "${fullPath}"[/line]`);
+                    const exists = await pathExists(fullPath);
+                    if (!exists) {
+                        await addLine(`[line=red]cd: Given path doesn't exist![/line]`);
+                        return;
                     }
+                
+                    currentPath = fullPath;
+                    await huopaAPI.setAttribute(startText, "textContent", currentPath + " $\u00A0");
+                
                 } catch (e) {
                     await addLine(`[line=red]cd: Failed to access "${parentPath}"[/line]`);
                 }
@@ -243,7 +260,6 @@ function resolvePath(inputPath) {
         else if (part === "..") resolvedParts.pop();
         else resolvedParts.push(part);
     }
-
     return "/" + resolvedParts.join("/");
 }
 
@@ -270,6 +286,23 @@ async function isDir(path) {
         return true;
     } catch (err) {
         await huopaAPI.error(err);
+        return false;
+    }
+}
+
+async function pathExists(path) {
+    if (path === "/") return true;
+    let parentPath = path.split("/").slice(0, -1);
+    let children;
+
+    if (parentPath.length === 1) {
+        children = await huopaAPI.getFile("/");
+    } else {
+        children = await huopaAPI.getFile(parentPath.join("/"));
+    }
+    if (children.includes(path)) {
+        return true;
+    } else {
         return false;
     }
 }
