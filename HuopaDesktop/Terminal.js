@@ -300,6 +300,7 @@ async function pathExists(path) {
     } else {
         children = await huopaAPI.getFile(parentPath.join("/"));
     }
+    children = JSON.parse(children);
     if (children.includes(path)) {
         return true;
     } else {
