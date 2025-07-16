@@ -1650,11 +1650,12 @@ const createRoturLoginWindow = async (app) => {
         outerContainer.tabIndex = "0";
         outerContainer.focus();
         createDraggableWindow(outerContainer);
-        outerContainer.addEventListener("keydown", (e) => {
+        outerContainer.addEventListener("keydown", async(e) => {
             if (Number(outerContainer.style.zIndex) !== appZIndex) {
                 return;
             }
             if (!e.altKey) return;
+            const docked = await huopaAPI.getFile("/system/env/systemconfig/settings/customization/dockedTaskbar.txt");
             switch (e.key) {
                 case "ArrowLeft":
                     outerContainer.style.left = "0";
@@ -1662,7 +1663,13 @@ const createRoturLoginWindow = async (app) => {
                     outerContainer.style.right = "";
                     outerContainer.style.bottom = "";
                     outerContainer.style.width = "50%";
-                    outerContainer.style.height = `calc(100% - 6em)`;
+                    if (docked === "true") {
+                        outerContainer.style.height = `calc(100% - 4.3em)`;
+                    } else {
+                        outerContainer.style.height = `calc(100% - 7em)`;
+                    }
+                    
+                   
                     break;
                 
                 case "ArrowRight":
@@ -1671,7 +1678,11 @@ const createRoturLoginWindow = async (app) => {
                     outerContainer.style.top = "0";
                     outerContainer.style.bottom = "";
                     outerContainer.style.width = "50%";
-                    outerContainer.style.height = `calc(100% - 6em)`;
+                    if (docked === "true") {
+                        outerContainer.style.height = `calc(100% - 4.3em)`;
+                    } else {
+                        outerContainer.style.height = `calc(100% - 7em)`;
+                    }
                     break;
                
                 case "ArrowUp":
@@ -1686,6 +1697,11 @@ const createRoturLoginWindow = async (app) => {
                 case "ArrowDown":
                     outerContainer.style.left = "0";
                     outerContainer.style.right = "";
+                    if (docked === "true") {
+                        outerContainer.style.height = `calc(50% - 1.4em)`;
+                    } else {
+                        outerContainer.style.height = "calc(50% - 3em)";
+                    }
                     outerContainer.style.top = "calc(100% - 50% - 3em)";
                     outerContainer.style.bottom = "";
                     outerContainer.style.width = "100%";
@@ -1697,7 +1713,11 @@ const createRoturLoginWindow = async (app) => {
                     outerContainer.style.top = "0";
                     outerContainer.style.bottom = "";
                     outerContainer.style.width = "100%";
-                    outerContainer.style.height = `calc(100% - 6em)`;
+                    if (docked === "true") {
+                        outerContainer.style.height = `calc(100% - 4.3em)`;
+                    } else {
+                        outerContainer.style.height = `calc(100% - 7em)`;
+                    }
                     break;
                 default:
                     if (e.code === "KeyW") {

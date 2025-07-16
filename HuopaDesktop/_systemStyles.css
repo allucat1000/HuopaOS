@@ -179,7 +179,7 @@ input[type="checkbox"]:checked {
   transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
-/* Scrollbars */
+/* Scrollbars (disabled for now)
 
 ::-webkit-scrollbar {
   width: 12px;              
@@ -207,3 +207,5 @@ input[type="checkbox"]:checked {
 html, body {
   scrollbar-gutter: stable overlay;
 }
+
+*/

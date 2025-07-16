@@ -95,7 +95,7 @@ async function loop() {
         }) 
         const mainArea = await huopaAPI.createElement("div");
         await setAttrs(mainArea, {
-            "style":"position: absolute; right: 0; top: 0; width: calc(100% - 50px); height: 100%;"
+            "style":"position: absolute; right: 0; top: 0; width: calc(100% - 34px - 1em); height: 100%;"
         });
 
         ws.onmessage = async (msg) => {
