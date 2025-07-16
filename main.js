@@ -22,7 +22,9 @@ if (typeof window === "undefined") {
   throw new Error("HuopaOS requires a browser environment.");
 }
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("/service-worker.js");
+  navigator.serviceWorker.register("./service-worker.js", { scope: "./" })
+    .then(reg => console.log("SW registered", reg))
+    .catch(err => console.error("SW registration failed", err));
 }
 let sessionType = "terminal"
 const customColors = {
