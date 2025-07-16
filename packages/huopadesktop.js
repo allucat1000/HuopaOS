@@ -42,7 +42,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "1.0.4";
+    const version = "1.0.3";
     // Priv Sys Funcs
     const dataURIToBlob = async (dataURI) => {
         const [meta, base64Data] = dataURI.split(',');
@@ -59,117 +59,6 @@ window.huopadesktop = (() => {
 
         return new Blob([array], { type: mime });
     }
-
-    const GitHubAPI = (() => {
-    let authToken = null;
-
-    function setAuthToken(token) {
-        authToken = token;
-    }
-
-    async function fetchGitHub(url, method = 'GET', body = null) {
-        const headers = {
-        'Accept': 'application/vnd.github.v3+json',
-        };
-        if (authToken) headers['Authorization'] = `token ${authToken}`;
-        if (body) headers['Content-Type'] = 'application/json';
-
-        const response = await fetch(url, {
-        method,
-        headers,
-        body: body ? JSON.stringify(body) : undefined
-        });
-
-        if (!response.ok) throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
-        return await response.json();
-    }
-
-    async function getRepositoryInfo(user, repo) {
-        const data = await fetchGitHub(`https://api.github.com/repos/${user}/${repo}`);
-        return {
-        name: data.name,
-        description: data.description,
-        owner: data.owner.login,
-        stars: data.stargazers_count,
-        watchers: data.watchers_count,
-        forks: data.forks_count,
-        avatar: data.owner.avatar_url
-        };
-    }
-
-    async function getFile(user, repo, branch, path) {
-        const url = `https://raw.githubusercontent.com/${user}/${repo}/${branch}/${path}`;
-        const response = await fetch(url);
-        if (!response.ok) throw new Error("Failed to fetch file.");
-        return await response.text();
-    }
-
-    async function createOrUpdateFile(user, repo, path, content, isUpdate = false) {
-        const url = `https://api.github.com/repos/${user}/${repo}/contents/${path}`;
-        const base64 = btoa(content);
-
-        let sha = null;
-        if (isUpdate) {
-        const existing = await fetchGitHub(url);
-        sha = existing.sha;
-        }
-
-        const body = {
-        message: isUpdate ? 'Update file' : 'Create file',
-        content: base64,
-        ...(sha ? { sha } : {})
-        };
-
-        return await fetchGitHub(url, 'PUT', body);
-    }
-
-    async function deleteFile(user, repo, path) {
-        const url = `https://api.github.com/repos/${user}/${repo}/contents/${path}`;
-        const existing = await fetchGitHub(url);
-        const body = {
-        message: 'Delete file',
-        sha: existing.sha
-        };
-        return await fetchGitHub(url, 'DELETE', body);
-    }
-
-    async function listFolder(user, repo, folder) {
-        const data = await fetchGitHub(`https://api.github.com/repos/${user}/${repo}/contents/${folder}`);
-        return data.map(item => ({ name: item.name, path: item.path }));
-    }
-
-    async function listIssues(user, repo) {
-        return await fetchGitHub(`https://api.github.com/repos/${user}/${repo}/issues`);
-    }
-
-    async function createIssue(user, repo, title, body) {
-        return await fetchGitHub(`https://api.github.com/repos/${user}/${repo}/issues`, 'POST', {
-        title,
-        body
-        });
-    }
-
-    async function updateIssue(user, repo, issueNumber, title, body) {
-        return await fetchGitHub(`https://api.github.com/repos/${user}/${repo}/issues/${issueNumber}`, 'PATCH', {
-        title,
-        body
-        });
-    }
-
-    return {
-        setAuthToken,
-        getRepositoryInfo,
-        getFile,
-        createFile: (user, repo, path, content) => createOrUpdateFile(user, repo, path, content, false),
-        updateFile: (user, repo, path, content) => createOrUpdateFile(user, repo, path, content, true),
-        deleteFile,
-        listFolder,
-        listIssues,
-        createIssue,
-        updateIssue
-    };
-    })();
-
     const mainInstaller = async () => {
         try {
                     await sys.import("quantum");
@@ -662,7 +551,7 @@ const createRoturLoginWindow = async (app) => {
                             }
                         }
                         async function importModule(moduleName) {
-                            const moduleCode = await huopaAPI.fs.getFile("/system/env/modules/" + moduleName.toLowerCase() + ".js");
+                            const moduleCode = await huopaAPI.getFile("/system/env/modules/" + moduleName.toLowerCase() + ".js");
                             const module = eval("(() => { " + moduleCode + " })()");
                             return module;
                         }
@@ -874,6 +763,7 @@ const createRoturLoginWindow = async (app) => {
                 console.warn(`[APP WARN]: ${msg}`);
             },
 
+            container: appContainer,
 
             Math,
 
@@ -901,60 +791,13 @@ const createRoturLoginWindow = async (app) => {
                     body,
                 };
             },
-            window: {
-                getSize: function() {
-                    return {
-                        width: appContainer.clientWidth,
-                        height: appContainer.clientHeight,
-                    };
-                },
 
-                runApp: async(path, startParams) => {
-                    if (!path || !path.endsWith(".js")) {
-                        if (!path) {
-                            console.warn("No path given for app execution. Request cancelled.");
-                            return;
-                        } else {
-                            console.warn("File not correct type or is directory. Request cancelled.");
-                            return;
-                        }
-                    }
-                    const appName = path.split("/").pop().slice(0, -3);
-                    const code = await internalFS.getFile(path);
-                    await runApp(appName, code, path, startParams);
-                },
-
-                close: () => {
-                    const digitId = appContainer.parentElement.id;
-                    const codeElem = quantum.document.querySelector(`[data-digit-id="${digitId}"]`);
-                    if (codeElem) {
-                        codeElem.remove();
-                    }
-                    appContainer.parentElement.remove();
-                    const appToDock = quantum.document.querySelector(`[data-dock-digit-id="${digitId}"]`);
-                    if (appToDock) {
-                        appToDock.remove();
-                    }
-                },
-
-                setTitle: (content) => {
-                    const digitId = appContainer.parentElement.id;
-                    const title = quantum.document.querySelector(`[data-title-digit-id="${digitId}"]`);
-                    title.textContent = content;
-                },
-
-
-                hid: () => {
-                    appContainer.parentElement.style.display = "none";
-                },
-
-                show: () => {
-                    appContainer.parentElement.style.display = "block";
-                },
-                
-    
+            getWindowSize: function() {
+                return {
+                    width: appContainer.clientWidth,
+                    height: appContainer.clientHeight,
+                };
             },
-            
 
 
             setOnClick: function(id) {
@@ -995,34 +838,33 @@ const createRoturLoginWindow = async (app) => {
                     }, "*");
                 });
             },
-            fs: {
-                getFile: function(path, permissions) {
-                    if (path.startsWith("/system/env/appconfig")) {
-                        console.warn("[huopaAPI SAFETY]: App tried reading in safeStorage using default read command!");
-                        return "[HuopaDesktop FS Security]: No permissions";
-                    }
-                    return internalFS.getFile(path, permissions);
-                },
 
-                deleteFile: function(path, recursive = true, permissions) {
-                    if (path.startsWith("/system/env/appconfig")) {
-                        console.warn("[huopaAPI SAFETY]: App tried deleting file in safeStorage using default delete command!");
-                        return "[HuopaDesktop FS Security]: No permissions";
-                    }
-                    return internalFS.delDir(path, permissions, recursive);
-                },
+            getFile: function(path, permissions) {
+                if (path.startsWith("/system/env/appconfig")) {
+                    console.warn("[huopaAPI SAFETY]: App tried reading in safeStorage using default read command!");
+                    return "[HuopaDesktop FS Security]: No permissions";
+                }
+                return internalFS.getFile(path, permissions);
+            },
 
-                writeFile: function(path, type, content, permissions = {
-                    "read":"",
-                    "write":"",
-                    "modify":"",
-                }) {
-                    if (path.startsWith("/system/env/appconfig")) {
-                        console.warn("[huopaAPI SAFETY]: App tried writing in safeStorage using default write command!");
-                        return "[HuopaDesktop FS Security]: No permissions";
-                    }
-                    return internalFS.createPath(path, type, content, permissions);
-                },
+            deleteFile: function(path, recursive = true, permissions) {
+                if (path.startsWith("/system/env/appconfig")) {
+                    console.warn("[huopaAPI SAFETY]: App tried deleting file in safeStorage using default delete command!");
+                    return "[HuopaDesktop FS Security]: No permissions";
+                }
+                return internalFS.delDir(path, permissions, recursive);
+            },
+
+            writeFile: function(path, type, content, permissions = {
+                "read":"",
+                "write":"",
+                "modify":"",
+            }) {
+                if (path.startsWith("/system/env/appconfig")) {
+                    console.warn("[huopaAPI SAFETY]: App tried writing in safeStorage using default write command!");
+                    return "[HuopaDesktop FS Security]: No permissions";
+                }
+                return internalFS.createPath(path, type, content, permissions);
             },
 
 
@@ -1180,12 +1022,10 @@ const createRoturLoginWindow = async (app) => {
                     console.error("Error: " + error);
                 }
             },
-            rotur: {
-                openLogin: async(appId) => {
-                    return await createRoturLoginWindow(appId);
-                },
+
+            openRoturLogin: async(appId) => {
+                return await createRoturLoginWindow(appId);
             },
-            
 
             prependToApp: async(id) => {
                 const el = elementRegistry[id];
@@ -1217,7 +1057,20 @@ const createRoturLoginWindow = async (app) => {
                 return await internalFS.getFile("/system/env/appconfig/"+ appId.replace(".js", "") + "/" + path);
             },
 
-            
+            runApp: async(path, startParams) => {
+                if (!path || !path.endsWith(".js")) {
+                    if (!path) {
+                        console.warn("No path given for app execution. Request cancelled.");
+                        return;
+                    } else {
+                        console.warn("File not correct type or is directory. Request cancelled.");
+                        return;
+                    }
+                }
+                const appName = path.split("/").pop().slice(0, -3);
+                const code = await internalFS.getFile(path);
+                await runApp(appName, code, path, startParams);
+            },
 
             addClass: async(id, className) => {
                 const el = elementRegistry[id];
@@ -1276,7 +1129,24 @@ const createRoturLoginWindow = async (app) => {
                 }
             },
 
-            
+            closeApp: () => {
+                const digitId = appContainer.parentElement.id;
+                const codeElem = quantum.document.querySelector(`[data-digit-id="${digitId}"]`);
+                if (codeElem) {
+                    codeElem.remove();
+                }
+                appContainer.parentElement.remove();
+                const appToDock = quantum.document.querySelector(`[data-dock-digit-id="${digitId}"]`);
+                if (appToDock) {
+                    appToDock.remove();
+                }
+            },
+
+            setTitle: (content) => {
+                const digitId = appContainer.parentElement.id;
+                const title = quantum.document.querySelector(`[data-title-digit-id="${digitId}"]`);
+                title.textContent = content;
+            },
 
             playAudio: (url) => {
                 if (typeof url !== "string") throw new Error("Content must be a string!");
@@ -1331,6 +1201,36 @@ const createRoturLoginWindow = async (app) => {
                 
             },
 
+            hideWindow: () => {
+                appContainer.parentElement.style.display = "none";
+            },
+
+            showWindow: () => {
+                appContainer.parentElement.style.display = "block";
+            },
+            
+            createNotification: async (title, content) => {
+                const notifEl = quantum.document.createElement("div");
+                notifEl.style = "border-radius: 0.5em; background-color: rgba(35, 35, 35, 0.65); border-style: solid; border-color: rgba(65, 65, 65, 0.85); width: 20em; position: absolute; top: 0.5em; right: -22em; transition: right ease 1s;";
+                const titleEl = quantum.document.createElement("h3");
+                const descEl = quantum.document.createElement("p");
+                titleEl.style = "color: white; padding: 0.75em; margin: 0;";
+                titleEl.textContent = title;
+                descEl.style = "color: white; padding: 0 0.75em; padding-bottom: 0.75em;";
+                descEl.textContent = content;
+                const desktop = quantum.document.getElementById("desktop");
+                await notifEl.append(titleEl, descEl);
+                await desktop.append(notifEl);
+                requestAnimationFrame(() => {
+                    notifEl.style.right = "0.5em";
+                })
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                notifEl.style.right = "-22em";
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                await notifEl.remove();
+                
+            },
+ 
             addEventListener: async(id, type) => {
                 const el = elementRegistry[id];
                 if (!el) return;
@@ -1371,78 +1271,37 @@ const createRoturLoginWindow = async (app) => {
                     return;
                 }
             },
-            system: {
-                getInfo: async() => {
-                    async function getBrowserName() {
-                        const ua = navigator.userAgent;
 
-                        if (ua.includes("Firefox/")) return "Firefox";
-                        if (ua.includes("Edg/")) return "Edge";
-                        if (ua.includes("OPR/") || ua.includes("Opera")) return "Opera";
-                        if (ua.includes("Vivaldi")) return "Vivaldi";
-                        if (ua.includes("Safari/") && !ua.includes("Chrome/") && !ua.includes("Chromium/")) return "Safari";
+            getSystemInfo: async() => {
+                async function getBrowserName() {
+                    const ua = navigator.userAgent;
 
-                        if (navigator.brave && await navigator.brave.isBrave()) {
-                            return "Brave";
-                        }
+                    if (ua.includes("Firefox/")) return "Firefox";
+                    if (ua.includes("Edg/")) return "Edge";
+                    if (ua.includes("OPR/") || ua.includes("Opera")) return "Opera";
+                    if (ua.includes("Vivaldi")) return "Vivaldi";
+                    if (ua.includes("Safari/") && !ua.includes("Chrome/") && !ua.includes("Chromium/")) return "Safari";
 
-                        if (ua.includes("Chrome/")) return "Chrome";
-
-                        return "Unknown";
+                    if (navigator.brave && await navigator.brave.isBrave()) {
+                        return "Brave";
                     }
-                    const browser = await getBrowserName()
-                    const battery = await navigator.getBattery();
-                    const systemInfo = {
-                    version: version,
-                    bootTime: quantum.bootTime,
-                    battery: battery.level,
-                    host: navigator.userAgentData?.platform ?? "Unknown",
-                    browser
-                    };
-                    
-                    return JSON.stringify(systemInfo);
-                },
 
-                createNotification: async (title, content) => {
-                    const notifEl = quantum.document.createElement("div");
-                    notifEl.style = "border-radius: 0.5em; background-color: rgba(35, 35, 35, 0.65); border-style: solid; border-color: rgba(65, 65, 65, 0.85); width: 20em; position: absolute; top: 0.5em; right: -22em; transition: right ease 1s;";
-                    const titleEl = quantum.document.createElement("h3");
-                    const descEl = quantum.document.createElement("p");
-                    titleEl.style = "color: white; padding: 0.75em; margin: 0;";
-                    titleEl.textContent = title;
-                    descEl.style = "color: white; padding: 0 0.75em; padding-bottom: 0.75em;";
-                    descEl.textContent = content;
-                    const desktop = quantum.document.getElementById("desktop");
-                    await notifEl.append(titleEl, descEl);
-                    await desktop.append(notifEl);
-                    requestAnimationFrame(() => {
-                        notifEl.style.right = "0.5em";
-                    })
-                    await new Promise(resolve => setTimeout(resolve, 2000));
-                    notifEl.style.right = "-22em";
-                    await new Promise(resolve => setTimeout(resolve, 1500));
-                    await notifEl.remove();
-                    
-                },
+                    if (ua.includes("Chrome/")) return "Chrome";
+
+                    return "Unknown";
+                }
+                const browser = await getBrowserName()
+                const battery = await navigator.getBattery();
+                const systemInfo = {
+                version: version,
+                bootTime: quantum.bootTime,
+                battery: battery.level,
+                host: navigator.userAgentData?.platform ?? "Unknown",
+                browser
+                };
                 
-            },
-            
-            focusElement: (id) => {
-                const el = elementRegistry[id];
-                if (!el) {
-                    console.warn(`focusElement: Element with ID: '${id}' not found.`);
-                    return;
-                }
-                el.focus();
-            },
-
-            github: { 
-                createFile: () => {
-
-                }
+                return JSON.stringify(systemInfo);
             }
-
-            
         };
 
     };

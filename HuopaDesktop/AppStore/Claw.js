@@ -47,7 +47,7 @@ await huopaAPI.setAttribute(loginButton, "onclick", async () => {
     loginState = "inProcess"
     await huopaAPI.setCertainStyle(loginButton, "opacity", "0.85");
     await huopaAPI.setAttribute(loginButton, "textContent", "Logging in...")
-    token = await huopaAPI.rotur.openLogin();
+    token = await huopaAPI.openRoturLogin();
     if (token) {
         loginState = true
         await huopaAPI.setCertainStyle(loginButton, "opacity", "1");

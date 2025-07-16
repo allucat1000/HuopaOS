@@ -9,6 +9,6 @@ await huopaAPI.appendToApp(importButton);
 await huopaAPI.setAttribute(importButton, "onclick", async () => {
     const file = await huopaAPI.openFileImport(".js", "text");
     if (file) {
-        await huopaAPI.fs.writeFile("/home/applications/" + file.name, "file", file.content);
+        await huopaAPI.writeFile("/home/applications/" + file.name, "file", file.content);
     }
 })

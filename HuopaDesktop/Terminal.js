@@ -100,32 +100,8 @@ async function runCmd(value) {
     const values = rawArgs.slice(1).map(arg => arg.replace(/^["']|["']$/g, ""));
 
     switch (cmd) {
-        case "exit":
-            await huopaAPI.window.close();
-            break
-        case "cat":
-            if (values[0]) {
-                const path = resolvePath(values[0]);
-                const exists = await pathExists(path);
-                if (!exists) {
-                    await addLine(`[line=red]cat: Given path doesn't exist![/line]`);
-                    return;
-                }
-                const dir = await isDir(fullPath);
-                if (!dir) {
-                    const contents = await huopaAPI.fs.getFile(path);
-                    await addLine(`[color=green]Contents of "${path.split("/").pop()}":[/color]
-                    ⠀
-                    ${contents}
-                    ⠀`);
-                } else {
-                    await addLine(`[line=red]cat: Given path is not supposed to be a directory![/line]`);
-                }
-                
-            }
-            break;
         case "open":
-            if (values[0]) {
+            if (values) {
                 const path = values[0];
                 const fullPath = resolvePath(values[0]);
                 const exists = await pathExists(fullPath);
@@ -139,9 +115,9 @@ async function runCmd(value) {
                 } else {
                     if (path.endsWith(".js")) {
                         await addLine(`open: Executed app at path "${fullPath}"`);
-                        await huopaAPI.window.runApp(fullPath);
+                        await huopaAPI.runApp(fullPath);
                     } else {
-                        await huopaAPI.window.runApp("/home/applications/Preview.js", fullPath);
+                        await huopaAPI.runApp("/home/applications/Preview.js", fullPath);
                     }
                 }
                 
@@ -150,7 +126,7 @@ async function runCmd(value) {
         case "touch":
             if (values) {
                 let fullPath = resolvePath(values[0]);
-                await huopaAPI.fs.writeFile(fullPath, "file");
+                await huopaAPI.writeFile(fullPath, "file");
             } else {
                 await addLine(`[line=red]touch: A parameter is required[/line]`);
             }
@@ -166,7 +142,7 @@ async function runCmd(value) {
             await huopaAPI.setAttribute(termDiv, "innerHTML", "");
             break;
         case "info":
-            const sysInfo = JSON.parse(await huopaAPI.system.getInfo());
+            const sysInfo = JSON.parse(await huopaAPI.getSystemInfo());
             const diffInMilliseconds = Math.abs(Date.now() - sysInfo.bootTime);
             const diffInSeconds = Math.floor(diffInMilliseconds / 1000)
             const hours = Math.floor(diffInSeconds / 3600);
@@ -202,21 +178,16 @@ async function runCmd(value) {
                 return;
             }
             if (isDir(fullPath)) {
-                const list = JSON.parse(await huopaAPI.fs.getFile(fullPath));
-                addLine(`[color=green]Items at path "${fullPath}":[/color]
-⠀
-                `);
+                const list = JSON.parse(await huopaAPI.getFile(fullPath));
+                let listToShow = `Items at path "${fullPath}":
+
+                `;
                 for (const item of list) {
-                    const truncated = item.split("/").pop();
-                    const dir = await isDir(item);
-                    if (dir) {
-                        addLine(`[color=blue]${truncated}[/color]`);
-                    } else {
-                        addLine(`${truncated}`);
-                    }
-                    
+                    listToShow = listToShow + `
+${item}
+                    `;
                 }
-                addLine("⠀");
+                addLine(listToShow);
             } else {
                 await addLine(`[line=red]ls: Given path is not a directory![/line]`);
             }
@@ -229,7 +200,7 @@ async function runCmd(value) {
                     await addLine(`[line=red]rm: Given path doesn't exist![/line]`);
                     return;
                 }
-                await huopaAPI.fs.deleteFile(fullPath);
+                await huopaAPI.deleteFile(fullPath);
             } else {
                 await addLine(`[line=red]rm: A parameter is required[/line]`);
             }
@@ -238,7 +209,7 @@ async function runCmd(value) {
         case "mkdir":
             if (values) {
                 let fullPath = resolvePath(values[0]);
-                await huopaAPI.fs.writeFile(fullPath, "dir");
+                await huopaAPI.writeFile(fullPath, "dir");
             } else {
                 await addLine(`[line=red]mkdir: A parameter is required[/line]`);
             }
@@ -256,14 +227,9 @@ async function runCmd(value) {
                         await addLine(`[line=red]cd: Given path doesn't exist![/line]`);
                         return;
                     }
-                    const dir = await isDir(fullPath);
-                    if (dir) {
-                        currentPath = fullPath;
-                        await huopaAPI.setAttribute(startText, "textContent", currentPath + " $\u00A0");
-                    } else {
-                        await addLine(`[line=red]cd: Cannot cd into a file![/line]`);
-                    }
-                   
+                
+                    currentPath = fullPath;
+                    await huopaAPI.setAttribute(startText, "textContent", currentPath + " $\u00A0");
                 
                 } catch (e) {
                     await addLine(`[line=red]cd: Failed to access "${parentPath}"[/line]`);
@@ -306,7 +272,7 @@ async function isDir(path) {
             return false;
         }
         
-        const fileContent = await huopaAPI.fs.getFile(normalizedPath);
+        const fileContent = await huopaAPI.getFile(normalizedPath);
         if (path === "/") return true;
         let parsed;
         try {
@@ -331,9 +297,9 @@ async function pathExists(path) {
     let children;
 
     if (parentPath.length === 1) {
-        children = await huopaAPI.fs.getFile("/");
+        children = await huopaAPI.getFile("/");
     } else {
-        children = await huopaAPI.fs.getFile(parentPath.join("/"));
+        children = await huopaAPI.getFile(parentPath.join("/"));
     }
     children = JSON.parse(children);
     if (children.includes(path)) {
