@@ -42,7 +42,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "1.0.3";
+    const version = "1.0.4";
     // Priv Sys Funcs
     const dataURIToBlob = async (dataURI) => {
         const [meta, base64Data] = dataURI.split(',');
@@ -1655,7 +1655,7 @@ const createRoturLoginWindow = async (app) => {
                 return;
             }
             if (!e.altKey) return;
-            const docked = await huopaAPI.getFile("/system/env/systemconfig/settings/customization/dockedTaskbar.txt");
+            const docked = await internalFS.getFile("/system/env/systemconfig/settings/customization/dockedTaskbar.txt");
             switch (e.key) {
                 case "ArrowLeft":
                     outerContainer.style.left = "0";
