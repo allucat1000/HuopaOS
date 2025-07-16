@@ -1663,7 +1663,7 @@ const createRoturLoginWindow = async (app) => {
                     outerContainer.style.right = "";
                     outerContainer.style.bottom = "";
                     outerContainer.style.width = "50%";
-                    if (docked === "true") {
+                    if (docked === true) {
                         outerContainer.style.height = `calc(100% - 4.3em)`;
                     } else {
                         outerContainer.style.height = `calc(100% - 7em)`;
@@ -1678,7 +1678,7 @@ const createRoturLoginWindow = async (app) => {
                     outerContainer.style.top = "0";
                     outerContainer.style.bottom = "";
                     outerContainer.style.width = "50%";
-                    if (docked === "true") {
+                    if (docked === true) {
                         outerContainer.style.height = `calc(100% - 4.3em)`;
                     } else {
                         outerContainer.style.height = `calc(100% - 7em)`;
@@ -1697,7 +1697,7 @@ const createRoturLoginWindow = async (app) => {
                 case "ArrowDown":
                     outerContainer.style.left = "0";
                     outerContainer.style.right = "";
-                    if (docked === "true") {
+                    if (docked === true) {
                         outerContainer.style.height = `calc(50% - 1.4em)`;
                     } else {
                         outerContainer.style.height = "calc(50% - 3em)";
@@ -1713,7 +1713,7 @@ const createRoturLoginWindow = async (app) => {
                     outerContainer.style.top = "0";
                     outerContainer.style.bottom = "";
                     outerContainer.style.width = "100%";
-                    if (docked === "true") {
+                    if (docked === true) {
                         outerContainer.style.height = `calc(100% - 4.3em)`;
                     } else {
                         outerContainer.style.height = `calc(100% - 7em)`;
