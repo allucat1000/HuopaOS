@@ -4,7 +4,7 @@ let fileSelectorMode = false;
 let returnId;
 
 if (typeof loadParams === "object" && loadParams.mode === "fileSelector") {
-    await huopaAPI.setTitle("File Selector - Choose a file");
+    await huopaAPI.window.setTitle("File Selector - Choose a file");
     fileSelectorMode = true;
     returnId = loadParams.returnId;
 }
@@ -40,7 +40,7 @@ async function renderFileList(path) {
     if (!fileSelectorMode) {
         await huopaAPI.setAttribute(deleteButton, "onclick", async() => {
                 if (!pathSelected) {
-                    let corePaths = await huopaAPI.getFile("/system/manifest.json");
+                    let corePaths = await huopaAPI.fs.getFile("/system/manifest.json");
                     if (corePaths) {
                         corePaths = JSON.parse(corePaths).corePaths
                         if (corePaths.includes(path)) {
@@ -48,12 +48,12 @@ async function renderFileList(path) {
                             return;
                         }
                     }
-                    await huopaAPI.deleteFile(path)
+                    await huopaAPI.fs.deleteFile(path)
                     let parentPath = path.split("/").slice(0, -1).join("/");
                     if (!parentPath) parentPath = "/";
                     renderFileList(parentPath);
                 } else {
-                    await huopaAPI.deleteFile(pathSelected)
+                    await huopaAPI.fs.deleteFile(pathSelected)
                     pathSelected = undefined;
                     for (const child of await huopaAPI.getChildren(fileListDiv)) {
                         await huopaAPI.removeClass(child, "file-selected");
@@ -94,7 +94,7 @@ async function renderFileList(path) {
     const match = path.match(/\.[a-zA-Z0-9]+$/);
     if (await isDir(path) && !match) {
         let perms = true;
-        let fileList = await huopaAPI.getFile(path);
+        let fileList = await huopaAPI.fs.getFile(path);
         fileList = JSON.parse(fileList);
         
         for (const file of fileList) {
@@ -133,17 +133,17 @@ async function renderFileList(path) {
                         if (file.endsWith(".js") && notDir) {
                             if (fileSelectorMode) {
                                 await huopaAPI.returnToHost(returnId, file);
-                                await huopaAPI.closeApp();
+                                await huopaAPI.window.close();
                                 return;
                             }
-                            await huopaAPI.runApp(file);
+                            await huopaAPI.window.runApp(file);
                         } else if (notDir) {
                             if (fileSelectorMode) {
                                 await huopaAPI.returnToHost(returnId, file); 
-                                await huopaAPI.closeApp();
+                                await huopaAPI.window.close();
                                 return;
                             }
-                            await huopaAPI.runApp("/home/applications/Preview.js", file);
+                            await huopaAPI.window.runApp("/home/applications/Preview.js", file);
                         } else {
                             await renderFileList(file)
                         }
@@ -169,7 +169,7 @@ async function renderFileList(path) {
             await huopaAPI.append(fileListDiv, fileDiv);
         }
     } else {
-        await huopaAPI.runApp("/home/applications/Preview.js", path);
+        await huopaAPI.window.runApp("/home/applications/Preview.js", path);
     }
 }
 
@@ -181,7 +181,7 @@ async function isDir(path) {
             return false;
         }
         
-        const fileContent = await huopaAPI.getFile(normalizedPath);
+        const fileContent = await huopaAPI.fs.getFile(normalizedPath);
         if (path === "/") return true;
         let parsed;
         try {

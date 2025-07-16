@@ -12,7 +12,7 @@ let frameOrientation = "Horizontal";
 
 return {
     render: async(code) => {
-        const rwlSrc = await huopaAPI.getFile("/system/env/moduleSrc/rwlSrc.js");
+        const rwlSrc = await huopaAPI.fs.getFile("/system/env/moduleSrc/rwlSrc.js");
         const injectedCodeLine = `const injectedCode = ${JSON.stringify(code)};\n`;
         const fullSrc = injectedCodeLine + rwlSrc;
         const dataURL = "data:text/javascript;charset=utf-8," + convToDataURL(fullSrc);

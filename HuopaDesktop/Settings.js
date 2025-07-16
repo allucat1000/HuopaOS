@@ -1,7 +1,7 @@
 mainScreen();
 
 async function mainScreen() {
-    await huopaAPI.setTitle("Settings");
+    await huopaAPI.window.setTitle("Settings");
     const mainScreenDiv = await huopaAPI.createElement("div");
     const title = await huopaAPI.createElement("h1");
     await huopaAPI.setAttribute(title, "textContent", "Settings");
@@ -80,7 +80,7 @@ async function mainScreen() {
     });
 }
 async function wallpapersTabLoad() {
-    await huopaAPI.setTitle("Settings — Wallpapers");
+    await huopaAPI.window.setTitle("Settings — Wallpapers");
     const mainScreenDiv = await huopaAPI.createElement("div");
     const title = await huopaAPI.createElement("h1");
     await huopaAPI.setAttribute(title, "textContent", "Wallpapers");
@@ -98,7 +98,7 @@ async function wallpapersTabLoad() {
         await mainScreen();
     });
 
-    const wallpaperList = JSON.parse(await huopaAPI.getFile("/system/env/wallpapers") || "[]");
+    const wallpaperList = JSON.parse(await huopaAPI.fs.getFile("/system/env/wallpapers") || "[]");
 
     if (wallpaperList.length < 1) {
         const warning = await huopaAPI.createElement("h2");
@@ -130,13 +130,13 @@ async function wallpapersTabLoad() {
 
         const img = await huopaAPI.createElement("img");
         await huopaAPI.setAttribute(img, "style", "border-radius: 0.5em; width: 100%; height: 100%; background-size: cover; margin: 0; border-style: none; border-color: white; object-fit: cover; object-position: center;");
-        const imageData = await huopaAPI.compressImage(await huopaAPI.getFile(wallpaperPath), 200, 112.5, "1");
+        const imageData = await huopaAPI.compressImage(await huopaAPI.fs.getFile(wallpaperPath), 200, 112.5, "1");
         await huopaAPI.setAttribute(img, "src", imageData);
 
         await huopaAPI.append(wallpaperButton, img);
         await huopaAPI.append(wallpaperListDiv, wallpaperButton);
         await huopaAPI.setAttribute(wallpaperButton, "onclick", async () => {
-            await huopaAPI.writeFile("/system/env/systemconfig/settings/customization/wallpaperchosen.txt", "file", wallpaperPath);
+            await huopaAPI.fs.writeFile("/system/env/systemconfig/settings/customization/wallpaperchosen.txt", "file", wallpaperPath);
         });
     }
     const iconSrc = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up-from-line-icon lucide-arrow-up-from-line"><path d="m18 9-6-6-6 6"/><path d="M12 3v14"/><path d="M5 21h14"/></svg>';
@@ -160,7 +160,7 @@ async function wallpapersTabLoad() {
     await huopaAPI.setAttribute(importButton, "onclick", async () => {
         const file = await huopaAPI.openFileImport(".png,.jpg,.webp,.jpeg", "dataURL");
         if (file) {
-            await huopaAPI.writeFile("/system/env/wallpapers/" + file.name, "file", file.content);
+            await huopaAPI.fs.writeFile("/system/env/wallpapers/" + file.name, "file", file.content);
             await huopaAPI.deleteElement(mainScreenDiv);
             await wallpapersTabLoad();
         }
@@ -169,7 +169,7 @@ async function wallpapersTabLoad() {
     await huopaAPI.append(mainScreenDiv, wallpaperListDiv);
 }
 async function customizationTabLoad() {
-    await huopaAPI.setTitle("Settings — Customization");
+    await huopaAPI.window.setTitle("Settings — Customization");
     const mainScreenDiv = await huopaAPI.createElement("div");
     const title = await huopaAPI.createElement("h1");
     await huopaAPI.setAttribute(title, "textContent", "Customization");
@@ -198,18 +198,18 @@ async function customizationTabLoad() {
     await huopaAPI.setAttribute(slider, "type", "range");
     await huopaAPI.setAttribute(slider, "min", "0");
     await huopaAPI.setAttribute(slider, "max", "12");
-    await huopaAPI.setAttribute(slider, "value", await huopaAPI.getFile("/system/env/systemconfig/settings/customization/bgblur.txt") || "3.5");
+    await huopaAPI.setAttribute(slider, "value", await huopaAPI.fs.getFile("/system/env/systemconfig/settings/customization/bgblur.txt") || "3.5");
     await huopaAPI.setAttribute(slider, "step", "0.1");
 
     const label = await huopaAPI.createElement("span");
-    await huopaAPI.setAttribute(label, "textContent", await huopaAPI.getFile("/system/env/systemconfig/settings/customization/bgblur.txt") + "px" || "3.5px");
+    await huopaAPI.setAttribute(label, "textContent", await huopaAPI.fs.getFile("/system/env/systemconfig/settings/customization/bgblur.txt") + "px" || "3.5px");
     await huopaAPI.setAttribute(label, "style", "color: white; display: block; text-align: center; margin: 0.5em auto; padding-bottom: 1.5em;");
     await huopaAPI.setCertainStyle(slider, "margin", "0.5em auto");
     await huopaAPI.setCertainStyle(slider, "display", "block");
 
     await huopaAPI.setAttribute(slider, "oninput", async () => {
         await huopaAPI.setAttribute(label, "textContent", await huopaAPI.getAttribute(slider, "value") + "px");
-        await huopaAPI.writeFile("/system/env/systemconfig/settings/customization/bgblur.txt", "file", await huopaAPI.getAttribute(slider, "value"))
+        await huopaAPI.fs.writeFile("/system/env/systemconfig/settings/customization/bgblur.txt", "file", await huopaAPI.getAttribute(slider, "value"))
     });
 
     await huopaAPI.append(bgBlurDiv, slider);
@@ -228,17 +228,17 @@ async function customizationTabLoad() {
     await huopaAPI.setAttribute(opacSlider, "min", "0.3");
     await huopaAPI.setAttribute(opacSlider, "max", "1");
     await huopaAPI.setAttribute(opacSlider, "step", "0.05");
-    await huopaAPI.setAttribute(opacSlider, "value", await huopaAPI.getFile("/system/env/systemconfig/settings/customization/bgopac.txt") || "0.90");
+    await huopaAPI.setAttribute(opacSlider, "value", await huopaAPI.fs.getFile("/system/env/systemconfig/settings/customization/bgopac.txt") || "0.90");
 
     const opacLabel = await huopaAPI.createElement("span");
-    await huopaAPI.setAttribute(opacLabel, "textContent", Math.round(await huopaAPI.getFile("/system/env/systemconfig/settings/customization/bgopac.txt") * 100) + "%");
+    await huopaAPI.setAttribute(opacLabel, "textContent", Math.round(await huopaAPI.fs.getFile("/system/env/systemconfig/settings/customization/bgopac.txt") * 100) + "%");
     await huopaAPI.setAttribute(opacLabel, "style", "color: white; display: block; text-align: center; margin: 0.5em auto; padding-bottom: 1.5em;");
     await huopaAPI.setCertainStyle(opacSlider, "margin", "0.5em auto");
     await huopaAPI.setCertainStyle(opacSlider, "display", "block");
 
     await huopaAPI.setAttribute(opacSlider, "oninput", async () => {
         await huopaAPI.setAttribute(opacLabel, "textContent", Math.round(await huopaAPI.getAttribute(opacSlider, "value") * 100) + "%");
-        await huopaAPI.writeFile("/system/env/systemconfig/settings/customization/bgopac.txt", "file", await huopaAPI.getAttribute(opacSlider, "value"))
+        await huopaAPI.fs.writeFile("/system/env/systemconfig/settings/customization/bgopac.txt", "file", await huopaAPI.getAttribute(opacSlider, "value"))
     });
     await huopaAPI.append(bgOpacDiv, opacSlider);
     await huopaAPI.append(bgOpacDiv, opacLabel);
@@ -253,19 +253,19 @@ async function customizationTabLoad() {
 
     const appBorderColorPicker = await huopaAPI.createElement("input");
     await huopaAPI.setAttribute(appBorderColorPicker, "type", "color");
-    await huopaAPI.setAttribute(appBorderColorPicker, "value", await huopaAPI.getFile("/system/env/systemconfig/settings/customization/windowbordercolor.txt") || "");
+    await huopaAPI.setAttribute(appBorderColorPicker, "value", await huopaAPI.fs.getFile("/system/env/systemconfig/settings/customization/windowbordercolor.txt") || "");
     await huopaAPI.append(mainScreenDiv, appBorderColorPicker);
     await huopaAPI.setCertainStyle(appBorderColorDiv, "margin", "1em");
 
     await huopaAPI.setAttribute(appBorderColorPicker, "oninput", async () => {
-        await huopaAPI.writeFile("/system/env/systemconfig/settings/customization/windowbordercolor.txt", "file", await huopaAPI.getAttribute(appBorderColorPicker, "value"));
+        await huopaAPI.fs.writeFile("/system/env/systemconfig/settings/customization/windowbordercolor.txt", "file", await huopaAPI.getAttribute(appBorderColorPicker, "value"));
     });
 
     await huopaAPI.append(appBorderColorDiv, appBorderColorPicker);
 }
 
 async function dockTabLoad() {
-    await huopaAPI.setTitle("Settings — Dock");
+    await huopaAPI.window.setTitle("Settings — Dock");
     const mainScreenDiv = await huopaAPI.createElement("div");
     const title = await huopaAPI.createElement("h1");
     await huopaAPI.setAttribute(title, "textContent", "Dock");
@@ -292,14 +292,14 @@ async function dockTabLoad() {
 
     const dockDockedCheckbox = await huopaAPI.createElement("input");
     await huopaAPI.setAttribute(dockDockedCheckbox, "type", "checkbox");
-    await huopaAPI.setAttribute(dockDockedCheckbox, "checked", await huopaAPI.getFile("/system/env/systemconfig/settings/customization/dockedTaskbar.txt") || false);
+    await huopaAPI.setAttribute(dockDockedCheckbox, "checked", await huopaAPI.fs.getFile("/system/env/systemconfig/settings/customization/dockedTaskbar.txt") || false);
     await huopaAPI.append(mainScreenDiv, dockDockedCheckbox);
     await huopaAPI.setCertainStyle(dockDockedDiv, "margin", "1em");
     await huopaAPI.setCertainStyle(dockDockedCheckbox, "margin", "1em auto");
     await huopaAPI.setCertainStyle(dockDockedCheckbox, "display", "block");
 
     await huopaAPI.setAttribute(dockDockedCheckbox, "oninput", async () => {
-        await huopaAPI.writeFile("/system/env/systemconfig/settings/customization/dockedTaskbar.txt", "file", await huopaAPI.getAttribute(dockDockedCheckbox, "checked"));
+        await huopaAPI.fs.writeFile("/system/env/systemconfig/settings/customization/dockedTaskbar.txt", "file", await huopaAPI.getAttribute(dockDockedCheckbox, "checked"));
     });
 
     await huopaAPI.append(dockDockedDiv, dockDockedCheckbox);
@@ -316,17 +316,17 @@ async function dockTabLoad() {
     await huopaAPI.setAttribute(opacSlider, "min", "0.3");
     await huopaAPI.setAttribute(opacSlider, "max", "1");
     await huopaAPI.setAttribute(opacSlider, "step", "0.05");
-    await huopaAPI.setAttribute(opacSlider, "value", await huopaAPI.getFile("/system/env/systemconfig/settings/customization/dockopac.txt"));
+    await huopaAPI.setAttribute(opacSlider, "value", await huopaAPI.fs.getFile("/system/env/systemconfig/settings/customization/dockopac.txt"));
 
     const opacLabel = await huopaAPI.createElement("span");
-    await huopaAPI.setAttribute(opacLabel, "textContent", Math.round(await huopaAPI.getFile("/system/env/systemconfig/settings/customization/dockopac.txt") * 100) + "%");
+    await huopaAPI.setAttribute(opacLabel, "textContent", Math.round(await huopaAPI.fs.getFile("/system/env/systemconfig/settings/customization/dockopac.txt") * 100) + "%");
     await huopaAPI.setAttribute(opacLabel, "style", "color: white; display: block; text-align: center; margin: 0.5em auto; padding-bottom: 1.5em;");
     await huopaAPI.setCertainStyle(opacSlider, "margin", "0.5em auto");
     await huopaAPI.setCertainStyle(opacSlider, "display", "block");
 
     await huopaAPI.setAttribute(opacSlider, "oninput", async () => {
         await huopaAPI.setAttribute(opacLabel, "textContent", Math.round(await huopaAPI.getAttribute(opacSlider, "value") * 100) + "%");
-        await huopaAPI.writeFile("/system/env/systemconfig/settings/customization/dockopac.txt", "file", await huopaAPI.getAttribute(opacSlider, "value"))
+        await huopaAPI.fs.writeFile("/system/env/systemconfig/settings/customization/dockopac.txt", "file", await huopaAPI.getAttribute(opacSlider, "value"))
     });
     await huopaAPI.append(dockOpacDiv, opacSlider);
     await huopaAPI.append(dockOpacDiv, opacLabel);

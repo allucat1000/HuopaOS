@@ -75,12 +75,12 @@ if (response.ok) {
             let update = false;
             const installStateIcon = await huopaAPI.createElement("img");
             if (!ver || ver !== appArray.version) update = true;
-            if (await huopaAPI.getFile("/home/applications/" + appName) && !update) {
+            if (await huopaAPI.fs.getFile("/home/applications/" + appName) && !update) {
                 installState = true
                 await huopaAPI.setAttribute(installText, "textContent", "Uninstall");
             } else {
                 installState = false;
-                if (update && await huopaAPI.getFile("/home/applications/" + appName)) {
+                if (update && await huopaAPI.fs.getFile("/home/applications/" + appName)) {
                     await huopaAPI.setAttribute(installText, "textContent", "Update");
                 } else {
                     await huopaAPI.setAttribute(installText, "textContent", "Install");
@@ -105,13 +105,13 @@ if (response.ok) {
                     if (response.ok) {
                         await huopaAPI.setAttribute(installText, "textContent", "Installing...");
                         const code = response.body;
-                        await huopaAPI.writeFile("/home/applications/" + appName, "file", code);
+                        await huopaAPI.fs.writeFile("/home/applications/" + appName, "file", code);
                         await huopaAPI.safeStorageWrite(appName + "/version.txt", "file", appArray.version)
                         await huopaAPI.setAttribute(installText, "textContent", "Uninstall");
                         iconSrc = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-icon lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
                         await huopaAPI.setAttribute(installStateIcon, "src", "data:image/svg+xml;utf8," + encodeURIComponent(iconSrc));
                         if (appIconSrc) {
-                            await huopaAPI.writeFile("/home/applications/" + appName + ".icon", "file", appIconSrc);
+                            await huopaAPI.fs.writeFile("/home/applications/" + appName + ".icon", "file", appIconSrc);
                         }
                         installState = true;
                     } else {
@@ -120,7 +120,7 @@ if (response.ok) {
                     }
                 } else if (installState === true) {
                     installState = "mid";
-                    await huopaAPI.deleteFile("/home/applications/" + appName);
+                    await huopaAPI.fs.deleteFile("/home/applications/" + appName);
                     await huopaAPI.setAttribute(installText, "textContent", "Install");
                     iconSrc = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-down-to-line-icon lucide-arrow-down-to-line"><path d="M12 17V3"/><path d="m6 11 6 6 6-6"/><path d="M19 21H5"/></svg>';
                     await huopaAPI.setAttribute(installStateIcon, "src", "data:image/svg+xml;utf8," + encodeURIComponent(iconSrc));

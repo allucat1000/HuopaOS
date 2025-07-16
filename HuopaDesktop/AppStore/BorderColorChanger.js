@@ -1,5 +1,5 @@
-await huopaAPI.hideWindow();
-let colors = await huopaAPI.getFile("/home/applications/BorderColorChanger/colors.json");
+await huopaAPI.window.hide();
+let colors = await huopaAPI.fs.getFile("/home/applications/BorderColorChanger/colors.json");
 if (!colors) {
     colors = [
         "#FF0000", "#FF3300", "#FF6600", "#FF9900", "#FFCC00", "#FFFF00",
@@ -9,10 +9,10 @@ if (!colors) {
         "#CC00FF", "#FF00FF", "#FF00CC", "#FF0099", "#FF0066", "#FF0033",
         "#FF0000"
     ];
-    await huopaAPI.writeFile("/home/applications/BorderColorChanger/colors.json", "file", JSON.stringify(colors));
-    huopaAPI.createNotification("BorderColorChanger", "Thanks for trying out this border color changer!");
+    await huopaAPI.fs.writeFile("/home/applications/BorderColorChanger/colors.json", "file", JSON.stringify(colors));
+    huopaAPI.system.createNotification("BorderColorChanger", "Thanks for trying out this border color changer!");
 } else {
-    huopaAPI.createNotification("BorderColorChanger", "The border color changer has started!");
+    huopaAPI.system.createNotification("BorderColorChanger", "The border color changer has started!");
     colors = JSON.parse(colors);
 }
 
@@ -27,14 +27,14 @@ await setAttrs(hideWindowButton, {
     "textContent":"Hide the window again",
     "style":"display: block; margin: 0.5em auto;",
     "onclick": async () => {
-        await huopaAPI.hideWindow()
+        await huopaAPI.window.hide()
     }
 })
 
 await huopaAPI.appendToApp(errorText);
 await huopaAPI.appendToApp(hideWindowButton);
 while (true) {
-    await huopaAPI.writeFile("/system/env/systemconfig/settings/customization/windowbordercolor.txt", "file", colors[index]);
+    await huopaAPI.fs.writeFile("/system/env/systemconfig/settings/customization/windowbordercolor.txt", "file", colors[index]);
     index++;
     if (index + 1 > colors.length) index = 0;
     await new Promise(resolve => setTimeout(resolve, 200));
