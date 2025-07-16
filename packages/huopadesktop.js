@@ -42,7 +42,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "1.0.1";
+    const version = "1.0.2";
     // Priv Sys Funcs
     const dataURIToBlob = async (dataURI) => {
         const [meta, base64Data] = dataURI.split(',');
@@ -132,6 +132,7 @@ window.huopadesktop = (() => {
                 let wallpaper2Success;
                 let wallpaper3Success;
                 let wallpaper4Success;
+                let wallpaper5Success;
                 if (!await internalFS.getFile("/system/env/wallpapers/Chilly Mountain.png")) {
                     wallpaper1Success = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/Wallpapers/Chilly%20Mountain.png`, "/system/env/wallpapers/Chilly Mountain.png");
                 }
@@ -143,6 +144,10 @@ window.huopadesktop = (() => {
                 }
                 if (!await internalFS.getFile("/system/env/wallpapers/Forest Landscape.png")) {
                     wallpaper4Success = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/Wallpapers/Forest%20Landscape.png`, "/system/env/wallpapers/Forest Landscape.png");
+                }
+                if (!await internalFS.getFile("/system/env/wallpapers/Deep Space.jpg")) {
+                    // Credits to https://wallpaperaccess.com/real-space-hd-desktop (image #4)
+                    wallpaper5Success = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/Wallpapers/Deep%20Space.jpg`, "/system/env/wallpapers/Deep Space.png");
                 }
                 
                 const logoSuccess = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaLogo.png`, "/system/env/assets/huopalogo.png");
@@ -160,6 +165,10 @@ window.huopadesktop = (() => {
 
                 if (!await internalFS.getFile("/system/env/systemconfig/settings/customization/bgopac.txt")) {
                     await internalFS.createPath("/system/env/systemconfig/settings/customization/bgopac.txt", "file", "0.90")
+                }
+
+                if (!await internalFS.getFile("/system/env/systemconfig/settings/customization/dockopac.txt")) {
+                    await internalFS.createPath("/system/env/systemconfig/settings/customization/dockopac.txt", "file", "0.7")
                 }
 
                 if (!await internalFS.getFile("/system/env/systemconfig/settings/customization/windowbordercolor.txt")) {
@@ -1283,7 +1292,6 @@ const createRoturLoginWindow = async (app) => {
                 }
                 const browser = await getBrowserName()
                 const battery = await navigator.getBattery();
-                console.log(browser);
                 const systemInfo = {
                 version: version,
                 bootTime: quantum.bootTime,
@@ -1915,10 +1923,10 @@ const createRoturLoginWindow = async (app) => {
                 dock.style.borderRadius = "0";
 
             }
-            dock.style.backdropFilter = `bluck(${blur}px)`;
-            
+            dock.style.backdropFilter = `blur(${blur}px)`;
 
-            await desktop.append(dock);
+
+            desktop.append(dock);
 
             const huopalogoURI = await internalFS.getFile("/system/env/assets/huopalogo.png");
             const huopalogoBlob = await dataURIToBlob(huopalogoURI);
@@ -1977,7 +1985,18 @@ const createRoturLoginWindow = async (app) => {
                 startMenuButton.style.filter = "brightness(1)";
             });
 
-            requestAnimationFrame(() => {
+            requestAnimationFrame(async() => {
+                const opacity = (await internalFS.getFile("/system/env/systemconfig/settings/customization/dockopac.txt")) || "0.9";
+                
+                const computed = getComputedStyle(dock);
+                const baseColor = computed.backgroundColor;
+                console.log(baseColor);
+                const rgbaMatch = baseColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+                if (rgbaMatch) {
+                    const [_, r, g, b] = rgbaMatch;
+                    dock.style.backgroundColor = `rgba(${r}, ${g}, ${b}, ${opacity})`;
+                } else {
+                }
                 desktop.style.opacity = "1";
             });
 

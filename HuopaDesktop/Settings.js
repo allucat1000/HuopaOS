@@ -218,7 +218,7 @@ async function customizationTabLoad() {
 
     const bgOpacDiv = await huopaAPI.createElement("div");
     const bgOpacText = await huopaAPI.createElement("p");
-    await huopaAPI.setAttribute(bgOpacText, "textContent", "Window opacity — Choose how transparent you want windows to be. (Requires restart for most elements)");
+    await huopaAPI.setAttribute(bgOpacText, "textContent", "Element opacity — Choose how transparent you want elements to be. (Requires restart for most elements)");
     await huopaAPI.setAttribute(bgOpacText, "style", "text-align: center; color: white; margin: 0.5em;");
     await huopaAPI.setAttribute(bgOpacDiv, "style", "margin: 2em;");
     await huopaAPI.append(bgOpacDiv, bgOpacText);
@@ -228,7 +228,7 @@ async function customizationTabLoad() {
     await huopaAPI.setAttribute(opacSlider, "min", "0.3");
     await huopaAPI.setAttribute(opacSlider, "max", "1");
     await huopaAPI.setAttribute(opacSlider, "step", "0.05");
-    await huopaAPI.setAttribute(opacSlider, "value", await huopaAPI.getFile("/system/env/systemconfig/settings/customization/bgopac.txt") || "0.75");
+    await huopaAPI.setAttribute(opacSlider, "value", await huopaAPI.getFile("/system/env/systemconfig/settings/customization/bgopac.txt") || "0.90");
 
     const opacLabel = await huopaAPI.createElement("span");
     await huopaAPI.setAttribute(opacLabel, "textContent", Math.round(await huopaAPI.getFile("/system/env/systemconfig/settings/customization/bgopac.txt") * 100) + "%");
@@ -245,7 +245,7 @@ async function customizationTabLoad() {
 
     const appBorderColorDiv = await huopaAPI.createElement("div");
     const appBorderColorTitle = await huopaAPI.createElement("p");
-    await huopaAPI.setAttribute(appBorderColorTitle, "textContent", "Window border color — Choose the color of window borders. (Requires restart for most elements)");
+    await huopaAPI.setAttribute(appBorderColorTitle, "textContent", "Window border color — Choose the color of window borders.");
     await huopaAPI.setAttribute(appBorderColorTitle, "style", "text-align: center; color: white; margin: 0.5em;");
     await huopaAPI.setAttribute(appBorderColorDiv, "style", "margin: 2em; padding-bottom: 1.5em;");
     await huopaAPI.append(appBorderColorDiv, appBorderColorTitle);
@@ -303,4 +303,32 @@ async function dockTabLoad() {
     });
 
     await huopaAPI.append(dockDockedDiv, dockDockedCheckbox);
+
+    const dockOpacDiv = await huopaAPI.createElement("div");
+    const dockOpacText = await huopaAPI.createElement("p");
+    await huopaAPI.setAttribute(dockOpacText, "textContent", "Dock opacity — Choose how transparent you want the dock to be. (Requires restart)");
+    await huopaAPI.setAttribute(dockOpacText, "style", "text-align: center; color: white; margin: 0.5em;");
+    await huopaAPI.setAttribute(dockOpacDiv, "style", "margin: 2em;");
+    await huopaAPI.append(dockOpacDiv, dockOpacText);
+    await huopaAPI.append(mainScreenDiv, dockOpacDiv);
+    const opacSlider = await huopaAPI.createElement("input");
+    await huopaAPI.setAttribute(opacSlider, "type", "range");
+    await huopaAPI.setAttribute(opacSlider, "min", "0.3");
+    await huopaAPI.setAttribute(opacSlider, "max", "1");
+    await huopaAPI.setAttribute(opacSlider, "step", "0.05");
+    await huopaAPI.setAttribute(opacSlider, "value", await huopaAPI.getFile("/system/env/systemconfig/settings/customization/dockopac.txt"));
+
+    const opacLabel = await huopaAPI.createElement("span");
+    await huopaAPI.setAttribute(opacLabel, "textContent", Math.round(await huopaAPI.getFile("/system/env/systemconfig/settings/customization/dockopac.txt") * 100) + "%");
+    await huopaAPI.setAttribute(opacLabel, "style", "color: white; display: block; text-align: center; margin: 0.5em auto; padding-bottom: 1.5em;");
+    await huopaAPI.setCertainStyle(opacSlider, "margin", "0.5em auto");
+    await huopaAPI.setCertainStyle(opacSlider, "display", "block");
+
+    await huopaAPI.setAttribute(opacSlider, "oninput", async () => {
+        await huopaAPI.setAttribute(opacLabel, "textContent", Math.round(await huopaAPI.getAttribute(opacSlider, "value") * 100) + "%");
+        await huopaAPI.writeFile("/system/env/systemconfig/settings/customization/dockopac.txt", "file", await huopaAPI.getAttribute(opacSlider, "value"))
+    });
+    await huopaAPI.append(dockOpacDiv, opacSlider);
+    await huopaAPI.append(dockOpacDiv, opacLabel);
+
 }

@@ -139,13 +139,13 @@ input[type="checkbox"]:checked {
 /* Many system elements */
 
 #dock {
-  position: absolute; bottom: 20px; width: 96%; height: 4em; background: rgba(30, 30, 30, 0.65); border: rgba(65, 65, 65, 0.65) 1.5px solid; border-radius: 2em; left: 50%; transform: translateX(-50%); display: flex; align-items: center; border-color: #99999989; z-index: 15000;
+  position: absolute; bottom: 20px; width: 96%; height: 4em; background: rgba(17, 17, 17, 0.65); border: rgba(65, 65, 65, 0.65) 1.5px solid; border-radius: 2em; left: 50%; transform: translateX(-50%); display: flex; align-items: center; border-color: #99999989; z-index: 15000;
 }
 
 #startMenuDiv {
   width: 30em;
   height: 385px;
-  background: rgba(30, 30, 30, 0.65);
+  background: rgba(17, 17, 17, 0.65);
   position: absolute;
   border-radius: 1em;
   border: 2.5px;
@@ -158,9 +158,10 @@ input[type="checkbox"]:checked {
   transition: opacity 0.3s ease, transform 0.3s ease;
   z-index: 99999;
   backdrop-filter: blur(2px);
-  padding: 0.25em;
+  padding: 0.5em;
   overflow-x: hidden;
   overflow-y: auto;
+
 }
 
 .appContainer {
