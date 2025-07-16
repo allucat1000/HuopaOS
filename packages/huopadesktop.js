@@ -42,7 +42,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "1.0.0";
+    const version = "1.0.1";
     // Priv Sys Funcs
     const dataURIToBlob = async (dataURI) => {
         const [meta, base64Data] = dataURI.split(',');
@@ -94,6 +94,10 @@ window.huopadesktop = (() => {
                 await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/File%20Manager.js`, "/home/applications/File Manager.js");
                 if (!await internalFS.getFile("/home/applications/File Manager.js.icon")) {
                     await internalFS.createPath("/home/applications/File Manager.js.icon", "file", `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder-closed-icon lucide-folder-closed"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/><path d="M2 10h20"/></svg>`);
+                }
+                await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/Terminal.js`, "/home/applications/Terminal.js");
+                if (!await internalFS.getFile("/home/applications/Terminal.js.icon")) {
+                    await internalFS.createPath("/home/applications/Terminal.icon", "file", `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square-terminal-icon lucide-square-terminal"><path d="m7 11 2-2-2-2"/><path d="M11 13h4"/><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/></svg>`);
                 }
                 await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/Preview.js`, "/home/applications/Preview.js");
                 if (!await internalFS.getFile("/home/applications/Preview.js.icon")) {
@@ -288,19 +292,13 @@ const createRoturLoginWindow = async (app) => {
     const induceCrash = async (error) => {
         const mainDiv = quantum.document.getElementById("termDiv");
             mainDiv.innerHTML = ""
-            await sys.addLine("--/!\\--")
-            await sys.addLine("An unhandled exeption has occurred in HuopaDesktop and the system has been forced to halt.");
+            await sys.addLine("## --!--")
+            await sys.addLine("### An unhandled exeption has occurred in HuopaDesktop and the system has been forced to halt.");
             await sys.addLine(`Error: ${error}`);
             await sys.addLine("Try updating your packages (such as HuopaDesktop) using the command: \"hpkg update\".");
             await sys.addLine("If you still have issues, check if you have any custom scripts for HuopaDesktop. If you do, try booting HuopaDesktop without the scripts.");
             await sys.addLine("If you don't have any custom scripts or the issue is still occurring, please report this issue to me (for example through the HuopaOS Github).");
             await sys.addLine("Reboot the system to load into HuopaDesktop or the terminal (hold down \"C\" to load into the terminal).");
-            const errorTitle = quantum.document.createElement("h1");
-            errorTitle.textContent = "/!\\";
-            mainDiv.append(errorTitle);
-            const errorInfo = quantum.document.createElement("h2");
-            errorInfo.textContent = "An unhandled exeption has occurred in HuopaDesktop and the system has been forced to halt. For more info, check the DevTools console.";
-            mainDiv.append(errorInfo);
     }
     function importStylesheet(content, dataURL = false) {
         const linkElement = quantum.document.createElement('link');
@@ -993,8 +991,11 @@ const createRoturLoginWindow = async (app) => {
                     try {
                         if (type === "id") {
                             idRegistry[content] = id;
+                            el[type] = "huopa-" + content;
+                        } else {
+                            el[type] = content;
                         }
-                        el[type] = content;
+                        
                     } catch (e) {
                         console.error("[huopaAPI RUN ERROR] Error with setting attribute: " + type);
                         console.error("Error: " + e);
@@ -1250,6 +1251,48 @@ const createRoturLoginWindow = async (app) => {
                     return;
                 }
                 
+            },
+
+            parseMarkdown: (html) => {
+                try {
+                    const returned = marked.parse(html);
+                    return returned;
+                } catch (error) {
+                    console.error(`parseMarkdown: Failed to parse markdown: '${error}'`);
+                    return;
+                }
+            },
+
+            getSystemInfo: async() => {
+                async function getBrowserName() {
+                    const ua = navigator.userAgent;
+
+                    if (ua.includes("Firefox/")) return "Firefox";
+                    if (ua.includes("Edg/")) return "Edge";
+                    if (ua.includes("OPR/") || ua.includes("Opera")) return "Opera";
+                    if (ua.includes("Vivaldi")) return "Vivaldi";
+                    if (ua.includes("Safari/") && !ua.includes("Chrome/") && !ua.includes("Chromium/")) return "Safari";
+
+                    if (navigator.brave && await navigator.brave.isBrave()) {
+                        return "Brave";
+                    }
+
+                    if (ua.includes("Chrome/")) return "Chrome";
+
+                    return "Unknown";
+                }
+                const browser = await getBrowserName()
+                const battery = await navigator.getBattery();
+                console.log(browser);
+                const systemInfo = {
+                version: version,
+                bootTime: quantum.bootTime,
+                battery: battery.level,
+                host: navigator.userAgentData?.platform ?? "Unknown",
+                browser
+                };
+                
+                return JSON.stringify(systemInfo);
             }
         };
 
