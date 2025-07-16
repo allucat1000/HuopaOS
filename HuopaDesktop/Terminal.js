@@ -62,11 +62,12 @@ function getColor(colorName) {
 }
 
 function escapeWithBackslashes(str) {
-  return str.replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#39;");
+  return str.replace(/\\/g, "\\\\")
+            .replace(/&/g, "&amp;")         // escape &
+            .replace(/</g, "&lt;")          // escape <
+            .replace(/>/g, "&gt;")          // escape >
+            .replace(/"/g, "&quot;")        // escape "
+            .replace(/'/g, "&#39;");        // escape '
 }
 
 const startText = await huopaAPI.createElement("span");
@@ -131,7 +132,7 @@ async function runCmd(value) {
             }
             break;
         case "echo":
-            if (values) {
+            if (values[0]) {
                 await addLine(values[0]);
             } else {
                 await addLine(`[line=red]echo: A parameter is required[/line]`);
