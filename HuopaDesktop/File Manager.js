@@ -10,13 +10,13 @@ if (typeof loadParams === "object" && loadParams.mode === "fileSelector") {
 }
 async function renderFileList(path) {
     if (fileListDiv) {
-        await huopaAPI.deleteElement(fileListDiv);
+        fileListDiv.remove()
     }
-    fileListDiv = await huopaAPI.createElement("div");
+    fileListDiv = document.createElement("div");
     await huopaAPI.setAttribute(fileListDiv, "id", "fileList");
-    const backButton = await huopaAPI.createElement("button");
-    const deleteButton = await huopaAPI.createElement("button");
-    const topBarList = await huopaAPI.createElement("div");
+    const backButton = document.createElement("button");
+    const deleteButton = document.createElement("button");
+    const topBarList = document.createElement("div");
     await huopaAPI.setAttribute(fileListDiv, "style", "width: 100%; height: calc(100% - 20px); display: flex; flex-direction: column; margin-bottom: -0.25em;");
     await huopaAPI.setAttribute(topBarList, "style", "display: flex; align-items: center; justify-content: start; padding: 0.25em; margin-top: 0.33em;");
     await setAttrs(backButton, {
@@ -28,14 +28,14 @@ async function renderFileList(path) {
         "style":"display: flex; justify-content: center; align-items: center;"
     });
     if (path === "/") {
-        await huopaAPI.setCertainStyle(backButton, "opacity", "0.5");
-        await huopaAPI.setCertainStyle(backButton, "cursor", "default");
+        backButton.style.opacity = "0.5";
+        backButton.style.cursor = "default";
     } else {
-        await huopaAPI.setAttribute(backButton, "onclick", async() => {
+        backButton.onclick = async() => {
             let parentPath = path.split("/").slice(0, -1).join("/");
             if (!parentPath) parentPath = "/";
             renderFileList(parentPath);
-        });
+        };
     }
     if (!fileSelectorMode) {
         await huopaAPI.setAttribute(deleteButton, "onclick", async() => {
@@ -66,28 +66,28 @@ async function renderFileList(path) {
         });
     }
     const buttonCss = async (button) => {
-        await huopaAPI.setCertainStyle(button, "width", "30px");
-        await huopaAPI.setCertainStyle(button, "height", "30px");
-        await huopaAPI.setCertainStyle(button, "padding", "0.5em");
+        button.style.width = "30px";
+        button.style.height = "30px";
+        button.style.padding = "0.5em";
     }
 
     await buttonCss(backButton);
     await buttonCss(deleteButton);
 
-    await huopaAPI.append(topBarList, backButton);
+    topBarList.append(backButton);
     if (!fileSelectorMode) {
-        await huopaAPI.append(topBarList, deleteButton);
+        topBarList.append(deleteButton);
     }
     
-    const currentPathTitle = await huopaAPI.createElement("p");
+    const currentPathTitle = document.createElement("p");
     await huopaAPI.setAttribute(currentPathTitle, "style", "color: white; display: inline; text-align: left; margin: 0.5em; font-size: 1.5em;")
     await huopaAPI.setAttribute(currentPathTitle, "textContent", path);
-    await huopaAPI.append(topBarList, currentPathTitle);
-    await huopaAPI.append(fileListDiv, topBarList)
-    await huopaAPI.appendToApp(fileListDiv);
-    const styleTag = await huopaAPI.createElement("style");
+    topBarList.append(currentPathTitle);
+    fileListDiv.append(topBarList)
+    document.body.append(fileListDiv);
+    const styleTag = document.createElement("style");
     await huopaAPI.setAttribute(styleTag, "textContent", ".file-selected { filter: brightness(1.25); } .disabled { opacity: 0.5; } ");
-    await huopaAPI.appendToApp(styleTag);
+    document.body.append(styleTag);
     if (!fileSelectorMode) {
         await huopaAPI.addClass(deleteButton, "disable");
     }
@@ -98,11 +98,11 @@ async function renderFileList(path) {
         fileList = JSON.parse(fileList);
         
         for (const file of fileList) {
-            const fileDiv = await huopaAPI.createElement("div");
+            const fileDiv = document.createElement("div");
             await huopaAPI.setAttribute(fileDiv, "style", "width: calc(100% - 20px); background-color: rgba(65, 65, 65, 0.5); margin: 0em auto; border-radius: 0.5em; border: rgba(105, 105, 105, 0.65) 2.5px solid; margin: 0.25em; display: flex; cursor: pointer;");
-            const fileName = await huopaAPI.createElement("label");
+            const fileName = document.createElement("label");
             const dynamicFilePath = file.replace(path + "/", "")
-            const fileIcon = await huopaAPI.createElement("img");
+            const fileIcon = document.createElement("img");
             let fileIconSrc;
             const fileDir = await isDir(file);
             if (file.endsWith(".js")) {
@@ -161,12 +161,12 @@ async function renderFileList(path) {
                     
                 });
             } else {
-                await huopaAPI.setCertainStyle(fileDiv, "opacity", "0.5");
+                fileDiv.style.opacity = "0.5";
             }
             
-            await huopaAPI.append(fileDiv, fileIcon);
-            await huopaAPI.append(fileDiv, fileName);
-            await huopaAPI.append(fileListDiv, fileDiv);
+            fileDiv.append(fileIcon);
+            fileDiv.append(fileName);
+            fileListDiv.append(fileDiv);
         }
     } else {
         await huopaAPI.runApp("/home/applications/Preview.js", path);

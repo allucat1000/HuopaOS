@@ -1,9 +1,9 @@
-const display = await huopaAPI.createElement("div");
+const display = document.createElement("div");
 await setAttrs(display, {
     "style":"position: absolute; left: 0; top: 0; width: 100%; height: 100%;"
 });
-const result = await huopaAPI.createElement("h1");
-const input = await huopaAPI.createElement("input");
+const result = document.createElement("h1");
+const input = document.createElement("input");
 await setAttrs(result, {
     "style":"color: white; padding 0.5em; text-align: center; font-size: 2em; user-select: text;"
 })
@@ -12,21 +12,21 @@ await setAttrs(input, {
     "placeholder":"Type a calculation here",
     "onkeypress":async(key) => {
         if (key === "Enter") {
-            const calculation = await huopaAPI.getAttribute(input, "value");
+            const calculation = input.value;
             if (calculation) {
                 const calcResult = await huopaAPI.calculate(calculation);
                 if (!calcResult) {
-                    await huopaAPI.setAttribute(result, "textContent", "Invalid calculation!");
-                    await huopaAPI.setAttribute(input, "value", "");
+                    result.textContent = "Invalid calculation!";
+                    input.value = "";
                 } else {
-                    await huopaAPI.setAttribute(result, "textContent", calcResult);
-                    await huopaAPI.setAttribute(input, "value", calcResult);
+                    result.textContent = calcResult;
+                    input.value = calcResult;
                 }
                 
             }
         }
     }
 });
-await huopaAPI.append(display, result);
-await huopaAPI.append(display, input);
-await huopaAPI.appendToApp(display);
+display.append(result);
+display.append(input);
+document.body.append(display);

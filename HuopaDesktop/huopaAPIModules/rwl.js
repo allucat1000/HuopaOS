@@ -17,10 +17,10 @@ return {
         const fullSrc = injectedCodeLine + rwlSrc;
         const dataURL = "data:text/javascript;charset=utf-8," + convToDataURL(fullSrc);
 
-        const scriptEl = await huopaAPI.createElement("script");
+        const scriptEl = document.createElement("script");
         await huopaAPI.setAttribute(scriptEl, "type", "module");
         await huopaAPI.setAttribute(scriptEl, "src", dataURL);
-        await huopaAPI.appendToApp(scriptEl);
+        document.body.append(scriptEl);
         const module = await import(dataURL);
         await renderElemSetup(module.parseData.data);
         lastWindowWidth = await huopaAPI.getRenderedSize(rootEl, "width");
@@ -35,7 +35,7 @@ async function renderElemSetup(rawData) {
     if (rawData) {
         const data = JSON.parse(rawData);
         root = data.elements[0];
-        rootEl = await huopaAPI.createElement("div");
+        rootEl = document.createElement("div");
         await huopaAPI.setAttribute(rootEl, "style", `
             width: 100%;
             position: relative;   
@@ -45,7 +45,7 @@ async function renderElemSetup(rawData) {
             opacity: 0;
             text-align: center;
         `);
-        await huopaAPI.appendToApp(rootEl);
+        document.body.append(rootEl);
         await huopaAPI.log(JSON.stringify(root.data.content.elements));
         await renderElems(root.data.content.elements, rootEl);
         await huopaAPI.setCertainStyle(rootEl, "opacity", "1");
@@ -62,11 +62,11 @@ async function renderElems(parentPath, parentId) {
         let childEl;
         let key;
         if (child.kind === "element") {
-            childEl = await huopaAPI.createElement("p");
+            childEl = document.createElement("p");
             await huopaAPI.setAttribute(childEl, "textContent", child.data.value.value);
         } else if (child.kind === "block") {
             key = child?.data?.header?.key.toLowerCase()
-            childEl = await huopaAPI.createElement("div");
+            childEl = document.createElement("div");
             if (key === "button") {
                 await huopaAPI.setAttribute(childEl, "style", "padding: 0.5em; border-radius: 0.5em; background-color: rgba(65, 65, 65, 0.5); border-color: rgba(105, 105, 105, 0.65); border-style: solid; cursor: pointer;");
             }
@@ -160,7 +160,7 @@ async function renderElems(parentPath, parentId) {
                         
                     }
                     if (attrType === "padding") {
-                        const paddingSanitize = await huopaAPI.createElement("div");
+                        const paddingSanitize = document.createElement("div");
                         await huopaAPI.setCertainStyle(paddingSanitize, "padding", value + "px");
     
                         if (await huopaAPI.getCertainStyle(paddingSanitize, "padding")) {
@@ -168,7 +168,7 @@ async function renderElems(parentPath, parentId) {
                         } else {
                             await huopaAPI.warn("RWL.js Interpretor: Invalid padding value, ignored.");
                         }
-                        await huopaAPI.deleteElement(paddingSanitize)
+                        (paddingSanitize).remove()
                         
                     }
                     if (attrType === "size") {
@@ -189,7 +189,7 @@ async function renderElems(parentPath, parentId) {
         } else if (anchorY === "c") {
             await huopaAPI.setCertainStyle(childEl, "transform", "translateY(-50%)");
         }
-        await huopaAPI.append(parentId, childEl);
+        parentId.append(childEl);
         yPointerNum = await resolvePosition(yPointer, "height", parentId);
         if (!yPointer.includes("%")) {
             let yCalc;

@@ -1,19 +1,19 @@
-const title = await huopaAPI.createElement("h1");
+const title = document.createElement("h1");
 await huopaAPI.setAttribute(title, "textContent", "Claw Feed");
 await huopaAPI.setAttribute(title, "style", "text-align: center; color: white; margin: 1em;");
-await huopaAPI.appendToApp(title);
-const postCreateDiv = await huopaAPI.createElement("div");
-const loginButton = await huopaAPI.createElement("button");
+document.body.append(title);
+const postCreateDiv = document.createElement("div");
+const loginButton = document.createElement("button");
 await huopaAPI.setAttribute(loginButton, "textContent", "Login with Rotur");
 await huopaAPI.setCertainStyle(loginButton, "position", "absolute");
 await huopaAPI.setCertainStyle(loginButton, "top", "0.5em");
 await huopaAPI.setCertainStyle(loginButton, "right", "0.5em");
-await huopaAPI.appendToApp(loginButton);
-await huopaAPI.appendToApp(postCreateDiv);
-const loadingText = await huopaAPI.createElement("h3");
+document.body.append(loginButton);
+document.body.append(postCreateDiv);
+const loadingText = document.createElement("h3");
 await huopaAPI.setAttribute(loadingText, "textContent", "Loading Claw feed...");
 await huopaAPI.setAttribute(loadingText, "style", "text-align: center; color: white;");
-await huopaAPI.appendToApp(loadingText);
+document.body.append(loadingText);
 let token = "";
 let loggedIn = false
 let loginState = false
@@ -61,13 +61,13 @@ async function createPostSendDiv() {
         // Post creation
         const oldPostCreateDiv = await huopaAPI.getElementById("postCreateDiv");
         if (oldPostCreateDiv) await huopaAPI.deleteElement(oldPostCreateDiv);
-        const postTextArea = await huopaAPI.createElement("textarea");
+        const postTextArea = document.createElement("textarea");
         await huopaAPI.append(postCreateDiv, postTextArea);
-        const postButton = await huopaAPI.createElement("button");
+        const postButton = document.createElement("button");
         await huopaAPI.setCertainStyle(postButton, "margin", "0.5em auto");
         await huopaAPI.setAttribute(postButton, "textContent", "Send post");
         await huopaAPI.append(postCreateDiv, postButton);
-        const postSendInfoText = await huopaAPI.createElement("p");
+        const postSendInfoText = document.createElement("p");
         await huopaAPI.setAttribute(postSendInfoText, "style", "color: white; margin: 0.5em; text-align: center;");
         await huopaAPI.setAttribute(postCreateDiv, "id", "postCreateDiv");
         await huopaAPI.append(postCreateDiv, postSendInfoText);
@@ -84,18 +84,18 @@ async function createPostSendDiv() {
                 const response = await huopaAPI.fetch("https://social.rotur.dev/feed?limit=1&offset=0");
                 if (response.ok) {
                     const post = response.body[0];
-                    const postDiv = await huopaAPI.createElement("div");
-                    const author = await huopaAPI.createElement("h3");
-                    const pfp = await huopaAPI.createElement("img");
+                    const postDiv = document.createElement("div");
+                    const author = document.createElement("h3");
+                    const pfp = document.createElement("img");
                     await setAttrs(pfp, {
                         "src":"https://avatars.rotur.dev/" + post.user,
                         "style":"border-radius: 50%; width: 1.5em; height: 1.5em;"
                     })
-                    const postContent = await huopaAPI.createElement("p");
+                    const postContent = document.createElement("p");
 
                     await huopaAPI.setAttribute(author, "textContent", post.user);
                     await huopaAPI.setAttribute(postContent, "textContent", post.content);
-                    const userBar = await huopaAPI.createElement("div");
+                    const userBar = document.createElement("div");
                     await huopaAPI.setAttribute(userBar, "style", "display: flex; align-items: center; margin: 0; margin-bottom: 1em;");
                     await huopaAPI.append(userBar, pfp);
                     await huopaAPI.append(userBar, author);
@@ -109,7 +109,7 @@ async function createPostSendDiv() {
                     );
                     await huopaAPI.setCertainStyle(author, "margin", "0 0.5em");
                     await huopaAPI.setCertainStyle(author, "paddingBottom", "0.15em");
-                    const osSendInfo = await huopaAPI.createElement("p");
+                    const osSendInfo = document.createElement("p");
                     if (post.os) {
                         await huopaAPI.setAttribute(osSendInfo, "style", "position: absolute; right: 0.5em; top: 0.5em; color: rgba(255, 255, 255, 0.3); text-align: right; font-size: 0.5em;");
                         await huopaAPI.setAttribute(osSendInfo, "textContent", post.os);
@@ -127,26 +127,26 @@ async function createPostSendDiv() {
 
 
 // Feed loading
-const postList = await huopaAPI.createElement("div");
-await huopaAPI.appendToApp(postList)
+const postList = document.createElement("div");
+document.body.append(postList)
 const response = await huopaAPI.fetch("https://social.rotur.dev/feed?limit=25&offset=0");
 if (response.ok) {
     const feed = response.body;
     if (Array.isArray(feed)) {
         huopaAPI.deleteElement(loadingText);
         for (const post of feed) {
-            const postDiv = await huopaAPI.createElement("div");
-            const author = await huopaAPI.createElement("h3");
-            const pfp = await huopaAPI.createElement("img");
+            const postDiv = document.createElement("div");
+            const author = document.createElement("h3");
+            const pfp = document.createElement("img");
             await setAttrs(pfp, {
                 "src":"https://avatars.rotur.dev/" + post.user,
                 "style":"border-radius: 50%; width: 1.5em; height: 1.5em;"
             })
-            const postContent = await huopaAPI.createElement("p");
+            const postContent = document.createElement("p");
 
             await huopaAPI.setAttribute(author, "textContent", post.user);
             await huopaAPI.setAttribute(postContent, "textContent", post.content);
-            const userBar = await huopaAPI.createElement("div");
+            const userBar = document.createElement("div");
             await huopaAPI.setAttribute(userBar, "style", "display: flex; align-items: center; margin: 0; margin-bottom: 1em;");
             await huopaAPI.append(userBar, pfp);
             await huopaAPI.append(userBar, author);
@@ -160,7 +160,7 @@ if (response.ok) {
             );
             await huopaAPI.setCertainStyle(author, "margin", "0 0.5em");
             await huopaAPI.setCertainStyle(author, "paddingBottom", "0.15em");
-            const osSendInfo = await huopaAPI.createElement("p");
+            const osSendInfo = document.createElement("p");
             if (post.os) {
                 await huopaAPI.setAttribute(osSendInfo, "style", "position: absolute; right: 0.5em; top: 0.5em; color: rgba(255, 255, 255, 0.3); text-align: right; font-size: 0.5em;");
                 await huopaAPI.setAttribute(osSendInfo, "textContent", post.os);
@@ -170,10 +170,10 @@ if (response.ok) {
         }
     }
 } else {
-    const errorMessage = await huopaAPI.createElement("h3");
+    const errorMessage = document.createElement("h3");
     await huopaAPI.setAttribute(errorMessage, "textContent", "Failed to load Claw Feed, relaunch the app and try again. Status: " + response.status);
     
-    await huopaAPI.appendToApp(errorMessage);
+    document.body.append(errorMessage);
 }
 
 

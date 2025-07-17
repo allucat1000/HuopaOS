@@ -17,12 +17,12 @@ if (!colors) {
 }
 
 let index = 0
-const errorText = await huopaAPI.createElement("h2");
+const errorText = document.createElement("h2");
 await setAttrs(errorText, {
     "style":"text-align: center; color: white; margin: 1em;",
     "textContent":"If you see this, you probably clicked on this app's icon in the dock, press the button below to hide the window again."
 })
-const hideWindowButton = await huopaAPI.createElement("button");
+const hideWindowButton = document.createElement("button");
 await setAttrs(hideWindowButton, {
     "textContent":"Hide the window again",
     "style":"display: block; margin: 0.5em auto;",
@@ -31,8 +31,8 @@ await setAttrs(hideWindowButton, {
     }
 })
 
-await huopaAPI.appendToApp(errorText);
-await huopaAPI.appendToApp(hideWindowButton);
+document.body.append(errorText);
+document.body.append(hideWindowButton);
 while (true) {
     await huopaAPI.writeFile("/system/env/systemconfig/settings/customization/windowbordercolor.txt", "file", colors[index]);
     index++;

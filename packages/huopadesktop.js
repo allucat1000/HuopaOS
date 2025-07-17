@@ -42,7 +42,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "1.0.5";
+    const version = "1.1.0";
     // Priv Sys Funcs
     const dataURIToBlob = async (dataURI) => {
         const [meta, base64Data] = dataURI.split(',');
@@ -495,8 +495,7 @@ window.huopadesktop = (() => {
         const digits = container.parentElement.id;  
         iframe.dataset.digitId = digits;
         iframe.sandbox = "allow-scripts";
-        iframe.style.display = "none";
-        quantum.document.body.appendChild(iframe);
+        container.appendChild(iframe);
         const iframeHTML = `
             <script>
                 const appName = ${JSON.stringify(appId)};
@@ -507,33 +506,6 @@ window.huopadesktop = (() => {
                         message, appName
                     }, "*");
                 };
-
-                window.addEventListener("message", (event) => {
-                    const data = event.data;
-                    if (data?.type === "click" && data?.elementId) {
-                        const handler = localEventHandlers[data.elementId];
-                        if (handler) handler()
-                    } else if (data?.type === "input" && data?.elementId) {
-                        const handler = localEventHandlers[data.elementId];
-                        if (handler) handler();
-                    } else if (data?.type === "eventListener" && data?.elementId) {
-                        const elId = data.elementId;
-                        const listenerName = data.listener;
-                        const id = elId + listenerName;
-                        const handler = localEventHandlers[id];
-                        if (handler) {
-                            handler();
-                        }
-                    } else if (data?.type === "keypress" && data?.elementId) {
-                        const key = data.key;
-                        const handler = localEventHandlers[data.elementId];
-                        if (typeof handler === "function") {
-                            handler(key);
-                        } else {
-                            console.warn("Handler not found or not a function for:", data.elementId);
-                        }
-                    }
-                });
 
                 const huopaAPI = (() => {
                     let msgId = 0;
@@ -550,94 +522,10 @@ window.huopadesktop = (() => {
                         return error ? reject(new Error(error)) : resolve(result);
                         }
 
-                        // Forwarded DOM event
-                        if (type === "event" && localEventHandlers[elementId]) {
-                        return localEventHandlers[elementId]();
-                        }
                     });
 
                     return new Proxy({}, {
                         get(_, prop) {
-                            if (prop === "setAttribute") {
-                                return async (elementId, attrName, handler) => {
-                                    const customAttrList = ["onclick", "oninput", "onkeypress"];
-                                    if (customAttrList.includes(attrName)) {
-                                        localEventHandlers[elementId] = handler;
-                                        return new Promise((resolve, reject) => {
-                                            const id = "msg_" + msgId++;
-                                            callbacks.set(id, { resolve, reject });
-                                            try {
-                                                window.parent.postMessage({
-                                                    type: "bindEventForward",
-                                                    data: [elementId, attrName],
-                                                    id,
-                                                    appName,
-                                                }, "*");
-                                            } catch (e) {
-                                                window.parent.postMessage({
-                                                    type: "iframeError",
-                                                    message: e?.message || "Unknown error",
-                                                    stack: e?.stack || null,
-                                                    name: e?.name || "Error",
-                                                    appName
-                                                }, "*");   
-                                                return;
-                                            }
-                                        });
-                                    } else {
-                                        return new Promise((resolve, reject) => {
-                                            const id = "msg_" + msgId++;
-                                            callbacks.set(id, { resolve, reject });
-                                            try {
-                                                window.parent.postMessage({
-                                                    type: prop,
-                                                    data: [elementId, attrName, handler],
-                                                    id,
-                                                    appName
-                                                }, "*");
-                                            } catch (e) {
-                                                window.parent.postMessage({
-                                                    type: "iframeError",
-                                                    message: e?.message || "Unknown error",
-                                                    stack: e?.stack || null,
-                                                    name: e?.name || "Error",
-                                                    appName
-                                                }, "*");
-                                                return;
-                                            }
-                                        });
-                                    }
-                                };
-                            } else if (prop === "addEventListener") {
-                                return async (elementId, listenerName, handler) => {
-                                    localEventHandlers[elementId + listenerName] = handler;
-                                    return new Promise((resolve, reject) => {
-                                        const id = "msg_" + msgId++;
-                                        callbacks.set(id, { resolve, reject });
-                                        try {
-                                            window.parent.postMessage({
-                                                type: "bindEventForward",
-                                                data: [elementId, listenerName],
-                                                id,
-                                                appName,
-                                            }, "*");
-                                        } catch (e) {
-                                            window.parent.postMessage({
-                                                type: "iframeError",
-                                                message: e?.message || "Unknown error",
-                                                stack: e?.stack || null,
-                                                name: e?.name || "Error",
-                                                appName
-                                            }, "*");   
-                                            return;
-                                        }
-                                    });
-                                }
-                            
-                            
-                            }
-
-                            // Other methods
                             return (...args) => {
                                 return new Promise((resolve, reject) => {
                                     const id = "msg_" + msgId++;
@@ -810,65 +698,6 @@ window.huopadesktop = (() => {
     const huopaAPIHandlers = (appContainer) => {
         
         return {
-            createElement: function(tag) {
-                const el = quantum.document.createElement(tag);
-                el.style.maxWidth = "100%";
-                el.style.maxHeight = "100%";
-                el.style.boxSizing = "border-box";
-                elementIdCounter++
-                const id = `el_${elementIdCounter}`;
-                el.dataset.huopaId = id;
-                el.id = id;
-                elementRegistry[id] = el;
-                idRegistry[id] = id;
-                return id;
-            },
-
-            appendToApp: function(id) {    
-                const el = elementRegistry[id];
-                if (!el) {
-                    console.warn(`append: Element with ID '${id}' not found.`);
-                    return;
-                }
-                if (el) appContainer.appendChild(el);
-            },
-            deleteElement: function(id) {
-                const el = elementRegistry[id]
-                if (!el) {
-                    console.warn(`delete: Element with ID '${id}' not found.`);
-                    return;
-                }
-                el.remove();
-                delete elementRegistry[id];
-
-            },
-
-            append: function(parent, id) {    
-                const el = elementRegistry[id];
-                if (!el) {
-                    console.warn(`append: Element with ID '${id}' not found.`);
-                    return;
-                }
-                const parentEl = elementRegistry[parent];
-                if (!parentEl) {
-                    console.warn(`append: Element with ID '${parent}' not found.`);
-                    return;
-                }
-                parentEl.appendChild(el);
-            },
-
-            getElementById: function(id) {
-                const returnData = idRegistry[id];
-                return returnData;
-            },
-
-            querySelector: function(sel) {
-                return appContainer.querySelector(sel);
-            },
-
-            querySelectorAll: function(sel) {
-                return appContainer.querySelectorAll(sel);
-            },
 
             log: function(msg) {
                 console.log(`[APP LOG]: ${msg}`);
@@ -892,70 +721,11 @@ window.huopadesktop = (() => {
 
             clearTimeout,
 
-            fetch: async (url, headers = {}, method = "GET") => {
-                const response = await window.fetch(url, {
-                    method,
-                    headers
-                });
-
-                const contentType = response.headers.get("content-type") || "";
-                const body = contentType.includes("application/json")
-                    ? await response.json()
-                    : await response.text();
-
-                return {
-                    ok: response.ok,
-                    status: response.status,
-                    contentType,
-                    body,
-                };
-            },
-
             getWindowSize: function() {
                 return {
                     width: appContainer.clientWidth,
                     height: appContainer.clientHeight,
                 };
-            },
-
-
-            setOnClick: function(id) {
-                const el = elementRegistry[id];
-                if (!el) return;
-
-                el.addEventListener("click", () => {
-                    sandboxWindow.postMessage({
-                        type: "event",
-                        event: "click",
-                        elementId: id
-                    }, "*");
-                });
-            },
-
-            setOnKeyPress: function(id) {
-                const el = elementRegistry[id];
-                if (!el) return;
-
-                el.addEventListener("keydown", () => {
-                    sandboxWindow.postMessage({
-                        type: "event",
-                        event: "keypress",
-                        elementId: id
-                    }, "*");
-                });
-            },
-
-            setOnInput: function(id) {
-                const el = elementRegistry[id];
-                if (!el) return;
-
-                el.addEventListener("input", () => {
-                    sandboxWindow.postMessage({
-                        type: "event",
-                        event: "input",
-                        elementId: id
-                    }, "*");
-                });
             },
 
             getFile: function(path, permissions) {
@@ -987,23 +757,6 @@ window.huopadesktop = (() => {
             },
 
 
-            setCertainStyle: function(id, styleName, content) {
-                const el = elementRegistry[id];
-                if (!el) {
-                    console.warn(`setCertainStyle: Element with ID: '${id}' not found.`);
-                    return;
-                }
-                el.style[styleName] = content;
-            },
-
-            getCertainStyle: function(id, styleName) {
-                const el = elementRegistry[id];
-                if (!el) {
-                    console.warn(`getCertainStyle: Element with ID: '${id}' not found.`);
-                    return;
-                }
-                return el.style[styleName]
-            },
 
             openFileImport: async function(accept = "*", type = "text", allowMultiple = false) {
                 const files = await new Promise((resolve, reject) => {
@@ -1087,83 +840,8 @@ window.huopadesktop = (() => {
                 return canvas.toDataURL('image/jpeg', quality);
             },
 
-            setAttribute: async(id, type, content) => {
-                const el = elementRegistry[id];
-                if (!el) return;
-                if (el.tagName.toLowerCase() === "iframe" && type.toLowerCase() === "src") {
-
-                    // Currently for safety reasons, only http(s) content is allowed in iFrames
-
-                    if (content.startsWith("http://") || content.startsWith("https://")) {
-                        el.src = content;
-                        return;
-                    } else {
-                        console.warn("[huopaAPI SAFETY] Currently only http(s) content is allowed to be rendered in an iFrame");
-                        return;
-                    }
-                }
-                if (type === "onclick") {
-                    setOnClick(id);
-                    return;
-                } else if (type === "oninput") {
-                    setOnInput(id);
-                    return;
-                } else if (type.toLowerCase() === "innerhtml") {
-                    try {
-                        el[type] = DOMPurify.sanitize(content);
-                    } catch (e) {
-                        console.error("[huopaAPI RUN ERROR] Error with setting innerHTML");
-                        console.error("Error: " + e);
-                    }
-                } else {
-                    try {
-                        if (type === "id") {
-                            idRegistry[content] = id;
-                            el[type] = "huopa-" + content;
-                        } else {
-                            el[type] = content;
-                        }
-                        
-                    } catch (e) {
-                        console.error("[huopaAPI RUN ERROR] Error with setting attribute: " + type);
-                        console.error("Error: " + e);
-                    }
-                }
-            },
-
-            getAttribute: async(id, type) => {
-                const el = elementRegistry[id];
-                if (!el) return;
-                try {
-                    return el[type];
-                } catch (error) {
-                    console.error("[huopaAPI RUN ERROR] Error with getting attribute: " + type);
-                    console.error("Error: " + error);
-                }
-            },
-
             openRoturLogin: async(appId) => {
                 return await createRoturLoginWindow(appId);
-            },
-
-            prependToApp: async(id) => {
-                const el = elementRegistry[id];
-                if (!el) {
-                    console.warn(`prependToApp: No element with ID ${id}`)
-                }
-                appContainer.insertBefore(el, appContainer.firstChild);
-            },
-
-            prepend: async(parentId, id) => {
-                const el = elementRegistry[id];
-                const parent = elementRegistry[parentId];
-                if (!el) {
-                    console.warn(`prepend: No element with ID ${id}`);
-                }
-                if (!parent) {
-                    console.warn(`prepend: No element with ID ${parentId}`);
-                }
-                parent.insertBefore(el, parent.firstChild);
             },
 
             safeStorageWrite: async(data, appId) => {
@@ -1190,48 +868,7 @@ window.huopadesktop = (() => {
                 const code = await internalFS.getFile(path);
                 await runApp(appName, code, path, startParams);
             },
-
-            addClass: async(id, className) => {
-                const el = elementRegistry[id];
-                if (!el) {
-                    console.warn(`addClass: No element with ID ${id}`);
-                    return;
-                }
-                try {
-                    el.classList.add(className);
-                } catch (error) {
-                    console.error("[huopaAPI RUN ERROR] Error with adding class: " + error);
-                }
-                
-            },
-
-            removeClass: async(id, className) => {
-                const el = elementRegistry[id];
-                if (!el) {
-                    console.warn(`removeClass: No element with ID ${id}`);
-                    return;
-                }
-                try {
-                    el.classList.remove(className);
-                } catch (error) {
-                    console.error("[huopaAPI RUN ERROR] Error with removing class: " + error);
-                }
-            },
-
-            getChildren: async (id) => {
-                const parent = elementRegistry[id];
-                if (!parent) {
-                    console.warn(`getChildren: No element with ID ${id}`);
-                    return [];
-                }
-
-                const children = Object.entries(elementRegistry)
-                    .filter(([_, el]) => el.parentElement === parent)
-                    .map(([childId, _]) => childId);
-
-                return children;
-            },
-
+ 
             openFileDialog: async (options = {}, appName) => {
                     try {
                         const data = await runAppWithReturn("/home/applications/File Manager.js", "fileSelector");
@@ -1265,38 +902,6 @@ window.huopadesktop = (() => {
                 const digitId = appContainer.parentElement.id;
                 const title = quantum.document.querySelector(`[data-title-digit-id="${digitId}"]`);
                 title.textContent = content;
-            },
-
-            playAudio: (url) => {
-                if (typeof url !== "string") throw new Error("Content must be a string!");
-                const appId = appContainer.parentElement.id;
-                const existing = quantum.document.querySelector(`audio[data-app-id="${appId}"]`);
-                if (existing) {
-                    existing.src = url;
-                    existing.play();
-                    return;
-                }
-
-                const audio = quantum.document.createElement("audio");
-                audio.src = url;
-                audio.controls = true;
-                audio.autoplay = true;
-                audio.dataset.appId = appId;
-                audio.display = "none";
-                audio.style.zIndex = "9999";
-                appContainer.appendChild(audio);
-
-                return;
-            },
-
-            stopAudio: () => {
-                const appId = appContainer.parentElement.id;
-                const audio = quantum.document.querySelector(`audio[data-app-id="${appId}"]`);
-                if (!audio) {
-                    console.warn("stopAudio: No audio element found!");
-                    return
-                }
-                audio.remove();
             },
 
             getRenderedSize: (id, type) => {
@@ -1350,26 +955,6 @@ window.huopadesktop = (() => {
                 
             },
  
-            addEventListener: async(id, type) => {
-                const el = elementRegistry[id];
-                if (!el) return;
-
-                el.addEventListener(type, () => {
-                    sandboxWindow.postMessage({
-                        type: "event",
-                        event: "eventListener",
-                        listener: type,
-                        elementId: id
-                    }, "*");
-                });
-            },
-
-            removeEventListener: async(id, type) => {
-                const el = elementRegistry[id];
-                if (!el) return;
-                el.removeEventListener(type);
-            },
-
             calculate: (expression, scope = {}) => {
                 try {
                     const result = math.evaluate(expression, scope);
@@ -1451,7 +1036,8 @@ window.huopadesktop = (() => {
 
             github_getFolder: (credentials, user, repo, folder) => {
                 GitHubAPI.listFolder(credentials, user, repo, folder);
-            }
+            },
+
         };
 
     };

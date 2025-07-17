@@ -1,24 +1,24 @@
 // Setup
-const font = await huopaAPI.createElement("link");
+const font = document.createElement("link");
 await setAttrs(font, {
     "href":"https://cdn.jsdelivr.net/npm/@fontsource/monaspace-neon/index.css",
     "rel":"stylesheet"
 });
-await huopaAPI.appendToApp(font);
+document.body.append(font);
 const customColors = {
   red: "#ff5454", 
   green: "#4eff33",
   blue: "#338fff", 
 };
 
-const termDiv = await huopaAPI.createElement("div");
-const inputDiv = await huopaAPI.createElement("div");
-const input = await huopaAPI.createElement("input");
+const termDiv = document.createElement("div");
+const inputDiv = document.createElement("div");
+const input = document.createElement("input");
 await setAttrs(termDiv, {
     "id":"termDiv",
     "style":`margin: 1em; margin-bottom: 0; padding: 0; font-family: "Monaspace Neon", sans-serif;`
 })
-await huopaAPI.setAttribute(inputDiv, "style", `margin: 1em; display: flex; align-items: center; flex-wrap: nowrap; gap: 0.2em; margin: 1em; margin-top: 0; font-family: "Monaspace Neon", sans-serif;`);
+inputDiv.style = `margin: 1em; display: flex; align-items: center; flex-wrap: nowrap; gap: 0.2em; margin: 1em; margin-top: 0; font-family: "Monaspace Neon", sans-serif;`;
 await setAttrs(input, {
     "style":"background-color: transparent; padding: 0; border: none; border-radius: 0; flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow-x: auto; font-family: 'Monaspace Neon';"
 });
@@ -29,9 +29,9 @@ async function addLine(text) {
     const coloredText = parseColorsAndBackgrounds(escapedText);
     const html = await huopaAPI.parseMarkdown(coloredText);
 
-    const termContentDiv = await huopaAPI.createElement('div');
+    const termContentDiv = document.createElement('div');
     await huopaAPI.setAttribute(termContentDiv, "innerHTML", html);
-    await huopaAPI.append(termDiv, termContentDiv)
+    termDiv.append(termContentDiv)
     await huopaAPI.setAttribute(termDiv, "scrollTop", await huopaAPI.getAttribute(termDiv, "scrollHeight"));
     
 }
@@ -70,11 +70,11 @@ function escapeWithBackslashes(str) {
             .replace(/'/g, "&#39;");        // escape '
 }
 
-const startText = await huopaAPI.createElement("span");
-await huopaAPI.appendToApp(termDiv);
-await huopaAPI.append(inputDiv, startText);
-await huopaAPI.append(inputDiv, input);
-await huopaAPI.appendToApp(inputDiv);
+const startText = document.createElement("span");
+document.body.append(termDiv);
+inputDiv.append(startText);
+inputDiv.append(input);
+document.body.append(inputDiv);
 let currentPath = "/system";
 await huopaAPI.setAttribute(input, "onkeypress", async(key) => {
     if (key === "Enter") {
