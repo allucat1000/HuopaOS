@@ -164,7 +164,7 @@ window.huopadesktop = (() => {
                 }
 
                 if (!await internalFS.getFile("/system/env/systemconfig/settings/customization/bgopac.txt")) {
-                    await internalFS.createPath("/system/env/systemconfig/settings/customization/bgopac.txt", "file", "0.90")
+                    await internalFS.createPath("/system/env/systemconfig/settings/customization/bgopac.txt", "file", "0.85")
                 }
 
                 if (!await internalFS.getFile("/system/env/systemconfig/settings/customization/dockopac.txt")) {
@@ -1700,7 +1700,7 @@ const createRoturLoginWindow = async (app) => {
                     if (docked === true) {
                         outerContainer.style.height = `calc(50% - 1.4em)`;
                     } else {
-                        outerContainer.style.height = "calc(50% - 3em)";
+                        outerContainer.style.height = "calc(50% - 4em)";
                     }
                     outerContainer.style.top = "calc(100% - 50% - 3em)";
                     outerContainer.style.bottom = "";
@@ -1988,11 +1988,48 @@ const createRoturLoginWindow = async (app) => {
 
             clockDiv.append(clockCurrentTime);
             clockDiv.append(clockCurrentDate);
+            let batteryDiv;
+            if ('getBattery' in navigator) {
+                batteryDiv = quantum.document.createElement("div");
+                batteryDiv.id = "batteryDiv";
+                batteryDiv.style = "padding: 0em; margin: 0em; border-radius: 0; border-style: none; border-width: 0px; text-align: center; width: 5em;"
+                const batteryText = quantum.document.createElement("p");
+                const batteryIcon = quantum.document.createElement("img");
+                createSysDaemon("batteryUpdate", () => {
+                    const loop = async() => {
+                        const battery = await navigator.getBattery()
+                        const batteryLevel = Math.round(battery.level * 100);
+                        batteryText.textContent = batteryLevel + "%";
+                        let icon;
+                        if (await navigator.getBattery.charging) {
+                            icon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-battery-charging-icon lucide-battery-charging"><path d="m11 7-3 5h4l-3 5"/><path d="M14.856 6H16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.935"/><path d="M22 14v-4"/><path d="M5.14 18H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h2.936"/></svg>`;
+                            
+                        } else {
+                            if (batteryLevel > 66) {
+                                icon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-battery-full-icon lucide-battery-full"><path d="M10 10v4"/><path d="M14 10v4"/><path d="M22 14v-4"/><path d="M6 10v4"/><rect x="2" y="6" width="16" height="12" rx="2"/></svg>`;
+                            } else if (batteryLevel > 33) {
+                                icon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-battery-medium-icon lucide-battery-medium"><path d="M10 14v-4"/><path d="M22 14v-4"/><path d="M6 14v-4"/><rect x="2" y="6" width="16" height="12" rx="2"/></svg>`
+                            } else if (batteryLevel > 5) {
+                               icon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-battery-low-icon lucide-battery-low"><path d="M22 14v-4"/><path d="M6 14v-4"/><rect x="2" y="6" width="16" height="12" rx="2"/></svg>`;
+                            } else {
+                                icon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-battery-icon lucide-battery"><path d="M 22 14 L 22 10"/><rect x="2" y="6" width="16" height="12" rx="2"/></svg>`
+                            }
+                        }
+                        batteryIcon.src = `data:image/svg+xml;utf8,${encodeURIComponent(icon)}`
+                        
+                        setTimeout(loop, 1000);
+                    }
+                    loop()
+                })
+                batteryDiv.append(batteryIcon);
+                batteryDiv.append(batteryText);
+            }
             appBar.style = `width: 100%; height: 90%; border-radius: 0.7em; display: flex; align-items: center; overflow-x: auto; overflow-y: hidden; position: relative;`
             appBar.id = "appBar";
-            await dock.append(startMenuButton);
-            await dock.append(appBar);
-            await dock.append(clockDiv);
+            dock.append(startMenuButton);
+            dock.append(appBar);
+            if (batteryDiv) dock.append(batteryDiv);
+            dock.append(clockDiv);
 
             startMenuButton.onclick = async function() {
                 openStartMenu();
@@ -2006,7 +2043,7 @@ const createRoturLoginWindow = async (app) => {
             });
 
             requestAnimationFrame(async() => {
-                const opacity = (await internalFS.getFile("/system/env/systemconfig/settings/customization/dockopac.txt")) || "0.9";
+                const opacity = (await internalFS.getFile("/system/env/systemconfig/settings/customization/dockopac.txt")) || "0.7";
                 
                 const computed = getComputedStyle(dock);
                 const baseColor = computed.backgroundColor;

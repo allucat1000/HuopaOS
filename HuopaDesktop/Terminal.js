@@ -179,15 +179,20 @@ async function runCmd(value) {
             }
             if (isDir(fullPath)) {
                 const list = JSON.parse(await huopaAPI.getFile(fullPath));
-                let listToShow = `Items at path "${fullPath}":
-
-                `;
+                addLine(`Items at path "${fullPath}":
+ 
+                    `);
                 for (const item of list) {
-                    listToShow = listToShow + `
-${item}
-                    `;
+                    const truncated = item.split("/").pop();
+                    const dir = await isDir(item);
+                    if (dir) {
+                        addLine(`[color=blue]${truncated}[/color]`)
+                    } else {
+                        addLine(truncated)
+                    }
+                    
                 }
-                addLine(listToShow);
+                addLine("    ");
             } else {
                 await addLine(`[line=red]ls: Given path is not a directory![/line]`);
             }
