@@ -1432,8 +1432,9 @@ window.huopadesktop = (() => {
             github_deleteFile: (credentials, user, repo, path) => {
                 GitHubAPI.deleteFile(credentials, user, repo, path)
             },
-            github_getFile: (credentials, user, repo, branch, path) => {
-                GitHubAPI.getFile(credentials, user, repo, branch, path);
+            github_getFile: async(credentials, user, repo, branch, path) => {
+                const result = await GitHubAPI.getFile(credentials, user, repo, branch, path);
+                return result;
             },
 
             github_getRepoInfo: (credentials, user, repo) => {

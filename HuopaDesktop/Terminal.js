@@ -108,7 +108,7 @@ async function runCmd(value) {
 
     switch (cmd) {
         case "github":
-            switch (values[0]) {
+            switch (values[0].toLowerCase()) {
                 case "help":
                     await addLine(`Github help:
 "github login <access token> <username>": Sets your login credentials. Make sure to use a classic access token, info: https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic
@@ -123,9 +123,39 @@ async function runCmd(value) {
 ⠀
 "github delete <github path>": Deletes a file at the given path
 ⠀
+"github pull <github path> <local path>": Updates a local path from a given path
+⠀
                         `);
                     break
-                case "openRepo":
+                case "pull":{
+                    const pathToUpdate = resolvePath(values[2]);
+                    const githubPath = values[1];
+                    if (!loggedIntoGithub) {
+                        await addLine(`You have to login first, run "github login <access token> <username>" to login.`);
+                        return;
+                    }
+                    if (!githubRepoOpen) {
+                        await addLine(`You have to open a github repo first, run "github openRepo <repo name>" to open a repo.`);
+                        return;
+                    }
+                    if (!githubPath && !pathToUpdate) {
+                        addLine(`[line=red]github pull: 2 parameters are required![/line]`);
+                        return;
+                    }
+                    if (await isDir(pathToUpdate)) {
+                        await addLine("You cannot update a folder with file data!");
+                        return;
+                    }
+                    if (!githubUsername) githubUsername = await huopaAPI.safeStorageRead("githubUsername");
+                    const data = await huopaAPI.github_getFile(undefined, githubUsername, githubRepoOpen, "main", githubPath);
+                    await huopaAPI.writeFile(pathToUpdate, "file", data);
+                    break;
+                }
+                case "openrepo":
+                    if (!loggedIntoGithub) {
+                        await addLine(`You have to login first, run "github login <access token> <username>" to login.`);
+                        return;
+                    }
                     if (values[1]) {
                         githubRepoOpen = values[1];
                     } else {
@@ -289,7 +319,7 @@ async function runCmd(value) {
             if (isDir(fullPath)) {
                 const list = JSON.parse(await huopaAPI.getFile(fullPath));
                 addLine(`Items at path "${fullPath}":
- 
+    
                     `);
                 for (const item of list) {
                     const truncated = item.split("/").pop();
@@ -301,7 +331,7 @@ async function runCmd(value) {
                     }
                     
                 }
-                addLine("    ");
+                await addLine(" ");
             } else {
                 await addLine(`[line=red]ls: Given path is not a directory![/line]`);
             }
