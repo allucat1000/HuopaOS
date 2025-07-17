@@ -1705,7 +1705,6 @@ const createRoturLoginWindow = async (app) => {
                     outerContainer.style.top = "calc(100% - 50% - 3em)";
                     outerContainer.style.bottom = "";
                     outerContainer.style.width = "100%";
-                    outerContainer.style.height = `calc(50% - 3em)`;
                     break;
                 case "Enter":
                     outerContainer.style.left = "0";
