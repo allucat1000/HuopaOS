@@ -143,7 +143,6 @@ async function runCmd(value) {
                     }
                     const pathToDelete = values[1];
                     if (!githubUsername) githubUsername = await huopaAPI.safeStorageRead("githubUsername");
-                    await huopaAPI.log(`${await huopaAPI.safeStorageRead("githubToken"), githubUsername, githubRepoOpen, pathToDelete}`)
                     await huopaAPI.github_deleteFile(await huopaAPI.safeStorageRead("githubToken"), githubUsername, githubRepoOpen, pathToDelete);
                     break;
                 }

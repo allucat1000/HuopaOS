@@ -333,19 +333,33 @@ window.huopadesktop = (() => {
             return await response.text();
         }
 
-        async function createOrUpdateFile(credentials, user, repo, path, content, isUpdate = false) {
-            console.log(isUpdate);
+        async function createFile(credentials, user, repo, path, content) {
             const url = `https://api.github.com/repos/${user}/${repo}/contents/${path}`;
             const base64 = btoa(content);
 
             let sha = null;
-            if (isUpdate) {
-            const existing = await fetchGitHub(credentials, url);
-            sha = existing.sha;
-            }
 
             const body = {
-            message: isUpdate ? 'Update file' : 'Create file',
+            message: 'Create file',
+            content: base64,
+            ...(sha ? { sha } : {})
+            };
+
+            return await fetchGitHub(credentials, url, 'PUT', body);
+        }
+
+        async function updateFile(credentials, user, repo, path, content) {
+            const url = `https://api.github.com/repos/${user}/${repo}/contents/${path}`;
+            const base64 = btoa(content);
+
+            let sha = null;
+            
+            const existing = await fetchGitHub(credentials, url);
+            sha = existing.sha;
+            
+
+            const body = {
+            message: 'Update file',
             content: base64,
             ...(sha ? { sha } : {})
             };
@@ -389,8 +403,8 @@ window.huopadesktop = (() => {
         return {
             getRepositoryInfo,
             getFile,
-            createFile: (credentials, user, repo, path, content) => createOrUpdateFile(credentials, user, repo, path, content, false),
-            updateFile: (credentials, user, repo, path, content) => createOrUpdateFile(credentials, user, repo, path, content, true),
+            createFile,
+            updateFile,
             deleteFile,
             listFolder,
             listIssues,
@@ -1413,7 +1427,7 @@ window.huopadesktop = (() => {
             },
 
             github_updateFile: (credentials, user, repo, path, content) => {
-                GitHubAPI.createFile(credentials, user, repo, path, content, true);
+                GitHubAPI.updateFile(credentials, user, repo, path, content, true);
             },
             github_deleteFile: (credentials, user, repo, path) => {
                 GitHubAPI.deleteFile(credentials, user, repo, path)
@@ -2181,7 +2195,6 @@ window.huopadesktop = (() => {
                 
                 const computed = getComputedStyle(dock);
                 const baseColor = computed.backgroundColor;
-                console.log(baseColor);
                 const rgbaMatch = baseColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
                 if (rgbaMatch) {
                     const [_, r, g, b] = rgbaMatch;
