@@ -92,6 +92,13 @@ await setAttrs(startText, {
 
 // Code
 
+let loggedIntoGithub = false;
+if (await huopaAPI.safeStorageRead("githubToken")) {
+    loggedIntoGithub = true;
+}
+let githubRepoOpen;
+let githubUsername;
+
 async function runCmd(value) {
     const splitRegex = /"([^"\\]*(?:\\.[^"\\]*)*)"|'([^'\\]*(?:\\.[^'\\]*)*)'|[^\s"']+/g;
     const rawArgs = value.match(splitRegex) || [];
@@ -100,6 +107,109 @@ async function runCmd(value) {
     const values = rawArgs.slice(1).map(arg => arg.replace(/^["']|["']$/g, ""));
 
     switch (cmd) {
+        case "github":
+            switch (values[0]) {
+                case "help":
+                    await addLine(`Github help:
+"github login <access token> <username>": Sets your login credentials. Make sure to use a classic access token, info: https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic
+⠀
+"github logout": Logs you out from this terminal instance
+⠀
+"github openRepo <repo name>": Sets the repo to make changes in
+⠀
+"github create <github path> <local path>": Creates a file at the given path from a local path
+⠀
+"github update <github path> <local path>": Updates a file at the given path from a local path
+⠀
+"github delete <github path>": Deletes a file at the given path
+⠀
+                        `);
+                    break
+                case "openRepo":
+                    if (values[1]) {
+                        githubRepoOpen = values[1];
+                    } else {
+                        addLine("[line=red]github openRepo: A parameter is required![/line]");
+                    }
+                    break;
+                case "delete":{
+                    if (!loggedIntoGithub) {
+                        await addLine(`You have to login first, run "github login <access token> <username>" to login.`);
+                        return;
+                    }
+                    if (!githubRepoOpen) {
+                        await addLine(`You have to open a github repo first, run "github openRepo <repo name>" to open a repo.`);
+                        return;
+                    }
+                    const pathToDelete = values[1];
+                    if (!githubUsername) githubUsername = await huopaAPI.safeStorageRead("githubUsername");
+                    await huopaAPI.log(`${await huopaAPI.safeStorageRead("githubToken"), githubUsername, githubRepoOpen, pathToDelete}`)
+                    await huopaAPI.github_deleteFile(await huopaAPI.safeStorageRead("githubToken"), githubUsername, githubRepoOpen, pathToDelete);
+                    break;
+                }
+                case "update":{
+                    if (!loggedIntoGithub) {
+                        await addLine(`You have to login first, run "github login <access token> <username>" to login.`);
+                        return;
+                    }
+                    if (!githubRepoOpen) {
+                        await addLine(`You have to open a github repo first, run "github openRepo <repo name>" to open a repo.`);
+                        return;
+                    }
+                    const pathToUpdate = values[1];
+                    const localPath = resolvePath(values[2]);
+    
+                    if (!await pathExists(localPath) || await isDir(localPath)) {
+                        await addLine("Invalid file. Does this file exist locally? If it does, check if the file is a folder, as you cannot create a file from a folder currently.");
+                        return;
+                    }
+                    if (!githubUsername) githubUsername = await huopaAPI.safeStorageRead("githubUsername");
+                    await huopaAPI.github_updateFile(await huopaAPI.safeStorageRead("githubToken"), githubUsername, githubRepoOpen, pathToUpdate, await huopaAPI.getFile(localPath));
+                    break;
+                }
+                case "create":
+                    if (!loggedIntoGithub) {
+                        await addLine(`You have to login first, run "github login <access token> <username>" to login.`);
+                        return;
+                    }
+                    if (!githubRepoOpen) {
+                        await addLine(`You have to open a github repo first, run "github openRepo <repo name>" to open a repo.`);
+                        return;
+                    }
+                    const pathToCreate = values[1];
+                    const localPath = resolvePath(values[2]);
+    
+                    if (!await pathExists(localPath) || await isDir(localPath)) {
+                        await addLine("Invalid file. Does this file exist locally? If it does, check if the file is a folder, as you cannot create a file from a folder currently.");
+                        return;
+                    }
+                    if (!githubUsername) githubUsername = await huopaAPI.safeStorageRead("githubUsername");
+                    await huopaAPI.github_createFile(await huopaAPI.safeStorageRead("githubToken"), githubUsername, githubRepoOpen, pathToCreate, await huopaAPI.getFile(localPath));
+                    break;
+                case "login":
+                    if (loggedIntoGithub) {
+                        addLine(`You are already logged into Github! Run "github logout" to sign out.`);
+                        return;
+                    }
+                    await huopaAPI.safeStorageWrite("githubToken", "file", values[1]);
+                    loggedIntoGithub = true;
+                    await huopaAPI.safeStorageWrite("githubUsername", "file", values[2]);
+                    githubUsername = values[2];
+                    break;
+                case "logout":
+                    loggedIntoGithub = false;
+                    githubUsername = undefined;
+                    await huopaAPI.safeStorageWrite("githubToken", "file", undefined);
+                    await huopaAPI.safeStorageWrite("githubUsername", "file", undefined);
+                    break;
+                default:
+                    await addLine("Unknown github command!");
+                    break;
+            }
+            break
+        case "git":
+            addLine(`Git isn't supported, but Github is. Run "github login <access token> <username>" and input your personal access token.`);
+            break
         case "open":
             if (values) {
                 const path = values[0];

@@ -42,7 +42,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "1.0.4";
+    const version = "1.0.5";
     // Priv Sys Funcs
     const dataURIToBlob = async (dataURI) => {
         const [meta, base64Data] = dataURI.split(',');
@@ -238,7 +238,7 @@ window.huopadesktop = (() => {
         container.append(infoText);
     }
 
-const createRoturLoginWindow = async (app) => {
+    const createRoturLoginWindow = async (app) => {
         return new Promise( async(resolve, reject) => {
             const container = await createAppContainer(`Rotur Login`);
             const titleText = quantum.document.createElement("h1");
@@ -271,28 +271,133 @@ const createRoturLoginWindow = async (app) => {
             resultText.style = "color: white; text-align: center; margin: 0.5em;";
             container.append(resultText);
             submitButton.onclick = async () => {
-            try {
-                const response = await fetch(`https://social.rotur.dev/get_user?username=${usernameInput.value}&password=${CryptoJS.MD5(passwordInput.value).toString()}`);
-                const data = await response.json();
-                
-                if (data.error) {
-                    resultText.textContent = "Failed to login to Rotur! Error: " + data.error;
-                    return reject(data.error);
-                }
+                try {
+                    const response = await fetch(`https://social.rotur.dev/get_user?username=${usernameInput.value}&password=${CryptoJS.MD5(passwordInput.value).toString()}`);
+                    const data = await response.json();
+                    
+                    if (data.error) {
+                        resultText.textContent = "Failed to login to Rotur! Error: " + data.error;
+                        return reject(data.error);
+                    }
 
-                resultText.textContent = "Logged into Rotur! You may close this window.";
-                resolve(data.key);
-            } catch (error) {
-                resultText.textContent = "Error fetching user data: " + error;
-                console.error("Login error:", error);
-                reject(error);
-            }
-        };
+                    resultText.textContent = "Logged into Rotur! You may close this window.";
+                    resolve(data.key);
+                } catch (error) {
+                    resultText.textContent = "Error fetching user data: " + error;
+                    console.error("Login error:", error);
+                    reject(error);
+                }
+            };
 
 
         })
         
     }
+    const GitHubAPI = (() => {
+
+        async function fetchGitHub(credentials, url, method = 'GET', body = null) {
+            const githubAuthToken = credentials;
+            const headers = {
+            'Accept': 'application/vnd.github.v3+json',
+            };
+            if (githubAuthToken) headers['Authorization'] = `token ${githubAuthToken}`;
+            if (body) headers['Content-Type'] = 'application/json';
+
+            const response = await fetch(url, {
+            method,
+            headers,
+            body: body ? JSON.stringify(body) : undefined
+            });
+
+            if (!response.ok) throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+            return await response.json();
+        }
+
+        async function getRepositoryInfo(credentials, user, repo) {
+            const data = await fetchGitHub(credentials, `https://api.github.com/repos/${user}/${repo}`);
+            return {
+            name: data.name,
+            description: data.description,
+            owner: data.owner.login,
+            stars: data.stargazers_count,
+            watchers: data.watchers_count,
+            forks: data.forks_count,
+            avatar: data.owner.avatar_url
+            };
+        }
+
+        async function getFile(credentials, user, repo, branch, path) {
+            const url = `https://raw.githubusercontent.com/${user}/${repo}/${branch}/${path}`;
+            const response = await fetch(url);
+            if (!response.ok) throw new Error("Failed to fetch file.");
+            return await response.text();
+        }
+
+        async function createOrUpdateFile(credentials, user, repo, path, content, isUpdate = false) {
+            console.log(isUpdate);
+            const url = `https://api.github.com/repos/${user}/${repo}/contents/${path}`;
+            const base64 = btoa(content);
+
+            let sha = null;
+            if (isUpdate) {
+            const existing = await fetchGitHub(credentials, url);
+            sha = existing.sha;
+            }
+
+            const body = {
+            message: isUpdate ? 'Update file' : 'Create file',
+            content: base64,
+            ...(sha ? { sha } : {})
+            };
+
+            return await fetchGitHub(credentials, url, 'PUT', body);
+        }
+
+        async function deleteFile(credentials, user, repo, path) {
+            const url = `https://api.github.com/repos/${user}/${repo}/contents/${path}`;
+            const existing = await fetchGitHub(credentials, url);
+            const body = {
+            message: 'Delete file',
+            sha: existing.sha
+            };
+            return await fetchGitHub(credentials, url, 'DELETE', body);
+        }
+
+        async function listFolder(credentials, user, repo, folder) {
+            const data = await fetchGitHub(credentials, `https://api.github.com/repos/${user}/${repo}/contents/${folder}`);
+            return data.map(item => ({ name: item.name, path: item.path }));
+        }
+
+        async function listIssues(credentials, user, repo) {
+            return await fetchGitHub(credentials, `https://api.github.com/repos/${user}/${repo}/issues`);
+        }
+
+        async function createIssue(credentials, user, repo, title, body) {
+            return await fetchGitHub(credentials, `https://api.github.com/repos/${user}/${repo}/issues`, 'POST', {
+            title,
+            body
+            });
+        }
+
+        async function updateIssue(credentials, user, repo, issueNumber, title, body) {
+            return await fetchGitHub(credentials, `https://api.github.com/repos/${user}/${repo}/issues/${issueNumber}`, 'PATCH', {
+            title,
+            body
+            });
+        }
+
+        return {
+            getRepositoryInfo,
+            getFile,
+            createFile: (credentials, user, repo, path, content) => createOrUpdateFile(credentials, user, repo, path, content, false),
+            updateFile: (credentials, user, repo, path, content) => createOrUpdateFile(credentials, user, repo, path, content, true),
+            deleteFile,
+            listFolder,
+            listIssues,
+            createIssue,
+            updateIssue
+        };
+    })();
 
     const createSysDaemon = async (name, daemonFunc) => {
         console.log("[SYS]: Running System Daemon: " + name);
@@ -1301,6 +1406,36 @@ const createRoturLoginWindow = async (app) => {
                 };
                 
                 return JSON.stringify(systemInfo);
+            },
+
+            github_createFile: (credentials, user, repo, path, content) => {
+                GitHubAPI.createFile(credentials, user, repo, path, content);
+            },
+
+            github_updateFile: (credentials, user, repo, path, content) => {
+                GitHubAPI.createFile(credentials, user, repo, path, content, true);
+            },
+            github_deleteFile: (credentials, user, repo, path) => {
+                GitHubAPI.deleteFile(credentials, user, repo, path)
+            },
+            github_getFile: (credentials, user, repo, branch, path) => {
+                GitHubAPI.getFile(credentials, user, repo, branch, path);
+            },
+
+            github_getRepoInfo: (credentials, user, repo) => {
+                GitHubAPI.getRepositoryInfo(credentials, user, repo);
+            },
+
+            github_getIssues: (credentials, user, repo) => {
+                GitHubAPI.listIssues(credentials, user, repo);
+            },
+
+            github_createIssue: (credentials, user, repo, title, content) => {
+                GitHubAPI.createIssue(credentials, user, repo, title, content);
+            },
+
+            github_getFolder: (credentials, user, repo, folder) => {
+                GitHubAPI.listFolder(credentials, user, repo, folder);
             }
         };
 
