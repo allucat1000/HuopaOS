@@ -279,7 +279,7 @@ async function loop() {
                 });
 
                 await setAttrs(chatBar, {
-                    "style":"position: absolute; left: 50%; transform: translateX(-50%); bottom: 1.2em; width: calc(100% - 50px); padding: 1em; border-radius: 0.5em; background-color: rgba(35, 35, 35, 0.65); border: rgba(105, 105, 105, 0.65) 1px solid; color: white;",
+                    "style":"position: absolute; left: 50%; transform: translateX(-50%); bottom: 1.2em; width: calc(100% - 50px); padding: 1em; border-radius: 0.5em; background-color: rgba(35, 35, 35, 0.65); border: rgba(105, 105, 105, 0.65) 1px solid; color: white; font-size: 1em;",
                     "placeholder":`Click on a channel to view and send messages!`,
                     "disabled":true
                 });
@@ -500,8 +500,9 @@ async function loop() {
                                     url = "https://proxy.mistium.com/?url=" + url;
                                     const response = await fetch(url);
                                     if (response.ok) {
-                                        if (response.contentType.startsWith("video/") || response.contentType.startsWith("image/")) {
-                                            if (response.contentType.startsWith("video/")) {
+                                        const contentType = response.headers.get('Content-Type');
+                                        if (contentType.startsWith("video/") || contentType.startsWith("image/")) {
+                                            if (contentType.startsWith("video/")) {
                                                 imgEl = document.createElement("video");
                                             } else {
                                                 imgEl = document.createElement("img");
@@ -629,8 +630,9 @@ async function loop() {
                     url = "https://proxy.mistium.com/?url=" + url;
                     const response = await fetch(url);
                     if (response.ok) {
-                        if (response.contentType.startsWith("video/") || response.contentType.startsWith("image/")) {
-                            if (response.contentType.startsWith("video/")) {
+                        const contentType = response.headers.get('Content-Type');
+                        if (contentType.startsWith("video/") || contentType.startsWith("image/")) {
+                            if (contentType.startsWith("video/")) {
                                 imgEl = document.createElement("video");
                             } else {
                                 imgEl = document.createElement("img");
