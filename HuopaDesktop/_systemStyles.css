@@ -9,6 +9,7 @@ input {
     padding: 1em;
     width: 200px;
     outline: none;
+    color: white;
 }
 
 
@@ -213,4 +214,8 @@ html, body {
 
 html, body {
   color: white;
+}
+
+p {
+  margin: 0.25em;
 }

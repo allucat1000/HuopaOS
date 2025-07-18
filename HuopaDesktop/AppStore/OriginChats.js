@@ -271,7 +271,7 @@ async function loop() {
                 });
 
                 await setAttrs(chatBar, {
-                    "style":"position: absolute; left: 50%; transform: translateX(-50%); bottom: 1.2em; width: calc(100% - 50px); padding: 1em; border-radius: 0.5em; background-color: rgba(35, 35, 35, 0.65); border: rgba(105, 105, 105, 0.65) 1px solid;",
+                    "style":"position: absolute; left: 50%; transform: translateX(-50%); bottom: 1.2em; width: calc(100% - 50px); padding: 1em; border-radius: 0.5em; background-color: rgba(35, 35, 35, 0.65); border: rgba(105, 105, 105, 0.65) 1px solid; color: white;",
                     "placeholder":`Click on a channel to view and send messages!`,
                     "disabled":true
                 });
@@ -281,7 +281,7 @@ async function loop() {
                 mainDiv.append(messageArea);
                 messageArea.append(chatBar);
                 messageArea.append(messageList);
-                chatBar.onkeypress = async (e) => {
+                chatBar.onkeydown = async (e) => {
                     if (e.key === "Enter") {
                         if (openedChannel) {
                             const message = chatBar.value;
