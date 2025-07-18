@@ -216,6 +216,6 @@ html, body {
   color: white;
 }
 
-p {
+.app p{
   margin: 0.25em;
 }

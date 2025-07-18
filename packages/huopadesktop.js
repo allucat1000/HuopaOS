@@ -492,6 +492,7 @@ window.huopadesktop = (() => {
 
         const iframe = quantum.document.createElement('iframe');
         iframe.id = `code-${appId}`;
+        iframe.classList.add("app");
         const digits = container.parentElement.id;  
         iframe.dataset.digitId = digits;
         iframe.style.width = "calc(100%)";
