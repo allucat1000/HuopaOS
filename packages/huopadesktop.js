@@ -573,6 +573,7 @@ window.huopadesktop = (() => {
                         if (document.body) return resolve();
                         window.addEventListener("DOMContentLoaded", () => resolve(), { once: true });
                         });
+                        document.body.style.height = "calc(100vh - 20px)";
                         document.body.append(systemStyles);
                         await eval("(async () => {" + ${JSON.stringify(appCode)} + "})()");
                     } catch (e) {

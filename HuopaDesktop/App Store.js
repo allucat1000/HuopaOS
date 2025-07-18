@@ -52,7 +52,7 @@ if (response.ok) {
             if (appArray.icon) {
                 const response = await fetch("https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/AppStore/" + appName + ".icon");
                 if (response.ok) {
-                    appIconSrc = response.text();
+                    appIconSrc = await response.text();
                 } else {
                     await huopaAPI.error("Failed to fetch app icon!")
                 }
@@ -103,7 +103,7 @@ if (response.ok) {
                     const response = await fetch("https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/AppStore/" + appName);
                     if (response.ok) {
                         installText.textContent = "Installing...";
-                        const code = response.text();
+                        const code = await response.text();
                         await huopaAPI.writeFile("/home/applications/" + appName, "file", code);
                         await huopaAPI.safeStorageWrite(appName + "/version.txt", "file", appArray.version)
                         installText.textContent = "Uninstall";
