@@ -20,11 +20,11 @@ const inputDiv = document.createElement("div");
 const input = document.createElement("input");
 await setAttrs(termDiv, {
     "id":"termDiv",
-    "style":`margin: 1em; margin-bottom: 0; padding: 0; font-family: "Monaspace Neon", sans-serif;`
+    "style":`margin: 1em; margin-bottom: 0; padding: 0; font-family: "Monaspace Neon", sans-serif; color: white;`
 })
 inputDiv.style = `margin: 1em; display: flex; align-items: center; flex-wrap: nowrap; gap: 0.2em; margin: 1em; margin-top: 0; font-family: "Monaspace Neon", sans-serif; color: white;`;
 await setAttrs(input, {
-    "style":"background-color: transparent; padding: 0; border: none; border-radius: 0; flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow-x: auto; font-family: 'Monaspace Neon';"
+    "style":"background-color: transparent; padding: 0; border: none; border-radius: 0; flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow-x: auto; font-family: 'Monaspace Neon'; padding: 0.5em; outline-style: none; color: white; font-size: 1em;"
 });
 termDiv.id = "termDiv";
 async function addLine(text) {
@@ -35,6 +35,10 @@ async function addLine(text) {
 
     const termContentDiv = document.createElement('div');
     termContentDiv.innerHTML = html;
+    termContentDiv.style.margin = "0";
+    termContentDiv.style.padding = "0";
+    const childEl = termContentDiv.children[0]
+    if (childEl) childEl.style = "margin: 0.5em 0;";
     termDiv.append(termContentDiv)
     termDiv.scrollTop = termDiv.scrollHeight;
     
@@ -67,11 +71,12 @@ function getColor(colorName) {
 
 function escapeWithBackslashes(str) {
   return str.replace(/\\/g, "\\\\")
-            .replace(/&/g, "&amp;")         // escape &
-            .replace(/</g, "&lt;")          // escape <
-            .replace(/>/g, "&gt;")          // escape >
-            .replace(/"/g, "&quot;")        // escape "
-            .replace(/'/g, "&#39;");        // escape '
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;")
+            .replace(/\n/g, "<br>");
 }
 
 const startText = document.createElement("span");

@@ -494,8 +494,8 @@ window.huopadesktop = (() => {
         iframe.id = `code-${appId}`;
         const digits = container.parentElement.id;  
         iframe.dataset.digitId = digits;
-        iframe.style.width = "100%";
-        iframe.style.height = "100%";
+        iframe.style.width = "calc(100%)";
+        iframe.style.height = "calc(100%)";
         iframe.style.border = "none";
         iframe.sandbox = "allow-scripts";
         container.appendChild(iframe);
@@ -1153,6 +1153,7 @@ window.huopadesktop = (() => {
 
         dragHandle.style.cursor = "grab";
         dragHandle.addEventListener("mousedown", (e) => {
+            windowEl.children[9].style.pointerEvents = "none";
             windowEl.focus();
             isDragging = true;
             const rect = windowEl.getBoundingClientRect();
@@ -1183,6 +1184,7 @@ window.huopadesktop = (() => {
         }
 
         function onMouseUp() {
+            windowEl.children[9].style.pointerEvents = "auto";
             isDragging = false;
             quantum.document.removeEventListener("mousemove", onMouseMove);
             quantum.document.removeEventListener("mouseup", onMouseUp);
@@ -1199,6 +1201,7 @@ window.huopadesktop = (() => {
         const startRect = win.getBoundingClientRect();
 
         function onMouseMove(ev) {
+            win.children[9].style.pointerEvents = "none";
             const dx = ev.clientX - startX;
             const dy = ev.clientY - startY;
 
@@ -1246,6 +1249,7 @@ window.huopadesktop = (() => {
 
 
         function onMouseUp() {
+            win.children[9].style.pointerEvents = "auto";
             quantum.document.removeEventListener("mousemove", onMouseMove);
             quantum.document.removeEventListener("mouseup", onMouseUp);
         }

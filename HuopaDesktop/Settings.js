@@ -28,8 +28,8 @@ async function mainScreen() {
 
     wallpapersTab.style.padding = "1.25em"
 ;
-    wallpapersTab.margin = "1em auto";
-    wallpapersTab.width = "65%";
+    wallpapersTab.style.margin = "1em auto";
+    wallpapersTab.style.width = "65%";
     mainScreenDiv.append(wallpapersTab);
     wallpapersTab.onclick = () => {
         mainScreenDiv.remove();
@@ -56,8 +56,8 @@ async function mainScreen() {
 
     customizationTab.style.padding = "1.25em"
 ;
-    customizationTab.margin = "1em auto";
-    customizationTab.width = "65%";
+    customizationTab.style.margin = "1em auto";
+    customizationTab.style.width = "65%";
     mainScreenDiv.append(customizationTab);
     customizationTab.onclick = () => {
         mainScreenDiv.remove();
@@ -83,8 +83,8 @@ async function mainScreen() {
 
     dockTab.style.padding = "1.25em"
 
-    dockTab.margin = "1em auto";
-    dockTab.width = "65%";
+    dockTab.style.margin = "1em auto";
+    dockTab.style.width = "65%";
     mainScreenDiv.append(dockTab);
     dockTab.onclick = () => {
         mainScreenDiv.remove();
@@ -130,17 +130,17 @@ async function wallpapersTabLoad() {
 
     for (const wallpaperPath of wallpaperList) {
         const wallpaperButton = document.createElement("button");
-        wallpaperButton.width = "25%";
+        wallpaperButton.style.width = "25%";
         wallpaperButton.style.margin = "1em"
 ;
         wallpaperButton.style.overflow = "hidden"
 ;
         wallpaperButton.style.minWidth = "200px"
 ;
-        wallpaperButton.flex = "1 0 100px";
+        wallpaperButton.style.flex = "1 0 100px";
         wallpaperButton.style.maxWidth = "200px"
 ;
-        wallpaperButton.aspectRatio = "16 / 9";
+        wallpaperButton.style.aspectRatio = "16 / 9";
         wallpaperButton.backgroundColor = "rgba(0, 0, 0, 0";
         wallpaperButton.style.padding = "0"
 
@@ -170,10 +170,10 @@ async function wallpapersTabLoad() {
 ;
     importButton.style.minWidth = "200px"
 ;
-    importButton.flex = "1 0 100px";
+    importButton.style.flex = "1 0 100px";
     importButton.style.maxWidth = "200px"
 ;
-    importButton.aspectRatio = "16 / 9";
+    importButton.style.aspectRatio = "16 / 9";
 
     importButton.append(importImg);
     importButton.append(importText);
