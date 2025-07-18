@@ -947,7 +947,7 @@ window.huopadesktop = (() => {
             
             createNotification: async (title, content) => {
                 const notifEl = quantum.document.createElement("div");
-                notifEl.style = "border-radius: 0.5em; background-color: rgba(35, 35, 35, 0.65); border-style: solid; border-color: rgba(65, 65, 65, 0.85); width: 20em; position: absolute; top: 0.5em; right: -22em; transition: right ease 1s;";
+                notifEl.style = "border-radius: 0.5em; background-color: rgba(35, 35, 35, 0.65); border-style: solid; border-color: rgba(65, 65, 65, 0.85); width: 20em; position: absolute; top: 0.5em; right: -22em; transition: right ease 1s; z-index: 99999;";
                 const titleEl = quantum.document.createElement("h3");
                 const descEl = quantum.document.createElement("p");
                 titleEl.style = "color: white; padding: 0.75em; margin: 0;";
