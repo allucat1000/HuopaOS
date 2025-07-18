@@ -38,7 +38,7 @@ async function addLine(text) {
     termContentDiv.style.margin = "0";
     termContentDiv.style.padding = "0";
     const childEl = termContentDiv.children[0]
-    if (childEl) childEl.style = "margin: 0.5em 0;";
+    if (childEl) childEl.style = "margin: 0.25em 0;";
     termDiv.append(termContentDiv)
     termDiv.scrollTop = termDiv.scrollHeight;
     

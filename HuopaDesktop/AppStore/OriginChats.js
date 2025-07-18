@@ -1,3 +1,11 @@
+const style = document.createElement("style");
+style.textContent = `
+    p{
+        margin: 0.25em;
+        color: white;
+    }
+`;
+document.body.append(style);
 async function loop() {
     let ws;
     let serverList;
