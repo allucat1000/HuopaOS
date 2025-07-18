@@ -44,7 +44,7 @@ if (code === "[HuopaDesktop FS Security]: No permissions") {
     });
     document.body.append(saveButton)
     textEditorField.value = code;
-    textEditorField.style.height = "calc(100% - 83px)";
+    textEditorField.style.height = "calc(100% - 60px)";
     textEditorField.style.width = "calc(100% - 17px)";
     const currentPathTitle = document.createElement("p");
     currentPathTitle.style = "color: white; display: inline; text-align: left; margin: 0.5em; font-size: 1em; margin-top: 1.15em;";
