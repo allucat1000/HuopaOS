@@ -13,12 +13,12 @@ async function renderFileList(path) {
         fileListDiv.remove()
     }
     fileListDiv = document.createElement("div");
-    await huopaAPI.setAttribute(fileListDiv, "id", "fileList");
+    fileListDiv.id = "fileList";
     const backButton = document.createElement("button");
     const deleteButton = document.createElement("button");
     const topBarList = document.createElement("div");
-    await huopaAPI.setAttribute(fileListDiv, "style", "width: 100%; height: calc(100% - 20px); display: flex; flex-direction: column; margin-bottom: -0.25em;");
-    await huopaAPI.setAttribute(topBarList, "style", "display: flex; align-items: center; justify-content: start; padding: 0.25em; margin-top: 0.33em;");
+    fileListDiv.style = "width: 100%; height: calc(100% - 20px); display: flex; flex-direction: column; margin-bottom: -0.25em;";
+    topBarList.style = "display: flex; align-items: center; justify-content: start; padding: 0.25em; margin-top: 0.33em;";
     await setAttrs(backButton, {
         "innerHTML":'<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left-icon lucide-arrow-left"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>',
         "style":"margin: 0.5em; display: inline; opacity: 1; display: flex; justify-content: center; align-items: center;"
@@ -38,7 +38,7 @@ async function renderFileList(path) {
         };
     }
     if (!fileSelectorMode) {
-        await huopaAPI.setAttribute(deleteButton, "onclick", async() => {
+        deleteButton.onclick = async() => {
                 if (!pathSelected) {
                     let corePaths = await huopaAPI.getFile("/system/manifest.json");
                     if (corePaths) {
@@ -55,15 +55,15 @@ async function renderFileList(path) {
                 } else {
                     await huopaAPI.deleteFile(pathSelected)
                     pathSelected = undefined;
-                    for (const child of await huopaAPI.getChildren(fileListDiv)) {
-                        await huopaAPI.removeClass(child, "file-selected");
+                    for (const child of await fileListDiv.children) {
+                        child.classList.remove("file-selected");
                     }
-                    await huopaAPI.addClass(deleteButton, "disable");
+                    deleteButton.classList.add("disabled");
                     renderFileList(path);
                 }
                 
             
-        });
+        };
     }
     const buttonCss = async (button) => {
         button.style.width = "30px";
@@ -80,16 +80,16 @@ async function renderFileList(path) {
     }
     
     const currentPathTitle = document.createElement("p");
-    await huopaAPI.setAttribute(currentPathTitle, "style", "color: white; display: inline; text-align: left; margin: 0.5em; font-size: 1.5em;")
-    await huopaAPI.setAttribute(currentPathTitle, "textContent", path);
+    currentPathTitle.style = "color: white; display: inline; text-align: left; margin: 0.5em; font-size: 1.5em;"
+    currentPathTitle.textContent = path;
     topBarList.append(currentPathTitle);
     fileListDiv.append(topBarList)
     document.body.append(fileListDiv);
     const styleTag = document.createElement("style");
-    await huopaAPI.setAttribute(styleTag, "textContent", ".file-selected { filter: brightness(1.25); } .disabled { opacity: 0.5; } ");
+    styleTag.textContent = ".file-selected { filter: brightness(1.25); } .disabled { opacity: 0.5; } ";
     document.body.append(styleTag);
     if (!fileSelectorMode) {
-        await huopaAPI.addClass(deleteButton, "disable");
+        deleteButton.classList.add("disabled")
     }
     const match = path.match(/\.[a-zA-Z0-9]+$/);
     if (await isDir(path) && !match) {
@@ -99,7 +99,7 @@ async function renderFileList(path) {
         
         for (const file of fileList) {
             const fileDiv = document.createElement("div");
-            await huopaAPI.setAttribute(fileDiv, "style", "width: calc(100% - 20px); background-color: rgba(65, 65, 65, 0.5); margin: 0em auto; border-radius: 0.5em; border: rgba(105, 105, 105, 0.65) 2.5px solid; margin: 0.25em; display: flex; cursor: pointer;");
+            fileDiv.style = "width: calc(100% - 20px); background-color: rgba(65, 65, 65, 0.5); margin: 0em auto; border-radius: 0.5em; border: rgba(105, 105, 105, 0.65) 2.5px solid; margin: 0.25em; display: flex; cursor: pointer;";
             const fileName = document.createElement("label");
             const dynamicFilePath = file.replace(path + "/", "")
             const fileIcon = document.createElement("img");
@@ -116,18 +116,18 @@ async function renderFileList(path) {
             } else {
                 fileIconSrc = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-icon lucide-file"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>';
             }
-            await huopaAPI.setAttribute(fileIcon, "src", "data:image/svg+xml;utf8," + encodeURIComponent(fileIconSrc));
-            await huopaAPI.setAttribute(fileIcon, "style", "display: inline; margin: 0 0.5em; width: 16px");
-            await huopaAPI.setAttribute(fileName, "textContent", dynamicFilePath.startsWith("/") ? dynamicFilePath.slice(1) : dynamicFilePath);
-            await huopaAPI.setAttribute(fileName, "style", "color: white; display: block; text-align: left; padding: 0.6em 0; cursor: pointer;");
+            fileIcon.src = "data:image/svg+xml;utf8," + encodeURIComponent(fileIconSrc);
+            fileIcon.style = "display: inline; margin: 0 0.5em; width: 16px";
+            fileName.textContent = dynamicFilePath.startsWith("/") ? dynamicFilePath.slice(1) : dynamicFilePath;
+            fileName.style = "color: white; display: block; text-align: left; padding: 0.6em 0; cursor: pointer;";
             if (perms) {
                 const notDir = !await isDir(file)
-                await huopaAPI.setAttribute(fileDiv, "onclick", async () => {
+                fileDiv.onclick = async () => {
                     if (pathSelected === file) {
                         pathSelected = undefined;
-                        await huopaAPI.removeClass(fileDiv, "file-selected");
+                        fileDiv.classList.remove("file-selected")
                         if (!fileSelectorMode) {
-                            await huopaAPI.removeClass(deleteButton, "disable");
+                            deleteButton.classList.remove("disabled")
                         }
                         
                         if (file.endsWith(".js") && notDir) {
@@ -148,18 +148,18 @@ async function renderFileList(path) {
                             await renderFileList(file)
                         }
                     } else {
-                        for (const child of await huopaAPI.getChildren(fileListDiv)) {
-                            await huopaAPI.removeClass(child, "file-selected");
+                        for (const child of fileListDiv.children) {
+                            child.classList.remove("file-selected")
                         }
                         if (!fileSelectorMode) {
-                            await huopaAPI.addClass(deleteButton, "disable");
+                            deleteButton.classList.add("disabled")
                         }
                         
-                        await huopaAPI.addClass(fileDiv, "file-selected");
+                        fileDiv.classList.add("file-selected")
                         pathSelected = file;
                     }
                     
-                });
+                };
             } else {
                 fileDiv.style.opacity = "0.5";
             }

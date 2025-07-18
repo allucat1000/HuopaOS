@@ -1,3 +1,7 @@
+await new Promise((resolve) => {
+  if (document.body) return resolve();
+  window.addEventListener("DOMContentLoaded", () => resolve(), { once: true });
+});
 // Setup
 const font = document.createElement("link");
 await setAttrs(font, {
@@ -18,11 +22,11 @@ await setAttrs(termDiv, {
     "id":"termDiv",
     "style":`margin: 1em; margin-bottom: 0; padding: 0; font-family: "Monaspace Neon", sans-serif;`
 })
-inputDiv.style = `margin: 1em; display: flex; align-items: center; flex-wrap: nowrap; gap: 0.2em; margin: 1em; margin-top: 0; font-family: "Monaspace Neon", sans-serif;`;
+inputDiv.style = `margin: 1em; display: flex; align-items: center; flex-wrap: nowrap; gap: 0.2em; margin: 1em; margin-top: 0; font-family: "Monaspace Neon", sans-serif; color: white;`;
 await setAttrs(input, {
     "style":"background-color: transparent; padding: 0; border: none; border-radius: 0; flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow-x: auto; font-family: 'Monaspace Neon';"
 });
-await huopaAPI.setAttribute(termDiv, "id", "termDiv");
+termDiv.id = "termDiv";
 async function addLine(text) {
     const newText = preprocessLineTag(text);
     const escapedText = escapeWithBackslashes(newText);
@@ -30,9 +34,9 @@ async function addLine(text) {
     const html = await huopaAPI.parseMarkdown(coloredText);
 
     const termContentDiv = document.createElement('div');
-    await huopaAPI.setAttribute(termContentDiv, "innerHTML", html);
+    termContentDiv.innerHTML = html;
     termDiv.append(termContentDiv)
-    await huopaAPI.setAttribute(termDiv, "scrollTop", await huopaAPI.getAttribute(termDiv, "scrollHeight"));
+    termDiv.scrollTop = termDiv.scrollHeight;
     
 }
 
@@ -76,14 +80,14 @@ inputDiv.append(startText);
 inputDiv.append(input);
 document.body.append(inputDiv);
 let currentPath = "/system";
-await huopaAPI.setAttribute(input, "onkeypress", async(key) => {
-    if (key === "Enter") {
-        const value = await huopaAPI.getAttribute(input, "value");
+input.onkeydown = async(e) => {
+    if (e.key === "Enter") {
+        const value = input.value;
         await addLine("$ " + value);
         runCmd(value);
-        await huopaAPI.setAttribute(input, "value", "");
+        input.value = "";
     }
-})
+}
 let prompt = false;
 await setAttrs(startText, {
     "style":"padding: 0; margin: 0; white-space: nowrap;",
@@ -278,7 +282,7 @@ async function runCmd(value) {
             }
             break;
         case "clear":
-            await huopaAPI.setAttribute(termDiv, "innerHTML", "");
+            termDiv.innerHTML = "";
             break;
         case "info":
             const sysInfo = JSON.parse(await huopaAPI.getSystemInfo());
@@ -373,7 +377,7 @@ async function runCmd(value) {
                     }
                 
                     currentPath = fullPath;
-                    await huopaAPI.setAttribute(startText, "textContent", currentPath + " $\u00A0");
+                    startText.textContent = currentPath + " $\u00A0";
                 
                 } catch (e) {
                     await addLine(`[line=red]cd: Failed to access "${parentPath}"[/line]`);

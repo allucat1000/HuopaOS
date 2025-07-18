@@ -1,3 +1,4 @@
+
 const display = document.createElement("div");
 await setAttrs(display, {
     "style":"position: absolute; left: 0; top: 0; width: 100%; height: 100%;"
@@ -10,8 +11,8 @@ await setAttrs(result, {
 await setAttrs(input, {
     "style":"color: white; padding 0.5em; position: absolute; bottom: 1em; left: 50%; transform: translateX(-50%); width: calc(100% - 3em); text-align: center;",
     "placeholder":"Type a calculation here",
-    "onkeypress":async(key) => {
-        if (key === "Enter") {
+    "onkeydown":async(e) => {
+        if (e.key === "Enter") {
             const calculation = input.value;
             if (calculation) {
                 const calcResult = await huopaAPI.calculate(calculation);

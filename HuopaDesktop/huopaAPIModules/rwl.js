@@ -18,8 +18,8 @@ return {
         const dataURL = "data:text/javascript;charset=utf-8," + convToDataURL(fullSrc);
 
         const scriptEl = document.createElement("script");
-        await huopaAPI.setAttribute(scriptEl, "type", "module");
-        await huopaAPI.setAttribute(scriptEl, "src", dataURL);
+        scriptEl.type = "module";
+        scriptEl.src = dataURL;
         document.body.append(scriptEl);
         const module = await import(dataURL);
         await renderElemSetup(module.parseData.data);
@@ -36,7 +36,7 @@ async function renderElemSetup(rawData) {
         const data = JSON.parse(rawData);
         root = data.elements[0];
         rootEl = document.createElement("div");
-        await huopaAPI.setAttribute(rootEl, "style", `
+        rootEl.style = `
             width: 100%;
             position: relative;   
             height: 100%;
@@ -44,11 +44,12 @@ async function renderElemSetup(rawData) {
             color: white;
             opacity: 0;
             text-align: center;
-        `);
+        `;
         document.body.append(rootEl);
         await huopaAPI.log(JSON.stringify(root.data.content.elements));
         await renderElems(root.data.content.elements, rootEl);
-        await huopaAPI.setCertainStyle(rootEl, "opacity", "1");
+        rootEl.style.opacity = "1"
+;
         
     } else {
         await huopaAPI.warn("No data returned from rwlSrc!")
@@ -63,20 +64,21 @@ async function renderElems(parentPath, parentId) {
         let key;
         if (child.kind === "element") {
             childEl = document.createElement("p");
-            await huopaAPI.setAttribute(childEl, "textContent", child.data.value.value);
+            childEl.textContent = child.data.value.value;
         } else if (child.kind === "block") {
             key = child?.data?.header?.key.toLowerCase()
             childEl = document.createElement("div");
             if (key === "button") {
-                await huopaAPI.setAttribute(childEl, "style", "padding: 0.5em; border-radius: 0.5em; background-color: rgba(65, 65, 65, 0.5); border-color: rgba(105, 105, 105, 0.65); border-style: solid; cursor: pointer;");
+                childEl.style = "padding: 0.5em; border-radius: 0.5em; background-color: rgba(65, 65, 65, 0.5); border-color: rgba(105, 105, 105, 0.65); border-style: solid; cursor: pointer;";
             }
             await huopaAPI.log(key);
             if (key === "frame" || key === "section") {
-                await huopaAPI.setAttribute(childEl, "style", `width: 100%; height: 100%; border-style: solid; border-color: white;`);
+                childEl.style = `width: 100%; height: 100%; border-style: solid; border-color: white;`;
             }
 
         }
-        await huopaAPI.setCertainStyle(childEl, "position", "absolute");
+        childEl.style.position = "absolute"
+;
         let padding = "5px"; // Default padding
         if (child.data?.header?.attributes) {
             const attrList = child.data.header.attributes;
@@ -90,12 +92,12 @@ async function renderElems(parentPath, parentId) {
                     }
                 } else {
                     if (attrType === "onclick") {
-                        await huopaAPI.setAttribute(childEl, "onclick", async() => {
+                        childEl.onclick = async() => {
                             await huopaAPI.log("buton clik");
-                        });
+                        };
                     }
                     if (attrType === "id") {
-                        await huopaAPI.setAttribute(childEl, "id", value);
+                        childEl.id = value;
                     }
                     if (attrType === "anchor" && key !== "frame" && key !== "section") {
                         
@@ -161,9 +163,9 @@ async function renderElems(parentPath, parentId) {
                     }
                     if (attrType === "padding") {
                         const paddingSanitize = document.createElement("div");
-                        await huopaAPI.setCertainStyle(paddingSanitize, "padding", value + "px");
+                        paddingSanitize.style.padding = value + "px";
     
-                        if (await huopaAPI.getCertainStyle(paddingSanitize, "padding")) {
+                        if (paddingSanitize.padding) {
                             padding = value + "px";
                         } else {
                             await huopaAPI.warn("RWL.js Interpretor: Invalid padding value, ignored.");
@@ -173,7 +175,7 @@ async function renderElems(parentPath, parentId) {
                     }
                     if (attrType === "size") {
                         if (child.kind === "element") {
-                            await huopaAPI.setCertainStyle(childEl, "fontSize", value * 1.6 + "px");
+                            childEl.fontSize = value * 1.6 + "px";
                         }  
                     }
                 }
@@ -182,12 +184,12 @@ async function renderElems(parentPath, parentId) {
         }
         if (anchorX === "c") {
             if (anchorY === "c") {
-                await huopaAPI.setCertainStyle(childEl, "transform", "translate(-50%, -50%)");
+                childEl.transform = "translate(-50%, -50%)";
             } else {
-                await huopaAPI.setCertainStyle(childEl, "transform", "translateX(-50%)");
+                childEl.transform = "translateX(-50%)";
             }
         } else if (anchorY === "c") {
-            await huopaAPI.setCertainStyle(childEl, "transform", "translateY(-50%)");
+            childEl.transform = "translateY(-50%)";
         }
         parentId.append(childEl);
         yPointerNum = await resolvePosition(yPointer, "height", parentId);
@@ -205,8 +207,10 @@ async function renderElems(parentPath, parentId) {
             yPointer = yCalc;
             yPointerNum = await resolvePosition(yPointer, "height", parentId);
         }
-        await huopaAPI.setCertainStyle(childEl, "left", xPointer);
-        await huopaAPI.setCertainStyle(childEl, "top", yPointer);
+        childEl.style.left = xPointer
+;
+        childEl.style.top = yPointer
+;
         
         if (child.data?.content?.elements) {
             await renderElems(child.data.content.elements, childEl)

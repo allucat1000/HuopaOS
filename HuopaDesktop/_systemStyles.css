@@ -8,6 +8,7 @@ input {
     border-width: 1px;
     padding: 1em;
     width: 200px;
+    outline: none;
 }
 
 
@@ -209,3 +210,7 @@ html, body {
 }
 
 */
+
+html, body {
+  color: white;
+}

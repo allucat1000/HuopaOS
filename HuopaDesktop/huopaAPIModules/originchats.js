@@ -62,9 +62,10 @@ return {
     },
 
     login: async(token) => {
-        const response = await huopaAPI.fetch(`https://social.rotur.dev/generate_validator?auth=${token}&key=${validatorKey}`);
+        const response = await fetch(`https://social.rotur.dev/generate_validator?auth=${token}&key=${validatorKey}`);
         if (response.ok) {
-            auth = response.body.validator;
+            const result = response.json()
+            auth = result.validator;
             ws.send(`{"cmd":"auth","validator":"${auth}"}`);
             while (!userData) {
                 await new Promise((res) => setTimeout(res, 10));

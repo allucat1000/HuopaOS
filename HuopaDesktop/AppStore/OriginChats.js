@@ -66,9 +66,9 @@ async function loop() {
     let channelList;
     const bg = document.createElement("div");
     const messageArea = document.createElement("div");
-    await huopaAPI.setAttribute(messageArea, "style", "position: absolute; right: 0; top: 0; width: calc(100% - 270px); height: 100%;");
+    messageArea.style = "position: absolute; right: 0; top: 0; width: calc(100% - 270px); height: 100%;";
     const messageList = document.createElement("div");
-    await huopaAPI.setAttribute(messageList, "style", "position: absolute; right: 0; top: 0; width: 100%; height: calc(100% - 5em); display: flex;flex-direction: column-reverse; overflow: auto; overflow-x: hidden;");
+    messageList.style = "position: absolute; right: 0; top: 0; width: 100%; height: calc(100% - 5em); display: flex;flex-direction: column-reverse; overflow: auto; overflow-x: hidden;";
     const chatBar = document.createElement("input");
     let loading;
     const loadingEl = document.createElement("h2");
@@ -143,10 +143,11 @@ async function loop() {
             }
             
             async function tryLogin() {
-                const response = await huopaAPI.fetch(`https://social.rotur.dev/generate_validator?auth=${token}&key=${validatorKey}`);
+                const response = await fetch(`https://social.rotur.dev/generate_validator?auth=${token}&key=${validatorKey}`);
                 if (response.ok) {
                     await huopaAPI.safeStorageWrite("token.txt", "file", token);
-                    auth = response.body.validator;
+                    const responseData = await response.json()
+                    auth = responseData.validator;
                     loginDiv.remove();
                     ws.send(`{"cmd":"auth","validator":"${auth}"}`);
                     await setAttrs(loadingEl, {
@@ -231,9 +232,9 @@ async function loop() {
                             "style":"width: 1000%; height: 45px; position: absolute; right: -825px; padding: 0.5em; top: 50%; transform: translateY(-50%); z-index: 9999;",
                             "placeholder":"Enter a server URL here (example: 'myserver.myusername.com'):"
                         });
-                        await huopaAPI.setAttribute(serverUrlInput, "onkeypress", async (key) => {
-                            if (key === "Enter") {
-                                const value = await huopaAPI.getAttribute(serverUrlInput, "value")
+                        serverUrlInput.onkeydown = async (e) => {
+                            if (e.key === "Enter") {
+                                const value = serverUrlInput.value
                                 if (value) {
                                     if (serverList.includes(value)) {
                                         await huopaAPI.writeFile("/home/applications/OriginChats/currentServerOpen.txt", "file", serverList.indexOf(value))
@@ -252,7 +253,7 @@ async function loop() {
                                 }
                                 
                             }
-                        });
+                        };
                         sidebarEl.append(serverUrlInput);
                     }
                 });
@@ -260,13 +261,13 @@ async function loop() {
                 (loadingEl).remove();
                 openedChannel = channelList[0].name;
                 if (channel.wallpaper) {
-                    await huopaAPI.setAttribute(bg, "style", `position: absolute; left: 0; top: 0; width: 100%; height: 100%; z-index: -1; background-image: url(${channelList[0].wallpaper}); background-size: cover; background-position: center; overflow: hidden;`);
+                    bg.style = `position: absolute; left: 0; top: 0; width: 100%; height: 100%; z-index: -1; background-image: url(${channelList[0].wallpaper}); background-size: cover; background-position: center; overflow: hidden;`;
                 } else {
-                    await huopaAPI.setAttribute(bg, "style", `position: absolute; left: 0; top: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden;`);
+                    bg.style = `position: absolute; left: 0; top: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden;`;
                 }
                 openedChannel = undefined;
                 wsHandlers.set("ok", (data) => {
-                    huopaAPI.setAttribute(chatBar, "value", "");
+                    chatBar.value = "";
                 });
 
                 await setAttrs(chatBar, {
@@ -280,25 +281,25 @@ async function loop() {
                 mainDiv.append(messageArea);
                 messageArea.append(chatBar);
                 messageArea.append(messageList);
-                await huopaAPI.setAttribute(chatBar, "onkeypress", async (key) => {
-                    if (key === "Enter") {
+                chatBar.onkeypress = async (e) => {
+                    if (e.key === "Enter") {
                         if (openedChannel) {
-                            const message = await huopaAPI.getAttribute(chatBar, "value");
+                            const message = chatBar.value;
                             if (!message) return;
                             if (messageLengthLimit && message.length > messageLengthLimit) {
-                                await huopaAPI.setAttribute(chatBar, "value", "");
-                                await huopaAPI.setAttribute(chatBar, "placeholder", `You can only post messages up to '' characters!`);
+                                chatBar.value = "";
+                                chatBar.placeholder = `You can only post messages up to '' characters!`;
                                 await new Promise((res) => setTimeout(res, 1000));
-                                await huopaAPI.setAttribute(chatBar, "placeholder", `Send a message in "#${openedChannel}" | Max message length: ${messageLengthLimit} characters`);
+                                chatBar.placeholder = `Send a message in "#${openedChannel}" | Max message length: ${messageLengthLimit} characters`;
                             } else {
                                 const messageToSend = `{"cmd":"message_new", "channel": "${openedChannel}", "content": ${JSON.stringify(message)}}`;
                                 ws.send(messageToSend);
-                                await huopaAPI.setAttribute(chatBar, "value", "");
+                                chatBar.value = "";
                             }
                             
                         }
                     }
-                });
+                };
                 mainDiv.append(bg);
                 mainArea.append(mainDiv);
 
@@ -344,9 +345,9 @@ async function loop() {
                 if (data.channel !== openedChannel) return;
                 const msg = messageTable[data.id];
                 if (extraConfig.messageLogger) {
-                    const children = await huopaAPI.getChildren(msg)
+                    const children = msg.children
                     const textEl = children[1];
-                    await huopaAPI.setCertainStyle(textEl, "color", "red");
+                    textEl.style.color = "red";
                 } else {
                     (msg).remove();
                 }
@@ -356,9 +357,9 @@ async function loop() {
             wsHandlers.set("message_edit", async(data) => {
                 if (data.channel !== openedChannel) return;
                 const msg = messageTable[data.id];
-                const children = await huopaAPI.getChildren(msg)
+                const children = msg.children
                 const textEl = children[1];
-                await huopaAPI.setAttribute(textEl, "textContent", msg.content);
+                textEl.textContent = msg.content;
             });
 
             wsHandlers.set("channels_get", async(data) => {
@@ -395,7 +396,7 @@ async function loop() {
                     });
                     const channelSave = channel;
                     const channelPerms = channelSave.permissions;
-                    await huopaAPI.setAttribute(channelDiv, "onclick", async() => {
+                    channelDiv.onclick = async() => {
                         try {
                             let viewAllowed
                             for (const role of roles) {
@@ -404,11 +405,11 @@ async function loop() {
                                 }
                             }
                             if (!viewAllowed || loading === true) return;
-                            await huopaAPI.setAttribute(messageList, "innerHTML", "");
+                            messageList.innerHTML = "";
                             if (channel.wallpaper) {
-                                await huopaAPI.setAttribute(bg, "style", `position: absolute; left: 0; top: 0; width: 100%; height: 100%; z-index: -1; background-image: url(${channel.wallpaper}); background-size: cover; background-position: center; overflow: hidden;`);
+                                bg.style = `position: absolute; left: 0; top: 0; width: 100%; height: 100%; z-index: -1; background-image: url(${channel.wallpaper}); background-size: cover; background-position: center; overflow: hidden;`;
                             } else {
-                                await huopaAPI.setAttribute(bg, "style", `position: absolute; left: 0; top: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden;`);
+                                bg.style = `position: absolute; left: 0; top: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden;`;
                             }
                             
                             openedChannel = channelSave.name;
@@ -426,11 +427,11 @@ async function loop() {
                                 }
                             }
                             if (sendAllowed === true) {
-                                await huopaAPI.setAttribute(chatBar, "placeholder", `Send a message in "#${openedChannel}" | Max message length: ${messageLengthLimit} characters`);
-                                await huopaAPI.setAttribute(chatBar, "disabled", false);
+                                chatBar.placeholder = `Send a message in "#${openedChannel}" | Max message length: ${messageLengthLimit} characters`;
+                                chatBar.disabled = false;
                             } else {
-                                await huopaAPI.setAttribute(chatBar, "disabled", true);
-                                await huopaAPI.setAttribute(chatBar, "placeholder", `You cannot send messages in this channel`);
+                                chatBar.disabled = true;
+                                chatBar.placeholder = `You cannot send messages in this channel`;
                             }
                             channelMsgs = undefined;
                             await huopaAPI.setTitle(`OriginChats - #${channelSave.name} - ${server.name}`);
@@ -461,13 +462,13 @@ async function loop() {
                                             ws.send(`{"cmd":"message_delete", "id":"${msg.id}", "channel":"${openedChannel}"}`)
                                         }
                                     });
-                                    await huopaAPI.addEventListener(msgDiv, "mouseenter", async() => {
+                                    msgDiv.addEventListener("mouseenter", async() => {
                                         if (!ratelimited) {
-                                            await huopaAPI.setCertainStyle(deleteButton, "display", "block");
+                                            deleteButton.style.display = "block";
                                         }
                                     });
-                                    await huopaAPI.addEventListener(msgDiv, "mouseleave", async() => {
-                                        await huopaAPI.setCertainStyle(deleteButton, "display", "none");
+                                    msgDiv.addEventListener("mouseleave", async() => {
+                                        deleteButton.style.display = "none";
                                     });
                                 }
                                 await setAttrs(user, {
@@ -489,7 +490,7 @@ async function loop() {
                                     const extMatch = url.match(extRegex);
                                     if (!extMatch) url = url + ".gif";
                                     url = "https://proxy.mistium.com/?url=" + url;
-                                    const response = await huopaAPI.fetch(url);
+                                    const response = await fetch(url);
                                     if (response.ok) {
                                         if (response.contentType.startsWith("video/") || response.contentType.startsWith("image/")) {
                                             if (response.contentType.startsWith("video/")) {
@@ -502,7 +503,7 @@ async function loop() {
                                                 "src":url
                                             });
                                             msgContent = msgContent.replace(/(https?:\/\/[^\s]+)/, "");
-                                            await huopaAPI.setAttribute(text, "textContent", msgContent)
+                                            text.textContent = msgContent
                                         }
                                         
                                     }
@@ -514,7 +515,7 @@ async function loop() {
                                 if (msgContent.length > 0) {
                                     msgDiv.append(text);
                                 } else {
-                                    await huopaAPI.setCertainStyle(imgEl, "marginTop", "2.5em");
+                                    imgEl.style.marginTop = "2.5em";
                                 }
                                 if (imgEl) {msgDiv.append(imgEl);}
                                 if (changeButtons) {
@@ -527,7 +528,7 @@ async function loop() {
                             crashError(error);
                         }
                         
-                    })
+                    }
                     if (channel.type === "text") {
                         const channelName = document.createElement("p");
                         await setAttrs(channelName, {
@@ -537,7 +538,7 @@ async function loop() {
                         
                         channelDiv.append(channelName);
                     } else if (channel.type === "separator") {
-                        await huopaAPI.setAttribute(channelDiv, "style", `padding: ${channel.size / 100}em; width: 100%; margin: 0;`);         
+                        channelDiv.style = `padding: ${channel.size / 100}em; width: 100%; margin: 0;`;         
                     }
                     
                     newChannelListEl.append(channelDiv);
@@ -553,11 +554,11 @@ async function loop() {
 
             wsHandlers.set("rate_limit", async(data) => {
                 ratelimited = true;
-                await huopaAPI.setAttribute(chatBar, "placeholder", `You have been ratelimited! You cannot send a message for ${Math.round(data.length / 1000)} seconds`);
-                await huopaAPI.setAttribute(chatBar, "disabled", true);
+                chatBar.placeholder = `You have been ratelimited! You cannot send a message for ${Math.round(data.length / 1000)} seconds`;
+                chatBar.disabled = true;
                 await new Promise((res) => setTimeout(res, data.length));
-                await huopaAPI.setAttribute(chatBar, "disabled", false);
-                await huopaAPI.setAttribute(chatBar, "placeholder",`Send a message in "#${openedChannel}" | Max message length: ${messageLengthLimit} characters`);
+                chatBar.disabled = false;
+                chatBar.placeholder = `Send a message in "#${openedChannel}" | Max message length: ${messageLengthLimit} characters`;
                 ratelimited = false;
             });
 
@@ -571,7 +572,7 @@ async function loop() {
                 if (msg.user !== userObj.username && extraConfig.notifications) {
                     huopaAPI.createNotification(`${msg.user} - #${data.channel} - ${server.name}`, msg.content);
                 }
-                await huopaAPI.setAttribute(messageList, "scrollTop", await huopaAPI.getAttribute(messageList, "scrollHeight"));
+                messageList.scrollTop = messageList.scrollHeight;
                 const msgDiv = document.createElement("div");
                 await setAttrs(msgDiv, {
                     "style":"width: calc(100% - 1em); padding: 0em; background-color: rgba(35, 35, 35, 0.65); margin: 0.5em; position: relative; border-radius: 0.5em; border: rgba(105, 105, 105, 0.65) 1px solid;"
@@ -590,13 +591,13 @@ async function loop() {
                             ws.send(`{"cmd":"message_delete", "id":"${msg.id}", "channel":"${openedChannel}"}`)
                         }
                     });
-                    await huopaAPI.addEventListener(msgDiv, "mouseenter", async() => {
+                    msgDiv.addEventListener("mouseenter", async() => {
                         if (!ratelimited) {
-                            await huopaAPI.setCertainStyle(deleteButton, "display", "block");
+                            deleteButton.display = "block";
                         }
                     });
-                    await huopaAPI.addEventListener(msgDiv, "mouseleave", async() => {
-                        await huopaAPI.setCertainStyle(deleteButton, "display", "none");
+                    msgDiv.addEventListener("mouseleave", async() => {
+                       deleteButton.display = "none";
                     });
                 }
                 await setAttrs(user, {
@@ -618,7 +619,7 @@ async function loop() {
                     const extMatch = url.match(extRegex);
                     if (!extMatch) url = url + ".gif";
                     url = "https://proxy.mistium.com/?url=" + url;
-                    const response = await huopaAPI.fetch(url);
+                    const response = await fetch(url);
                     if (response.ok) {
                         if (response.contentType.startsWith("video/") || response.contentType.startsWith("image/")) {
                             if (response.contentType.startsWith("video/")) {
@@ -631,7 +632,7 @@ async function loop() {
                                 "src":url
                             });
                             msgContent = msgContent.replace(/(https?:\/\/[^\s]+)/, "");
-                            await huopaAPI.setAttribute(text, "textContent", msgContent)
+                            text.textContent = msgContent
                         }
                         
                     }
@@ -643,7 +644,7 @@ async function loop() {
                 if (msgContent.length > 0) {
                     msgDiv.append(text);
                 } else {
-                    await huopaAPI.setCertainStyle(imgEl, "marginTop", "2.5em");
+                    imgEl.style.marginTop = "2.5em";
                 }
                 if (imgEl) msgDiv.append(imgEl);
                 if (changeButtons) {

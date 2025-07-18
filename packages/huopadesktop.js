@@ -494,8 +494,12 @@ window.huopadesktop = (() => {
         iframe.id = `code-${appId}`;
         const digits = container.parentElement.id;  
         iframe.dataset.digitId = digits;
+        iframe.style.width = "100%";
+        iframe.style.height = "100%";
+        iframe.style.border = "none";
         iframe.sandbox = "allow-scripts";
         container.appendChild(iframe);
+        const styleData = await internalFS.getFile("/system/env/systemStyles.css");
         const iframeHTML = `
             <script>
                 const appName = ${JSON.stringify(appId)};
@@ -554,7 +558,7 @@ window.huopadesktop = (() => {
                     try {
                         async function setAttrs(element, attrs) {
                             for (const [key, value] of Object.entries(attrs)) {
-                                await huopaAPI.setAttribute(element, key, value);
+                                element[key] = value;
                             }
                         }
                         async function importModule(moduleName) {
@@ -563,6 +567,13 @@ window.huopadesktop = (() => {
                             return module;
                         }
                         const loadParams = ${JSON.stringify(startParams)};
+                        const systemStyles = document.createElement("style");
+                        systemStyles.textContent = ${JSON.stringify(styleData)};
+                        await new Promise((resolve) => {
+                        if (document.body) return resolve();
+                        window.addEventListener("DOMContentLoaded", () => resolve(), { once: true });
+                        });
+                        document.body.append(systemStyles);
                         await eval("(async () => {" + ${JSON.stringify(appCode)} + "})()");
                     } catch (e) {
                         try {
