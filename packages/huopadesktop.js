@@ -499,6 +499,11 @@ window.huopadesktop = (() => {
         iframe.style.height = "calc(100%)";
         iframe.style.border = "none";
         iframe.sandbox = "allow-scripts";
+        const appStyles = `
+            p {
+                margin: 0.25em;
+            }
+        `
         container.appendChild(iframe);
         const styleData = await internalFS.getFile("/system/env/systemStyles.css");
         const iframeHTML = `
@@ -575,6 +580,9 @@ window.huopadesktop = (() => {
                         window.addEventListener("DOMContentLoaded", () => resolve(), { once: true });
                         });
                         document.body.style.height = "calc(100vh - 40px)";
+                        const appStyles = document.createElement("style");
+                        appStyles.textContent = ${JSON.stringify(appStyles)};
+                        document.body.append(appStyles);
                         document.body.append(systemStyles);
                         await eval("(async () => {" + ${JSON.stringify(appCode)} + "})()");
                     } catch (e) {
