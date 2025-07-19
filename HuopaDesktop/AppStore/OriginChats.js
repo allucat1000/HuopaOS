@@ -90,7 +90,7 @@ async function loop() {
         let connectedToWS;
         ws.onopen = () => {
             connectedToWS = true;
-            huopaAPI.log("WebSocket connected!");
+            console.log("WebSocket connected!");
         }
         await huopaAPI.writeFile("/home/applications/OriginChats/currentServerOpen.txt", "file", "0");
         
@@ -121,7 +121,7 @@ async function loop() {
                         loginPrompt();
                         break;
                     case "auth_success":
-                        huopaAPI.log("Successfully authed!");
+                        console.log("Successfully authed!");
                         createMainUI();
                         break;
                     case "ready":
@@ -424,7 +424,7 @@ async function loop() {
                             
                             delAllowed = false;
                             for (const role of roles) {
-                                if (channelPerms.send.includes(role)) {
+                                if (channelPerms.delete.includes(role)) {
                                     delAllowed = true
                                 }
                             }
@@ -602,11 +602,11 @@ async function loop() {
                     });
                     msgDiv.addEventListener("mouseenter", async() => {
                         if (!ratelimited) {
-                            deleteButton.display = "block";
+                            deleteButton.style.display = "block";
                         }
                     });
                     msgDiv.addEventListener("mouseleave", async() => {
-                       deleteButton.display = "none";
+                       deleteButton.style.display = "none";
                     });
                 }
                 await setAttrs(user, {
@@ -666,7 +666,7 @@ async function loop() {
         }
         async function checkForDisconnect() {
             if (!connectedToWS) {
-                await huopaAPI.log("Disconnected! Attempting to reconnect...");
+                console.log("Disconnected! Attempting to reconnect...");
                 (mainDiv).remove();
                 (sidebarEl).remove();
                 loop();

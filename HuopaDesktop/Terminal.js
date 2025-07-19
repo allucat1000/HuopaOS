@@ -116,6 +116,25 @@ async function runCmd(value) {
     const values = rawArgs.slice(1).map(arg => arg.replace(/^["']|["']$/g, ""));
 
     switch (cmd) {
+        case "cat":
+            if (values) {
+                const path = values[0];
+                const fullPath = resolvePath(values[0]);
+                const exists = await pathExists(fullPath);
+                if (!exists) {
+                    await addLine(`[line=red]open: Given path doesn't exist![/line]`);
+                    return;
+                }
+                const dir = await isDir(fullPath);
+                if (dir) {
+                    await addLine(`[line=red]open: Given path is not supposed to be a directory![/line]`)
+                } else {
+                    await addLine(`Content of "${fullPath}":
+${await huopaAPI.getFile(fullPath)}`);
+                }
+                
+            }
+            break;
         case "github":
             switch (values[0].toLowerCase()) {
                 case "help":
