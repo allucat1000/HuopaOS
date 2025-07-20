@@ -19,15 +19,11 @@ async function mainScreen() {
     wTabLabel.textContent = "Wallpapers";
     wallpapersTab.append(wallpapersTabIcon);
     wallpapersTab.append(wTabLabel);
-    wTabLabel.style.cursor = "pointer"
-;
-    wallpapersTab.style.display = "flex"
-;
-    wallpapersTab.style.justifyContent = "center"
-;
+    wTabLabel.style.cursor = "pointer";
+    wallpapersTab.style.display = "flex";
+    wallpapersTab.style.justifyContent = "center";
 
-    wallpapersTab.style.padding = "1.25em"
-;
+    wallpapersTab.style.padding = "1.25em";
     wallpapersTab.style.margin = "1em auto";
     wallpapersTab.style.width = "65%";
     mainScreenDiv.append(wallpapersTab);
@@ -47,15 +43,11 @@ async function mainScreen() {
     cTabLabel.textContent = "Customization"
     customizationTab.append(customizationTabIcon);
     customizationTab.append(cTabLabel);
-    cTabLabel.style.cursor = "pointer"
-;
-    customizationTab.style.display = "flex"
-;
-    customizationTab.style.justifyContent = "center"
-;
+    cTabLabel.style.cursor = "pointer";
+    customizationTab.style.display = "flex";
+    customizationTab.style.justifyContent = "center";
 
-    customizationTab.style.padding = "1.25em"
-;
+    customizationTab.style.padding = "1.25em";
     customizationTab.style.margin = "1em auto";
     customizationTab.style.width = "65%";
     mainScreenDiv.append(customizationTab);
@@ -90,6 +82,33 @@ async function mainScreen() {
         mainScreenDiv.remove();
         dockTabLoad();
     };
+
+    /* const appTab = document.createElement("button");
+
+    const appTabIcon = document.createElement("img");
+    const appTabIconSrc = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-app-window-mac-icon lucide-app-window-mac"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="M6 8h.01"/><path d="M10 8h.01"/><path d="M14 8h.01"/></svg>';
+    appTabIcon.style = "margin-right: 0.33em;"
+    appTabIcon.src = "data:image/svg+xml;utf8," + encodeURIComponent(appTabIconSrc);
+    const appTabLabel = document.createElement("label");
+    appTabLabel.textContent = "Default apps"
+    appTab.append(appTabIcon);
+    appTab.append(appTabLabel);
+    appTabLabel.style.cursor = "pointer"
+
+    appTab.style.display = "flex"
+
+    appTab.style.justifyContent = "center"
+
+
+    appTab.style.padding = "1.25em"
+
+    appTab.style.margin = "1em auto";
+    appTab.style.width = "65%";
+    mainScreenDiv.append(appTab);
+    appTab.onclick = () => {
+        mainScreenDiv.remove();
+        appTabLoad();
+    }; */
 }
 async function wallpapersTabLoad() {
     await huopaAPI.setTitle("Settings — Wallpapers");

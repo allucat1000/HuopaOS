@@ -1051,6 +1051,30 @@ window.huopadesktop = (() => {
                 GitHubAPI.listFolder(credentials, user, repo, folder);
             },
 
+            openSaveDialog: () => {
+                const popup = quantum.document.createElement("div");
+                popup.style = "position: absolute; left: 0; top: 0; background-color: rgba(0, 0, 0, 0.4); width: 100%; height: 100%;";
+                const input = quantum.document.createElement("input");
+                const title = quantum.document.createElement("h2");
+                title.textContent = "Choose a filename and path";
+                title.style = "margin: 0.5em auto; display: block;";
+                input.style = "margin: 0.5em auto; display: block; width: 35%";
+                input.placeholder = "eg: /home/test.txt";
+                popup.append(title, input);
+                appContainer.append(popup);
+                return new Promise(async(resolve, reject) => {
+                    input.addEventListener("keydown", (e) => {
+                        if (e?.key === "Enter") {
+                            if (input.value) {
+                                popup.remove();
+                                resolve(input.value)
+                            }
+                            
+                        }
+                    })
+                })
+                
+            }
         };
 
     };
