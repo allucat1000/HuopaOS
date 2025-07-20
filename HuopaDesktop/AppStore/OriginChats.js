@@ -73,10 +73,13 @@ async function loop() {
     let channelListEl = document.createElement("div");
     let channelList;
     const bg = document.createElement("div");
+    const accountDiv = document.createElement("div");
+    accountDiv.style = "bottom: 0.5em; left: 0.5em; height: 4em; width: calc(320px - 1em); border: rgba(105, 105, 105, 0.65) 1px solid; border-radius: 0.5em; background-color: rgba(65, 65, 65, 0.65);"
+    const signoutButton = document.createElement("button")
     const messageArea = document.createElement("div");
     messageArea.style = "position: absolute; right: 0; top: 0; width: calc(100% - 270px); height: 100%;";
     const messageList = document.createElement("div");
-    messageList.style = "position: absolute; right: 0; top: 0; width: 100%; height: calc(100% - 5em); display: flex;flex-direction: column-reverse; overflow: auto; overflow-x: hidden;";
+    messageList.style = "position: absolute; right: 0; top: 0; width: 100%; height: calc(100% - 5em); display: flex; flex-direction: column-reverse; overflow: auto; overflow-x: hidden;";
     const chatBar = document.createElement("input");
     let loading;
     const loadingEl = document.createElement("h2");
@@ -85,6 +88,7 @@ async function loop() {
     let messageTable = {};
     let delAllowed = false;
     let loading2 = false;
+
     const sidebarEl = document.createElement("div");
    
         let connectedToWS;
@@ -95,7 +99,7 @@ async function loop() {
         await huopaAPI.writeFile("/home/applications/OriginChats/currentServerOpen.txt", "file", "0");
         
         await setAttrs(sidebarEl, {
-            "style":"position: absolute; width: 50px; height: calc(100%); left: 0; top: 0; display: flex; flex-direction: column; align-items: center;"
+            "style":"position: absolute; width: 50px; height: calc(100% - 5em); left: 0; top: 0; display: flex; flex-direction: column; align-items: center;"
         });
         const userArea = document.createElement("div");
         await setAttrs(userArea, {
@@ -377,7 +381,7 @@ async function loop() {
                 const newChannelListEl = document.createElement("div");
                 (channelListEl).remove;
                 await setAttrs(newChannelListEl, {
-                    "style":"width: 250px; height: calc(100%); padding: 0; margin: 0; position: absolute; left: 0; top: 0; background-color: rgba(0, 0, 0, 0.2); padding-right: 1.25em; overflow: scroll; overflow-x: hidden;"
+                    "style":"width: 250px; height: calc(100% - 5em); padding: 0; margin: 0; position: absolute; left: 0; top: 0; padding-right: 1.25em; overflow: scroll; overflow-x: hidden;"
                 });
                 const serverInfo = document.createElement("div");
                 await setAttrs(serverInfo, {
