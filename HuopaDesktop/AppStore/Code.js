@@ -55,6 +55,7 @@ document.body.addEventListener("keydown", async(e) => {
                 path = await huopaAPI.openSaveDialog();
                 if (path) {
                     huopaAPI.writeFile(path, "file", code)
+                    const model = monacoEditor.getModel();
                     const lang = getLanguageFromExtension(path);
                     monacoEditor.setModelLanguage(model, lang);
                 }
