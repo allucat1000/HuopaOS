@@ -491,9 +491,9 @@ window.huopadesktop = (() => {
         if (killSwitch) return null;
 
         const iframe = quantum.document.createElement('iframe');
-        iframe.id = `code-${appId}`;
+        const digits = container.parentElement.id;
+        iframe.id = `code-${appId}-${digits}`;
         iframe.classList.add("app");
-        const digits = container.parentElement.id;  
         iframe.dataset.digitId = digits;
         iframe.style.width = "calc(100%)";
         iframe.style.height = "calc(100%)";
@@ -900,7 +900,7 @@ window.huopadesktop = (() => {
 
             closeApp: () => {
                 const digitId = appContainer.parentElement.id;
-                const codeElem = quantum.document.querySelector(`[data-digit-id="${digitId}"]`);
+                const codeElem = quantum.document.getElementById(`code-${appId}-${digitId}`);
                 if (codeElem) {
                     codeElem.remove();
                 }
@@ -1057,7 +1057,7 @@ window.huopadesktop = (() => {
                 const input = quantum.document.createElement("input");
                 const title = quantum.document.createElement("h2");
                 title.textContent = "Choose a filename and path";
-                title.style = "margin: 0.5em auto; display: block;";
+                title.style = "margin: 0.5em auto; display: block; text-align: center;";
                 input.style = "margin: 0.5em auto; display: block; width: 35%";
                 input.placeholder = "eg: /home/test.txt";
                 popup.append(title, input);
@@ -1402,7 +1402,7 @@ window.huopadesktop = (() => {
             outerContainer.style.zIndex = appZIndex;
         }
         closeButton.addEventListener("click", () => {
-            const codeElem = quantum.document.getElementById(`code-${appId}`);
+            const codeElem = quantum.document.getElementById(`code-${appId}-${digits}`);
             if (codeElem) {
                 codeElem.remove();
             }
@@ -1497,7 +1497,7 @@ window.huopadesktop = (() => {
                     break;
                 default:
                     if (e.code === "KeyW") {
-                        const codeElem = quantum.document.getElementById(`code-${appId}`);
+                        const codeElem = quantum.document.getElementById(`code-${appId}-${digits}`);
                         if (codeElem) {
                             codeElem.remove();
                         }
