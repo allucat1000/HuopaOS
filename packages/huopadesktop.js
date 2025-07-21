@@ -1074,6 +1074,16 @@ window.huopadesktop = (() => {
                     })
                 })
                 
+            },
+
+            removeTitlebar: () => {
+                const titlebar = appContainer.parentElement.children[8]
+                titlebar.children[0].remove();
+                titlebar.children[0].remove();
+
+                appContainer.parentElement.children[8].style.position = "absolute";
+                appContainer.parentElement.children[8].style.backgroundColor = "transparent";
+                appContainer.children[0].remove();
             }
         };
 

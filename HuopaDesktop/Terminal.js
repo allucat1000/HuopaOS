@@ -1,7 +1,5 @@
-await new Promise((resolve) => {
-  if (document.body) return resolve();
-  window.addEventListener("DOMContentLoaded", () => resolve(), { once: true });
-});
+document.body.style.margin = "0";
+huopaAPI.removeTitlebar();
 // Setup
 const font = document.createElement("link");
 await setAttrs(font, {
@@ -24,7 +22,7 @@ await setAttrs(termDiv, {
 })
 inputDiv.style = `margin: 1em; display: flex; align-items: center; flex-wrap: nowrap; gap: 0.2em; margin: 1em; margin-top: 0; font-family: "Monaspace Neon", sans-serif; color: white;`;
 await setAttrs(input, {
-    "style":"background-color: transparent; padding: 0; border: none; border-radius: 0; flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow-x: auto; font-family: 'Monaspace Neon'; padding: 0.5em; outline-style: none; color: white; font-size: 1em;"
+    "style":"background-color: transparent; padding: 0; border: none; border-radius: 0; flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow-x: auto; font-family: 'Monaspace Neon'; padding: 0.5em; outline-style: none; color: white; font-size: 1em; padding-left: 0;"
 });
 termDiv.id = "termDiv";
 async function addLine(text) {
@@ -100,7 +98,7 @@ await setAttrs(startText, {
 })
 
 // Code
-
+addLine("_HuopaOS Terminal_")
 let loggedIntoGithub = false;
 if (await huopaAPI.safeStorageRead("githubToken")) {
     loggedIntoGithub = true;
@@ -312,6 +310,7 @@ ${await huopaAPI.getFile(fullPath)}`);
             break;
         case "clear":
             termDiv.innerHTML = "";
+            addLine("_HuopaOS Terminal_")
             break;
         case "info":
             const sysInfo = JSON.parse(await huopaAPI.getSystemInfo());
