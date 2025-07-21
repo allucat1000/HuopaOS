@@ -280,11 +280,15 @@ ${await huopaAPI.getFile(fullPath)}`);
                 if (dir) {
                     await addLine(`[line=red]open: Given path is not supposed to be a directory![/line]`)
                 } else {
-                    if (path.endsWith(".js")) {
+                    if (path.endsWith(".js") && values[1]?.toLowerCase() !== "-v") {
                         await addLine(`open: Executed app at path "${fullPath}"`);
                         await huopaAPI.runApp(fullPath);
                     } else {
-                        await huopaAPI.runApp("/home/applications/Preview.js", fullPath);
+                        if (values[1]?.toLowerCase() !== "-code" && await huopaAPI.getFile("/home/applications/Code.js")) {
+                            await huopaAPI.runApp("/home/applications/Code.js", fullPath);
+                        } else {
+                            await huopaAPI.runApp("/home/applications/Preview.js", fullPath);
+                        }
                     }
                 }
                 
