@@ -17,8 +17,10 @@ async function renderFileList(path) {
     const backButton = document.createElement("button");
     const deleteButton = document.createElement("button");
     const topBarList = document.createElement("div");
+    const separator = document.createElement("div");
+    separator.style = "margin-bottom: 4em;";
     fileListDiv.style = "width: 100%; height: calc(100% - 20px); display: flex; flex-direction: column; margin-bottom: -0.25em;";
-    topBarList.style = "display: flex; align-items: center; justify-content: start; padding: 0.25em; margin-top: 0.33em;";
+    topBarList.style = "display: flex; align-items: center; justify-content: start; padding: 0.25em; margin-top: 0.33em; position: fixed; top: -5px; background-color: rgba(45, 45, 45, 0.5); width: 100%; left: 0;";
     await setAttrs(backButton, {
         "innerHTML":'<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left-icon lucide-arrow-left"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>',
         "style":"margin: 0.5em; display: inline; opacity: 1; display: flex; justify-content: center; align-items: center;"
@@ -58,7 +60,6 @@ async function renderFileList(path) {
                     for (const child of await fileListDiv.children) {
                         child.classList.remove("file-selected");
                     }
-                    deleteButton.classList.add("disabled");
                     renderFileList(path);
                 }
                 
@@ -83,14 +84,12 @@ async function renderFileList(path) {
     currentPathTitle.style = "color: white; display: inline; text-align: left; margin: 0.5em; font-size: 1.5em;"
     currentPathTitle.textContent = path;
     topBarList.append(currentPathTitle);
-    fileListDiv.append(topBarList)
+    fileListDiv.append(topBarList);
+    fileListDiv.append(separator);
     document.body.append(fileListDiv);
     const styleTag = document.createElement("style");
     styleTag.textContent = ".file-selected { filter: brightness(1.25); } .disabled { opacity: 0.5; } ";
     document.body.append(styleTag);
-    if (!fileSelectorMode) {
-        deleteButton.classList.add("disabled")
-    }
     const match = path.match(/\.[a-zA-Z0-9]+$/);
     if (await isDir(path) && !match) {
         let perms = true;
@@ -99,7 +98,7 @@ async function renderFileList(path) {
         
         for (const file of fileList) {
             const fileDiv = document.createElement("div");
-            fileDiv.style = "width: calc(100% - 20px); background-color: rgba(65, 65, 65, 0.5); margin: 0em auto; border-radius: 0.5em; border: rgba(105, 105, 105, 0.65) 2.5px solid; margin: 0.25em; display: flex; cursor: pointer;";
+            fileDiv.style = "width: calc(100% - 20px); margin: 0em auto; border-radius: 0.5em; border: rgba(105, 105, 105, 0.65) 2.5px solid; margin: 0.25em; display: flex; cursor: pointer;";
             const fileName = document.createElement("label");
             const dynamicFilePath = file.replace(path + "/", "")
             const fileIcon = document.createElement("img");
@@ -134,9 +133,6 @@ async function renderFileList(path) {
                     if (pathSelected === file) {
                         pathSelected = undefined;
                         fileDiv.classList.remove("file-selected")
-                        if (!fileSelectorMode) {
-                            deleteButton.classList.remove("disabled")
-                        }
                         
                         if (file.endsWith(".js") && notDir) {
                             if (fileSelectorMode) {
@@ -163,9 +159,6 @@ async function renderFileList(path) {
                     } else {
                         for (const child of fileListDiv.children) {
                             child.classList.remove("file-selected")
-                        }
-                        if (!fileSelectorMode) {
-                            deleteButton.classList.add("disabled")
                         }
                         
                         fileDiv.classList.add("file-selected")

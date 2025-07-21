@@ -42,7 +42,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "1.1.0";
+    const version = "1.1.1";
     // Priv Sys Funcs
     const dataURIToBlob = async (dataURI) => {
         const [meta, base64Data] = dataURI.split(',');
@@ -1665,9 +1665,11 @@ window.huopadesktop = (() => {
                     if (updateCheck === false) {
                         oldwallpaper = await internalFS.getFile("/system/env/systemconfig/settings/customization/wallpaperchosen.txt");
                         const wallpaperChosen = await internalFS.getFile("/system/env/systemconfig/settings/customization/wallpaperchosen.txt");
+                        const imageDataURI = await internalFS.getFile(wallpaperChosen);
+                        const blob = await dataURIToBlob(imageDataURI);
+                        const imageData = URL.createObjectURL(blob);
                         desktop.style.opacity = "0";
                         setTimeout(async () => {
-                        const imageData = await internalFS.getFile(wallpaperChosen);
                         desktop.style = `width: 100%; height: 100%; background-image: url(${imageData}); background-size: cover; background-position: center; font-family: sans-serif; transition: 0.2s; opacity: 0;`;
                         setTimeout(async () => {
                             desktop.style.opacity = "1";
