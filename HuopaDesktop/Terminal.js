@@ -284,7 +284,8 @@ ${await huopaAPI.getFile(fullPath)}`);
                         await addLine(`open: Executed app at path "${fullPath}"`);
                         await huopaAPI.runApp(fullPath);
                     } else {
-                        if (values[1]?.toLowerCase() !== "-code" && await huopaAPI.getFile("/home/applications/Code.js")) {
+                        if (values[1]?.toLowerCase() !== "-code" || values[0]?.toLowerCase() !== "-code") {
+                            if (!await huopaAPI.getFile("/home/applications/Code.js")) return;
                             await huopaAPI.runApp("/home/applications/Code.js", fullPath);
                         } else {
                             await huopaAPI.runApp("/home/applications/Preview.js", fullPath);
