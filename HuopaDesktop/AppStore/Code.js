@@ -1,6 +1,12 @@
 let code;
 let path = loadParams;
-if (path) code = await huopaAPI.getFile(path);
+if (path) {
+    code = await huopaAPI.getFile(path);
+    await huopaAPI.setTitle(`Code — ${path.split("/").pop()}`);
+} else {
+    await huopaAPI.setTitle("Code");
+}
+
 const editor = document.createElement("div");
 document.body.style.margin = "0";
 document.body.style.height = "100vh";
@@ -14,15 +20,18 @@ script.onload = () => {
     require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@latest/min/vs' } });
     require(['vs/editor/editor.main'], function () {
         if (path?.match(/\.\w{1,10}$/)) {
+            const lang = getLanguageFromExtension(path);
             monacoEditor = monaco.editor.create(document.getElementById('editor'), {
                 value: code,
-                language: path.split(".").pop(),
-                theme: 'vs-dark'
+                language: lang,
+                theme: 'vs-dark',
+                wordWrap: 'on'
             });
         } else {
             monacoEditor = monaco.editor.create(document.getElementById('editor'), {
                 value: code,
-                theme: 'vs-dark'
+                theme: 'vs-dark',
+                wordWrap: 'on'
             });
         }
         
@@ -34,8 +43,8 @@ script.onload = () => {
             inherit: true,
             rules: [],
             colors: {
-                'editor.background': '#00000000',
-                'minimap.background': '#28282834'
+                'editor.background': '#14141426',
+                'minimap.background': '#4a4a4a34'
             }
         });
 
