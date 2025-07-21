@@ -1168,6 +1168,7 @@ window.huopadesktop = (() => {
     });
     let appZIndex = 500;
     const createDraggableWindow = (windowEl, dragHandleSelector = ".titlebar") => {
+        let skipFirstMouseMove = true;
         windowEl.style.position = "absolute";
         
         const dragHandle = windowEl.querySelector(dragHandleSelector);
@@ -1179,30 +1180,34 @@ window.huopadesktop = (() => {
 
         dragHandle.style.cursor = "grab";
         dragHandle.addEventListener("mousedown", (e) => {
+            skipFirstMouseMove = true;
             windowEl.children[9].style.pointerEvents = "none";
             windowEl.focus();
             isDragging = true;
+
             const rect = windowEl.getBoundingClientRect();
             offsetX = e.clientX - rect.left;
             offsetY = e.clientY - rect.top;
 
             windowEl.style.position = "absolute";
-            appZIndex = appZIndex + 10;
+
+            appZIndex += 10;
             windowEl.style.zIndex = appZIndex;
 
-
-            const x = e.clientX - offsetX;
-            const y = e.clientY - offsetY;
-            windowEl.style.left = x + "px";
-            windowEl.style.top = y + "px";
-
-            quantum.document.addEventListener("mousemove", onMouseMove);
-            quantum.document.addEventListener("mouseup", onMouseUp);
+            requestAnimationFrame(() => {
+                quantum.document.addEventListener("mousemove", onMouseMove);
+                quantum.document.addEventListener("mouseup", onMouseUp);
+            });
         });
 
         function onMouseMove(e) {
             if (!isDragging) return;
             dragHandle.style.cursor = "grabbing";
+            if (skipFirstMouseMove) {
+                skipFirstMouseMove = false;
+                return;
+            }
+            
             const x = e.clientX - offsetX;
             const y = e.clientY - offsetY;
             windowEl.style.left = x + "px";
