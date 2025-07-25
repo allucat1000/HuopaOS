@@ -1678,6 +1678,7 @@ window.huopadesktop = (() => {
                 video.id = "wallpaperVideo";
                 video.autoplay = true;
                 video.muted = true;
+                video.loop = true;
                 video.playsInline = true;
                 video.style = "position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1;";
                 desktop.append(video);
@@ -1710,6 +1711,7 @@ window.huopadesktop = (() => {
                             video.id = "wallpaperVideo";
                             video.autoplay = true;
                             video.muted = true;
+                            video.loop = true;
                             video.playsInline = true;
                             video.style = "position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1;";
                             desktop.append(video);
