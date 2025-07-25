@@ -276,6 +276,12 @@ window.huopadesktop = (() => {
                     const data = await response.json();
                     
                     if (data.error) {
+                        if (data.error === "Terms-Of-Service are not accepted or outdated") {
+                            resultText.textContent = "You have to accept the terms of service on the official Rotur website before using Rotur on HuopaOS.";
+                            await new Promise(r => setTimeout(r, 1000));
+                            window.open("https://rotur.dev/terms-of-service", "_blank");
+                            return reject(data.error);
+                        }
                         resultText.textContent = "Failed to login to Rotur! Error: " + data.error;
                         return reject(data.error);
                     }
