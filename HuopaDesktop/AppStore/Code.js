@@ -66,7 +66,7 @@ document.body.addEventListener("keydown", async(e) => {
                     huopaAPI.writeFile(path, "file", code)
                     const model = monacoEditor.getModel();
                     const lang = getLanguageFromExtension(path);
-                    monacoEditor.setModelLanguage(model, lang);
+                    monaco.editor.setModelLanguage(model, lang);
                     await huopaAPI.setTitle(`Code — ${path.split("/").pop()}`);
                 }
             }

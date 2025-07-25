@@ -59,7 +59,7 @@ async function loop() {
     let auth;
     let appState = "auth"
     let userList;
-    let ratelimited;
+    let ratelimited = false;
     let userObj;
     let userData;
     let server;
@@ -305,7 +305,6 @@ async function loop() {
                 } else {
                     bg.style = `position: absolute; left: 0; top: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden;`;
                 }
-                openedChannel = undefined;
                 wsHandlers.set("ok", (data) => {
                     chatBar.value = "";
                 });
@@ -374,6 +373,22 @@ async function loop() {
 
                 document.body.append(sidebarEl);
                 document.body.append(mainArea);
+                console.log("[OriginChats Plugin Manager]: Activating plugins...");
+                console.log("[OriginChats Plugin Manager]: Beware of malicious plugins!");
+                let pluginList = await huopaAPI.getFile("/home/applications/OriginChats/plugins");
+                if (pluginList) {
+                    pluginList = JSON.parse(pluginList);
+                    for (const pluginPath of pluginList) {
+                        const code = await huopaAPI.getFile(pluginPath);
+                        console.log("[OriginChats Plugin Manager]: Executing plugin at path: " + pluginPath);
+                        (async () => {
+                            eval(code);
+                        })();
+                        
+                    }
+                } else {
+                    console.log("[OriginChats Plugin Manager]: No plugins found.");
+                }
             } catch (error) {
                 crashError(error)
             }
@@ -506,94 +521,6 @@ async function loop() {
                             await huopaAPI.setTitle(`OriginChats - #${channelSave.name} - ${server.name}`);
                             loading = true;
                             ws.send(`{"cmd":"messages_get", "channel": "${channelSave.name}"}`);
-                            while (!channelMsgs) {
-                                await new Promise((res) => setTimeout(res, 10));
-                            }
-                            channelMsgs = channelMsgs.reverse();
-                            
-                            for (const msg of channelMsgs) {
-                                const msgDiv = document.createElement("div");
-                                                
-                                await setAttrs(msgDiv, {
-                                    "style":"width: calc(100% - 1em); padding: 0em; background-color: rgba(35, 35, 35, 0.65); margin: 0.5em; position: relative; border-radius: 0.5em; border: rgba(105, 105, 105, 0.65) 1px solid;"
-                                });
-                                messageTable[msg.id] = msgDiv;
-                                const user = document.createElement("p");
-                                const text = document.createElement("p");
-                                let changeButtons = false;
-                                const deleteButton = document.createElement("button");
-                                if (msg.user === userObj.username || delAllowed) {
-                                    changeButtons = true
-                                    await setAttrs(deleteButton, {
-                                        "style":"position: absolute; top: -0.5em; color: red; right: 0.5em; padding: 0.5em 0.75em; display: none;",
-                                        "textContent":"x",
-                                        "onclick": async() => {
-                                            ws.send(`{"cmd":"message_delete", "id":"${msg.id}", "channel":"${openedChannel}"}`)
-                                        }
-                                    });
-                                    msgDiv.addEventListener("mouseenter", async() => {
-                                        if (!ratelimited) {
-                                            deleteButton.style.display = "block";
-                                        }
-                                    });
-                                    msgDiv.addEventListener("mouseleave", async() => {
-                                        deleteButton.style.display = "none";
-                                    });
-                                }
-                                await setAttrs(user, {
-                                    "style":`position: absolute; left: 0.5em; top: 0.5em; padding: 0em; color: ${userColors[msg.user]}; text-align: left; text-wrap: wrap;`,
-                                    "textContent":msg.user
-                                });
-                                await setAttrs(text, {
-                                    "style":"padding: 2.5em 0.5em 1em;; color: white; text-align: left; text-wrap: wrap; user-select: text;",
-                                    "textContent":msg.content
-                                });
-                                const urlRegex = /(?<!<)https?:\/\/[^\s>]+(?!>)/g;
-                                const match = msg.content.match(urlRegex);
-                                let msgContent = msg.content;
-                                let imgEl;
-                                if (match) {
-                                    let url = match[0];
-                                    if (!url) return
-                                    const extRegex = /\.(png|jpe?g|gif|bmp|webp|tiff)$/i;
-                                    const extMatch = url.match(extRegex);
-                                    if (!extMatch) url = url + ".gif";
-                                    url = "https://proxy.mistium.com/?url=" + url;
-                                    const response = await fetch(url);
-                                    if (response.ok) {
-                                        const contentType = response.headers.get('Content-Type');
-                                        if (contentType.startsWith("video/") || contentType.startsWith("image/")) {
-                                            if (contentType.startsWith("video/")) {
-                                                imgEl = document.createElement("video");
-                                            } else {
-                                                imgEl = document.createElement("img");
-                                            }
-                                            await setAttrs(imgEl, {
-                                                "style":"border-radius: 0.5em; margin: 0.5em; max-height: 20em; max-width: calc(100% - 1em);",
-                                                "src":url
-                                            });
-                                            msgContent = msgContent.replace(/(https?:\/\/[^\s]+)/, "");
-                                            text.textContent = msgContent
-                                        }
-                                        
-                                    }
-                                    
-                                    
-                                    
-                                }
-                                msgDiv.append(user);
-                                if (msgContent.length > 0) {
-                                    msgDiv.append(text);
-                                } else {
-                                    imgEl.style.marginTop = "2.5em";
-                                }
-                                if (imgEl) {msgDiv.append(imgEl);}
-                                if (changeButtons) {
-                                    msgDiv.append(deleteButton);
-                                }
-                                messageList.append(msgDiv);
-                            }
-                            loading = false;
                         } catch (error) {
                             crashError(error);
                         }
@@ -632,8 +559,93 @@ async function loop() {
                 ratelimited = false;
             });
 
-            wsHandlers.set("messages_get", (data) => {
+            wsHandlers.set("messages_get", async(data) => {
                 channelMsgs = data.messages;
+                channelMsgs = channelMsgs.reverse();
+                
+                for (const msg of channelMsgs) {
+                    const msgDiv = document.createElement("div");
+                                    
+                    await setAttrs(msgDiv, {
+                        "style":"width: calc(100% - 1em); padding: 0em; background-color: rgba(35, 35, 35, 0.65); margin: 0.5em; position: relative; border-radius: 0.5em; border: rgba(105, 105, 105, 0.65) 1px solid;"
+                    });
+                    messageTable[msg.id] = msgDiv;
+                    const user = document.createElement("p");
+                    const text = document.createElement("p");
+                    let changeButtons = false;
+                    const deleteButton = document.createElement("button");
+                    if (msg.user === userObj.username || delAllowed) {
+                        changeButtons = true
+                        await setAttrs(deleteButton, {
+                            "style":"position: absolute; top: -0.5em; color: red; right: 0.5em; padding: 0.5em 0.75em; display: none;",
+                            "textContent":"x",
+                            "onclick": async() => {
+                                ws.send(`{"cmd":"message_delete", "id":"${msg.id}", "channel":"${openedChannel}"}`)
+                            }
+                        });
+                        msgDiv.addEventListener("mouseenter", async() => {
+                            if (!ratelimited) {
+                                deleteButton.style.display = "block";
+                            }
+                        });
+                        msgDiv.addEventListener("mouseleave", async() => {
+                            deleteButton.style.display = "none";
+                        });
+                    }
+                    await setAttrs(user, {
+                        "style":`position: absolute; left: 0.5em; top: 0.5em; padding: 0em; color: ${userColors[msg.user]}; text-align: left; text-wrap: wrap;`,
+                        "textContent":msg.user
+                    });
+                    await setAttrs(text, {
+                        "style":"padding: 2.5em 0.5em 1em;; color: white; text-align: left; text-wrap: wrap; user-select: text;",
+                        "textContent":msg.content
+                    });
+                    const urlRegex = /(?<!<)https?:\/\/[^\s>]+(?!>)/g;
+                    const match = msg.content.match(urlRegex);
+                    let msgContent = msg.content;
+                    let imgEl;
+                    if (match) {
+                        let url = match[0];
+                        if (!url) return
+                        const extRegex = /\.(png|jpe?g|gif|bmp|webp|tiff)$/i;
+                        const extMatch = url.match(extRegex);
+                        if (!extMatch) url = url + ".gif";
+                        url = "https://proxy.mistium.com/?url=" + url;
+                        const response = await fetch(url);
+                        if (response.ok) {
+                            const contentType = response.headers.get('Content-Type');
+                            if (contentType.startsWith("video/") || contentType.startsWith("image/")) {
+                                if (contentType.startsWith("video/")) {
+                                    imgEl = document.createElement("video");
+                                } else {
+                                    imgEl = document.createElement("img");
+                                }
+                                await setAttrs(imgEl, {
+                                    "style":"border-radius: 0.5em; margin: 0.5em; max-height: 20em; max-width: calc(100% - 1em);",
+                                    "src":url
+                                });
+                                msgContent = msgContent.replace(/(https?:\/\/[^\s]+)/, "");
+                                text.textContent = msgContent
+                            }
+                            
+                        }
+                        
+                        
+                        
+                    }
+                    msgDiv.append(user);
+                    if (msgContent.length > 0) {
+                        msgDiv.append(text);
+                    } else {
+                        imgEl.style.marginTop = "2.5em";
+                    }
+                    if (imgEl) {msgDiv.append(imgEl);}
+                    if (changeButtons) {
+                        msgDiv.append(deleteButton);
+                    }
+                    messageList.append(msgDiv);
+                }
+                loading = false;
             });
 
             wsHandlers.set("message_new", async(data) => {
