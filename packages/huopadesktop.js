@@ -42,7 +42,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "1.1.3";
+    const version = "1.1.4";
     // Priv Sys Funcs
     const dataURIToBlob = async (dataURI) => {
         const [meta, base64Data] = dataURI.split(',');
@@ -1671,7 +1671,21 @@ window.huopadesktop = (() => {
             const blob = await dataURIToBlob(imageDataURI);
             const imageData = URL.createObjectURL(blob);
             quantum.document.body.style.margin = "0";
-            desktop.style = `width: 100%; height: 100%; background-image: url(${imageData}); background-size: cover; background-position: center; font-family: sans-serif; opacity: 0; transition: 0.2s; font-family: "Figtree", sans-serif;`;
+            const wallpaperExt = wallpaperChosen.split(".").pop()
+            if (wallpaperExt === "mp4") {
+                const video = quantum.document.createElement("video");
+                video.src = imageData;
+                video.id = "wallpaperVideo";
+                video.autoplay = true;
+                video.muted = true;
+                video.playsInline = true;
+                video.style = "position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1;";
+                desktop.append(video);
+                desktop.style = `width: 100%; height: 100%; font-family: sans-serif; opacity: 0; transition: 0.2s; font-family: "Figtree", sans-serif;`;
+            } else {
+                desktop.style = `width: 100%; height: 100%; background-image: url(${imageData}); background-size: cover; background-position: center; font-family: sans-serif; opacity: 0; transition: 0.2s; font-family: "Figtree", sans-serif;`;
+            }
+            
             quantum.document.body.style.userSelect = "none";
             desktop.id = "desktop";
             mainDiv.append(desktop);
@@ -1687,7 +1701,22 @@ window.huopadesktop = (() => {
                         const imageData = URL.createObjectURL(blob);
                         desktop.style.opacity = "0";
                         setTimeout(async () => {
-                        desktop.style = `width: 100%; height: 100%; background-image: url(${imageData}); background-size: cover; background-position: center; font-family: sans-serif; transition: 0.2s; opacity: 0;`;
+                        const wallpaperExt = wallpaperChosen.split(".").pop()
+                        const oldVid = quantum.document.getElementById("wallpaperVideo");
+                        if (oldVid) oldVid.remove();
+                        if (wallpaperExt === "mp4") {
+                            const video = quantum.document.createElement("video");
+                            video.src = imageData;
+                            video.id = "wallpaperVideo";
+                            video.autoplay = true;
+                            video.muted = true;
+                            video.playsInline = true;
+                            video.style = "position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1;";
+                            desktop.append(video);
+                            desktop.style = `width: 100%; height: 100%; font-family: sans-serif; opacity: 0; transition: 0.2s; font-family: "Figtree", sans-serif;`;
+                        } else {
+                            desktop.style = `width: 100%; height: 100%; background-image: url(${imageData}); background-size: cover; background-position: center; font-family: sans-serif; opacity: 0; transition: 0.2s; font-family: "Figtree", sans-serif;`;
+                        }
                         setTimeout(async () => {
                             desktop.style.opacity = "1";
                         }, 250)

@@ -150,27 +150,37 @@ async function wallpapersTabLoad() {
     for (const wallpaperPath of wallpaperList) {
         const wallpaperButton = document.createElement("button");
         wallpaperButton.style.width = "25%";
-        wallpaperButton.style.margin = "1em"
-;
-        wallpaperButton.style.overflow = "hidden"
-;
-        wallpaperButton.style.minWidth = "200px"
-;
+        wallpaperButton.style.margin = "1em";
+        wallpaperButton.style.overflow = "hidden";
+        wallpaperButton.style.minWidth = "200px";
         wallpaperButton.style.flex = "1 0 100px";
-        wallpaperButton.style.maxWidth = "200px"
-;
+        wallpaperButton.style.maxWidth = "200px";
         wallpaperButton.style.aspectRatio = "16 / 9";
-        wallpaperButton.backgroundColor = "rgba(0, 0, 0, 0";
-        wallpaperButton.style.padding = "0"
+        wallpaperButton.style.padding = "0";
 
+        const ext = wallpaperPath.split('.').pop().toLowerCase();
 
-        const img = document.createElement("img");
-        img.style = "border-radius: 0.5em; width: 100%; height: 100%; background-size: cover; margin: 0; border-style: none; border-color: white; object-fit: cover; object-position: center;";
-        const imageData = await huopaAPI.compressImage(await huopaAPI.getFile(wallpaperPath), 200, 112.5, "1");
-        img.src = imageData;
+        let preview;
+        preview = document.createElement("img");
 
-        wallpaperButton.append(img);
+        preview.style = "border-radius: 0.5em; width: 100%; height: 100%; object-fit: cover; object-position: center;";
+
+        const fileContent = await huopaAPI.getFile(wallpaperPath);
+
+        if (ext === "mp4") {
+            extractFrameAsPNG(fileContent, 1)
+                .then(pngBlob => {
+                    const imgUrl = URL.createObjectURL(pngBlob);
+                    preview.src = imgUrl;
+                })
+                .catch(console.error);
+        } else {
+            preview.src = await huopaAPI.compressImage(fileContent, 200, 112.5, "1");
+        }
+
+        wallpaperButton.append(preview);
         wallpaperListDiv.append(wallpaperButton);
+
         wallpaperButton.onclick = async () => {
             await huopaAPI.writeFile("/system/env/systemconfig/settings/customization/wallpaperchosen.txt", "file", wallpaperPath);
         };
@@ -198,7 +208,7 @@ async function wallpapersTabLoad() {
     importButton.append(importText);
     wallpaperListDiv.append(importButton);
     importButton.onclick = async () => {
-        const file = await huopaAPI.openFileImport(".png,.jpg,.webp,.jpeg", "dataURL");
+        const file = await huopaAPI.openFileImport(".png,.jpg,.webp,.jpeg,.gif,.webm,.mp4", "dataURL");
         if (file) {
             await huopaAPI.writeFile("/system/env/wallpapers/" + file.name, "file", file.content);
             mainScreenDiv.remove()
@@ -377,4 +387,42 @@ async function dockTabLoad() {
     dockOpacDiv.append(opacSlider);
     dockOpacDiv.append(opacLabel);
 
+}
+
+function extractFrameAsPNG(videoSrc, seekTime = 1) {
+  return new Promise((resolve, reject) => {
+    const video = document.createElement('video');
+    video.crossOrigin = "anonymous";
+    video.src = videoSrc;
+    video.muted = true;
+    
+    video.addEventListener('loadedmetadata', () => {
+      if (seekTime > video.duration) {
+        reject(new Error('Seek time exceeds video duration'));
+        return;
+      }
+      video.currentTime = seekTime;
+    });
+
+    video.addEventListener('seeked', () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      canvas.toBlob(blob => {
+        if (blob) {
+          resolve(blob);
+        } else {
+          reject(new Error('Failed to convert canvas to blob'));
+        }
+      }, 'image/png');
+    });
+
+    video.addEventListener('error', e => {
+      reject(new Error('Error loading video: ' + e.message));
+    });
+  });
 }
