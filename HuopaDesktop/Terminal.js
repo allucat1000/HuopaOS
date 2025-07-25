@@ -87,8 +87,10 @@ input.onkeydown = async(e) => {
     if (e.key === "Enter") {
         const value = input.value;
         await addLine("$ " + value);
-        runCmd(value);
+        await runCmd(value);
         input.value = "";
+        input.focus();
+        document.documentElement.scrollTop = document.documentElement.scrollHeight;
     }
 }
 let prompt = false;
@@ -96,7 +98,9 @@ await setAttrs(startText, {
     "style":"padding: 0; margin: 0; white-space: nowrap;",
     "textContent":currentPath + " $\u00A0"
 })
-
+document.documentElement.onclick = () => {
+    input.focus();
+}
 // Code
 addLine("_HuopaOS Terminal_")
 let loggedIntoGithub = false;
