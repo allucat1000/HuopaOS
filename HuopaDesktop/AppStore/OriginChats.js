@@ -317,7 +317,7 @@ async function loop() {
                 });
                 loading = false;
                 const accountDiv = document.createElement("div");
-                accountDiv.style = "bottom: 1em; left: -2.5em; height: 3.5em; width: 310px; border: rgba(105, 105, 105, 0.65) 1px solid; border-radius: 0.5em; background-color: rgba(45, 45, 45, 0.65); position: absolute; display: flex; align-items: center;"
+                accountDiv.style = "bottom: 1em; left: -2.75em; height: 3.5em; width: 310px; border: rgba(105, 105, 105, 0.65) 1px solid; border-radius: 0.5em; background-color: rgba(45, 45, 45, 0.65); position: absolute; display: flex; align-items: center;"
                 const usernameEl = document.createElement("p");
                 await setAttrs(usernameEl, {
                     "textContent":userData.username,
@@ -765,9 +765,10 @@ async function uploadFile(fileData) {
     const formData = new FormData();
     formData.append("reqtype", "fileupload");
     formData.append("userhash", "");
+    formData.append("time", "24h");
     formData.append("fileToUpload", file, "image.png");
 
-    const response = await fetch("https://corsproxy.io/?url=https://catbox.moe/user/api.php", {
+    const response = await fetch("https://corsproxy.io/?url=https://litterbox.catbox.moe/resources/internals/api.php", {
     method: "POST",
     body: formData
     });
