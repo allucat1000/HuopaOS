@@ -73,12 +73,42 @@ async function loop() {
     let channelListEl = document.createElement("div");
     let channelList;
     const bg = document.createElement("div");
-    const signoutButton = document.createElement("button")
     const messageArea = document.createElement("div");
     messageArea.style = "position: absolute; right: 0; top: 0; width: calc(100% - 270px); height: 100%;";
     const messageList = document.createElement("div");
     messageList.style = "position: absolute; right: 0; top: 0; width: 100%; height: calc(100% - 5em); display: flex; flex-direction: column-reverse; overflow: auto; overflow-x: hidden;";
     const chatBar = document.createElement("input");
+    const uploadButton = document.createElement("div");
+    const uploadInput = document.createElement("input");
+    const uploadIcon = document.createElement("img");
+    await setAttrs(uploadIcon, {
+        "src":"data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20class%3D%22lucide%20lucide-circle-plus-icon%20lucide-circle-plus%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%2210%22%2F%3E%3Cpath%20d%3D%22M8%2012h8%22%2F%3E%3Cpath%20d%3D%22M12%208v8%22%2F%3E%3C%2Fsvg%3E",
+        "style":"cursor: pointer;"
+    })
+    await setAttrs(uploadInput, {
+        "style":"width: 20px; height: 20px; opacity: 0; z-index: 99; outline-style: none; position: absolute; padding: 0.5em; cursor: pointer;",
+        "type":"file",
+        "id":"uploadInput",
+        "accept":"image/png"
+    })
+    uploadInput.addEventListener("change", async() => {
+        const file = uploadInput?.files[0];
+        if (file) {
+            const returned = await uploadFile(file);
+            if (!returned) {
+                chatBar.value = `Failed to upload file! Check the DevTools console for more info. ${chatBar.value}`;
+                uploadInput.files = "";
+                return;
+            }
+            chatBar.value = returned + " " + chatBar.value
+            uploadInput.files = "";
+        }
+    })
+    await setAttrs(uploadButton, {
+        "style":"width: 25px; height: 25px; position: absolute; right: 1em; bottom: 1.77em; z-index: 999; display: flex; align-items: center; justify-content: center; background-color: rgba(65, 65, 65, 0.65); border-radius: 50%; padding: 0.25em; cursor: pointer;"
+    })
+    uploadButton.append(uploadIcon);
+    uploadButton.append(uploadInput);
     let loading;
     const loadingEl = document.createElement("h2");
     let editingMessage = false; 
@@ -287,7 +317,7 @@ async function loop() {
                 });
                 loading = false;
                 const accountDiv = document.createElement("div");
-                accountDiv.style = "bottom: 1em; left: 0.5em; height: 3.5em; width: calc(270px - 20px); border: rgba(105, 105, 105, 0.65) 1px solid; border-radius: 0.5em; background-color: rgba(45, 45, 45, 0.65); position: absolute; display: flex; align-items: center;"
+                accountDiv.style = "bottom: 1em; left: -2.5em; height: 3.5em; width: 310px; border: rgba(105, 105, 105, 0.65) 1px solid; border-radius: 0.5em; background-color: rgba(45, 45, 45, 0.65); position: absolute; display: flex; align-items: center;"
                 const usernameEl = document.createElement("p");
                 await setAttrs(usernameEl, {
                     "textContent":userData.username,
@@ -300,7 +330,7 @@ async function loop() {
                 })
                 const signoutButton = document.createElement("img");
                 await setAttrs(signoutButton, {
-                    "src":'data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20class%3D%22lucide%20lucide-door-open-icon%20lucide-door-open%22%3E%3Cpath%20d%3D%22M11%2020H2%22%2F%3E%3Cpath%20d%3D%22M11%204.562v16.157a1%201%200%200%200%201.242.97L19%2020V5.562a2%202%200%200%200-1.515-1.94l-4-1A2%202%200%200%200%2011%204.561z%22%2F%3E%3Cpath%20d%3D%22M11%204H8a2%202%200%200%200-2%202v14%22%2F%3E%3Cpath%20d%3D%22M14%2012h.01%22%2F%3E%3Cpath%20d%3D%22M22%2020h-3%22%2F%3E%3C%2Fsvg%3E',
+                    "src":"data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20class%3D%22lucide%20lucide-door-open-icon%20lucide-door-open%22%3E%3Cpath%20d%3D%22M11%2020H2%22%2F%3E%3Cpath%20d%3D%22M11%204.562v16.157a1%201%200%200%200%201.242.97L19%2020V5.562a2%202%200%200%200-1.515-1.94l-4-1A2%202%200%200%200%2011%204.561z%22%2F%3E%3Cpath%20d%3D%22M11%204H8a2%202%200%200%200-2%202v14%22%2F%3E%3Cpath%20d%3D%22M14%2012h.01%22%2F%3E%3Cpath%20d%3D%22M22%2020h-3%22%2F%3E%3C%2Fsvg%3E",
                     "style":"position: absolute; right: 0.75em; cursor: pointer;",
                     "onclick":async() => {
                         await huopaAPI.safeStorageWrite("token.txt", "file", undefined);
@@ -317,6 +347,7 @@ async function loop() {
                 mainDiv.append(channelListEl);
                 mainDiv.append(accountDiv);
                 mainDiv.append(messageArea);
+                messageArea.append(uploadButton);
                 messageArea.append(chatBar);
                 messageArea.append(messageList);
                 chatBar.onkeydown = async (e) => {
@@ -538,7 +569,7 @@ async function loop() {
                                                 imgEl = document.createElement("img");
                                             }
                                             await setAttrs(imgEl, {
-                                                "style":"border-radius: 0.5em; margin: 0.5em; max-width: calc(100% - 1em);",
+                                                "style":"border-radius: 0.5em; margin: 0.5em; max-height: 20em; max-width: calc(100% - 1em);",
                                                 "src":url
                                             });
                                             msgContent = msgContent.replace(/(https?:\/\/[^\s]+)/, "");
@@ -668,7 +699,7 @@ async function loop() {
                                 imgEl = document.createElement("img");
                             }
                             await setAttrs(imgEl, {
-                                "style":"border-radius: 0.5em; margin: 0.5em; max-width: calc(100% - 1em);",
+                                "style":"border-radius: 0.5em; margin: 0.5em; max-height: 20em; max-width: calc(100% - 1em);",
                                 "src":url
                             });
                             msgContent = msgContent.replace(/(https?:\/\/[^\s]+)/, "");
@@ -726,4 +757,25 @@ async function crashError(error) {
             return;
         }
     })
+}
+
+async function uploadFile(fileData) {
+    const file = fileData
+
+    const formData = new FormData();
+    formData.append("reqtype", "fileupload");
+    formData.append("userhash", "");
+    formData.append("fileToUpload", file, "image.png");
+
+    const response = await fetch("https://corsproxy.io/?url=https://catbox.moe/user/api.php", {
+    method: "POST",
+    body: formData
+    });
+
+    if (response.ok) {
+        const result = await response.text();
+        return result
+    } else {
+        return false;
+    }
 }
