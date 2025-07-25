@@ -42,7 +42,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "1.1.1";
+    const version = "1.1.2";
     // Priv Sys Funcs
     const dataURIToBlob = async (dataURI) => {
         const [meta, base64Data] = dataURI.split(',');
@@ -764,7 +764,7 @@ window.huopadesktop = (() => {
                 "write":"",
                 "modify":"",
             }) {
-                if (path.startsWith("/system/env/appconfig")) {
+                if (path.startsWith("/system/env/appconfig") || path.toLowerCase() === "/system/packages/huopadesktop.js") {
                     console.warn("[huopaAPI SAFETY]: App tried writing in safeStorage using default write command!");
                     return "[HuopaDesktop FS Security]: No permissions";
                 }
