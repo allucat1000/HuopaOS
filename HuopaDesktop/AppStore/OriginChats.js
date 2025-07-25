@@ -73,8 +73,6 @@ async function loop() {
     let channelListEl = document.createElement("div");
     let channelList;
     const bg = document.createElement("div");
-    const accountDiv = document.createElement("div");
-    accountDiv.style = "bottom: 0.5em; left: 0.5em; height: 4em; width: calc(320px - 1em); border: rgba(105, 105, 105, 0.65) 1px solid; border-radius: 0.5em; background-color: rgba(65, 65, 65, 0.65);"
     const signoutButton = document.createElement("button")
     const messageArea = document.createElement("div");
     messageArea.style = "position: absolute; right: 0; top: 0; width: calc(100% - 270px); height: 100%;";
@@ -288,8 +286,36 @@ async function loop() {
                     "disabled":true
                 });
                 loading = false;
-
+                const accountDiv = document.createElement("div");
+                accountDiv.style = "bottom: 1em; left: 0.5em; height: 3.5em; width: calc(270px - 20px); border: rgba(105, 105, 105, 0.65) 1px solid; border-radius: 0.5em; background-color: rgba(45, 45, 45, 0.65); position: absolute; display: flex; align-items: center;"
+                const usernameEl = document.createElement("p");
+                await setAttrs(usernameEl, {
+                    "textContent":userData.username,
+                    "style":"text-align: left; padding: 0;"
+                })
+                const iconEl = document.createElement("img");
+                await setAttrs(iconEl, {
+                    "src":`https://avatars.rotur.dev/${userData.username}`,
+                    "style":"width: 32px; height: 32px; margin: 0.75em; border-radius: 50%;"
+                })
+                const signoutButton = document.createElement("img");
+                await setAttrs(signoutButton, {
+                    "src":'data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20class%3D%22lucide%20lucide-door-open-icon%20lucide-door-open%22%3E%3Cpath%20d%3D%22M11%2020H2%22%2F%3E%3Cpath%20d%3D%22M11%204.562v16.157a1%201%200%200%200%201.242.97L19%2020V5.562a2%202%200%200%200-1.515-1.94l-4-1A2%202%200%200%200%2011%204.561z%22%2F%3E%3Cpath%20d%3D%22M11%204H8a2%202%200%200%200-2%202v14%22%2F%3E%3Cpath%20d%3D%22M14%2012h.01%22%2F%3E%3Cpath%20d%3D%22M22%2020h-3%22%2F%3E%3C%2Fsvg%3E',
+                    "style":"position: absolute; right: 0.75em; cursor: pointer;",
+                    "onclick":async() => {
+                        await huopaAPI.safeStorageWrite("token.txt", "file", undefined);
+                        mainDiv.remove();
+                        sidebarEl.remove();
+                        ws.close()
+                        loop();
+                        return;
+                    }
+                })
+                accountDiv.append(iconEl);
+                accountDiv.append(usernameEl);
+                accountDiv.append(signoutButton);
                 mainDiv.append(channelListEl);
+                mainDiv.append(accountDiv);
                 mainDiv.append(messageArea);
                 messageArea.append(chatBar);
                 messageArea.append(messageList);
