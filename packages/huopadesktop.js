@@ -497,6 +497,8 @@ window.huopadesktop = (() => {
         iframe.dataset.digitId = digits;
         iframe.style.width = "calc(100%)";
         iframe.style.height = "calc(100%)";
+        iframe.style.position = "absolute";
+        iframe.style.top = "0";
         iframe.style.border = "none";
         iframe.sandbox = "allow-scripts";
         container.appendChild(iframe);
