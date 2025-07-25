@@ -89,7 +89,7 @@ async function loop() {
         "style":"width: 20px; height: 20px; opacity: 0; z-index: 99; outline-style: none; position: absolute; padding: 0.5em; cursor: pointer;",
         "type":"file",
         "id":"uploadInput",
-        "accept":"image/png"
+        "accept":""
     })
     uploadInput.addEventListener("change", async() => {
         const file = uploadInput?.files[0];
@@ -765,8 +765,8 @@ async function uploadFile(fileData) {
     const formData = new FormData();
     formData.append("reqtype", "fileupload");
     formData.append("userhash", "");
-    formData.append("time", "24h");
-    formData.append("fileToUpload", file, "image.png");
+    formData.append("time", "72h");
+    formData.append("fileToUpload", file, file.name);
 
     const response = await fetch("https://corsproxy.io/?url=https://litterbox.catbox.moe/resources/internals/api.php", {
     method: "POST",
