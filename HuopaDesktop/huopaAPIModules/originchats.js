@@ -64,7 +64,7 @@ return {
     login: async(token) => {
         const response = await fetch(`https://social.rotur.dev/generate_validator?auth=${token}&key=${validatorKey}`);
         if (response.ok) {
-            const result = response.json()
+            const result = await response.json()
             auth = result.validator;
             ws.send(`{"cmd":"auth","validator":"${auth}"}`);
             while (!userData) {
