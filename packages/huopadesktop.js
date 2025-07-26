@@ -280,10 +280,11 @@ window.huopadesktop = (() => {
                             resultText.textContent = "You have to accept the terms of service on the official Rotur website before using Rotur on HuopaOS.";
                             await new Promise(r => setTimeout(r, 1000));
                             window.open("https://rotur.dev/terms-of-service", "_blank");
+                        } else {
+                            resultText.textContent = "Failed to login to Rotur! Error: " + data.error;
                             return reject(data.error);
                         }
-                        resultText.textContent = "Failed to login to Rotur! Error: " + data.error;
-                        return reject(data.error);
+                        
                     }
 
                     resultText.textContent = "Logged into Rotur! You may close this window.";
@@ -1462,7 +1463,7 @@ window.huopadesktop = (() => {
                     outerContainer.style.top = "0";
                     outerContainer.style.right = "";
                     outerContainer.style.bottom = "";
-                    outerContainer.style.width = "50%";
+                    outerContainer.style.width = "calc(50% - 3px)";
                     if (docked === true) {
                         outerContainer.style.height = `calc(100% - 4.3em)`;
                     } else {
@@ -1477,7 +1478,7 @@ window.huopadesktop = (() => {
                     outerContainer.style.right = "0";
                     outerContainer.style.top = "0";
                     outerContainer.style.bottom = "";
-                    outerContainer.style.width = "50%";
+                    outerContainer.style.width = "calc(50% - 3px)";
                     if (docked === true) {
                         outerContainer.style.height = `calc(100% - 4.3em)`;
                     } else {
@@ -1491,16 +1492,16 @@ window.huopadesktop = (() => {
                     outerContainer.style.top = "0";
                     outerContainer.style.bottom = "";
                     outerContainer.style.width = "100%";
-                    outerContainer.style.height = `calc(50% - 3em)`;
+                    outerContainer.style.height = `calc(50% - 3em - 3px)`;
                     break;
                 
                 case "ArrowDown":
                     outerContainer.style.left = "0";
                     outerContainer.style.right = "";
                     if (docked === true) {
-                        outerContainer.style.height = `calc(50% - 1.4em)`;
+                        outerContainer.style.height = `calc(50% - 1.4em - 3px)`;
                     } else {
-                        outerContainer.style.height = "calc(50% - 4em)";
+                        outerContainer.style.height = "calc(50% - 4em - 3px)";
                     }
                     outerContainer.style.top = "calc(100% - 50% - 3em)";
                     outerContainer.style.bottom = "";
