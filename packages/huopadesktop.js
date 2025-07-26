@@ -42,7 +42,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "1.1.5";
+    const version = "1.1.6";
     // Priv Sys Funcs
     const dataURIToBlob = async (dataURI) => {
         const [meta, base64Data] = dataURI.split(',');
@@ -918,7 +918,7 @@ window.huopadesktop = (() => {
                     windowList.splice(index, 1);
                 }
                 appContainer.parentElement.remove();
-                const appToDock = quantum.document.querySelector(`[data-dock-digit-id="${digitId}"]`);
+                
                 if (appToDock) {
                     appToDock.remove();
                 }
@@ -1097,7 +1097,30 @@ window.huopadesktop = (() => {
                 appContainer.parentElement.children[8].style.position = "absolute";
                 appContainer.parentElement.children[8].style.backgroundColor = "transparent";
                 appContainer.children[0].remove();
-            }
+            },
+
+            setWindowPosition: (x, y) => {
+                if (x) appContainer.parentElement.style.left = x;
+                if (y) appContainer.parentElement.style.top = y;
+            },
+
+            setWindowSize: (width, height) => {
+                if (width) appContainer.parentElement.style.width = width;
+                if (height) appContainer.parentElement.style.height = height;
+            },
+
+            setWindowColor: (bg, border) => {
+                if (bg) appContainer.parentElement.style.backgroundColor = bg;
+                if (border) {
+                    const digitId = appContainer.parentElement.id;
+                    appContainer.parentElement.setAttribute("data-border-override", digitId);
+                    appContainer.parentElement.style.borderColor = border;
+                }
+            },
+
+            setWindowBlur: (blur) => {
+                if (blur) appContainer.parentElement.style.backdropFilter = `blur(${blur})`;
+            },
         };
 
     };
@@ -1347,15 +1370,6 @@ window.huopadesktop = (() => {
             const [_, r, g, b] = rgbaMatch;
             outerContainer.style.backgroundColor = `rgba(${r}, ${g}, ${b}, ${opacity})`;
         }
-        await createSysDaemon("appContBordUpdater", () => {
-            const loop = async () => {
-                const borderColor = await internalFS.getFile("/system/env/systemconfig/settings/customization/windowbordercolor.txt");
-                outerContainer.style.borderColor = borderColor;
-                setTimeout(loop, 200);
-            }
-            loop()
-            
-        })
 
         outerContainer.style.backdropFilter = `blur(${blur}px)`;
 
@@ -1437,6 +1451,20 @@ window.huopadesktop = (() => {
         for (let i = 0; i < 10; i++) {
             digits += Math.floor(Math.random() * 10);
         }
+
+        await createSysDaemon("appContBordUpdater", () => {
+            const loop = async () => {
+                const override = quantum.document.querySelector(`[data-border-override="${digits}"]`);
+                if (!override) {
+                    const borderColor = await internalFS.getFile("/system/env/systemconfig/settings/customization/windowbordercolor.txt");
+                    outerContainer.style.borderColor = borderColor;
+                }
+                
+                setTimeout(loop, 200);
+            }
+            loop()
+            
+        })
         appToDock.append(appToDockImg);
         appToDock.dataset.dockDigitId = digits;
         appBar.append(appToDock);
