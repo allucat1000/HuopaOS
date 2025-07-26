@@ -42,7 +42,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "1.1.4";
+    const version = "1.1.5";
     // Priv Sys Funcs
     const dataURIToBlob = async (dataURI) => {
         const [meta, base64Data] = dataURI.split(',');
@@ -716,7 +716,7 @@ window.huopadesktop = (() => {
         delete _returnCallbacks[uid];
         return data
     };
-
+    const windowList = [];
     const huopaAPIHandlers = (appContainer) => {
         
         return {
@@ -912,6 +912,10 @@ window.huopadesktop = (() => {
                 const codeElem = quantum.document.getElementById(`code-${appId}-${digitId}`);
                 if (codeElem) {
                     codeElem.remove();
+                }
+                const index = windowList.indexOf([digitId, appContainer.parentElement])
+                if (index !== -1) {
+                    windowList.splice(index, 1);
                 }
                 appContainer.parentElement.remove();
                 const appToDock = quantum.document.querySelector(`[data-dock-digit-id="${digitId}"]`);
@@ -1201,6 +1205,10 @@ window.huopadesktop = (() => {
         dragHandle.addEventListener("mousedown", (e) => {
             skipFirstMouseMove = true;
             windowEl.children[9].style.pointerEvents = "none";
+            for (const window of windowList) {
+                if (window[0] === windowEl.id) continue;
+                window[1].children[9].style.pointerEvents = "none";
+            }
             windowEl.focus();
             isDragging = true;
 
@@ -1235,6 +1243,10 @@ window.huopadesktop = (() => {
 
         function onMouseUp() {
             windowEl.children[9].style.pointerEvents = "auto";
+            for (const window of windowList) {
+                if (window[0] === windowEl.id) continue;
+                window[1].children[9].style.pointerEvents = "auto";
+            }
             isDragging = false;
             quantum.document.removeEventListener("mousemove", onMouseMove);
             quantum.document.removeEventListener("mouseup", onMouseUp);
@@ -1252,6 +1264,10 @@ window.huopadesktop = (() => {
 
         function onMouseMove(ev) {
             win.children[9].style.pointerEvents = "none";
+            for (const window of windowList) {
+                if (window[0] === win.id) continue;
+                window[1].children[9].style.pointerEvents = "none";
+            }
             const dx = ev.clientX - startX;
             const dy = ev.clientY - startY;
 
@@ -1300,6 +1316,10 @@ window.huopadesktop = (() => {
 
         function onMouseUp() {
             win.children[9].style.pointerEvents = "auto";
+            for (const window of windowList) {
+                if (window[0] === win.id) continue;
+                window[1].children[9].style.pointerEvents = "auto";
+            }
             quantum.document.removeEventListener("mousemove", onMouseMove);
             quantum.document.removeEventListener("mouseup", onMouseUp);
         }
@@ -1430,7 +1450,10 @@ window.huopadesktop = (() => {
             if (codeElem) {
                 codeElem.remove();
             }
-            
+            const index = windowList.indexOf([digits, outerContainer])
+            if (index !== -1) {
+                windowList.splice(index, 1);
+            }
             outerContainer.remove();
             appToDock.remove();
         });
@@ -1450,6 +1473,7 @@ window.huopadesktop = (() => {
         outerContainer.style.display = "block";
         outerContainer.tabIndex = "0";
         outerContainer.focus();
+        windowList.push([digits, outerContainer]);
         createDraggableWindow(outerContainer);
         outerContainer.addEventListener("keydown", async(e) => {
             if (Number(outerContainer.style.zIndex) !== appZIndex) {
@@ -1491,7 +1515,7 @@ window.huopadesktop = (() => {
                     outerContainer.style.right = "";
                     outerContainer.style.top = "0";
                     outerContainer.style.bottom = "";
-                    outerContainer.style.width = "100%";
+                    outerContainer.style.width = "calc(100% - 4px)";
                     outerContainer.style.height = `calc(50% - 3em - 3px)`;
                     break;
                 
@@ -1505,14 +1529,14 @@ window.huopadesktop = (() => {
                     }
                     outerContainer.style.top = "calc(100% - 50% - 3em)";
                     outerContainer.style.bottom = "";
-                    outerContainer.style.width = "100%";
+                    outerContainer.style.width = "calc(100% - 4px)";
                     break;
                 case "Enter":
                     outerContainer.style.left = "0";
                     outerContainer.style.right = "";
                     outerContainer.style.top = "0";
                     outerContainer.style.bottom = "";
-                    outerContainer.style.width = "100%";
+                    outerContainer.style.width = "calc(100% - 4px)";
                     if (docked === true) {
                         outerContainer.style.height = `calc(100% - 4.3em)`;
                     } else {
@@ -1525,7 +1549,10 @@ window.huopadesktop = (() => {
                         if (codeElem) {
                             codeElem.remove();
                         }
-                        
+                        const index = windowList.indexOf([digits, outerContainer])
+                        if (index !== -1) {
+                            windowList.splice(index, 1);
+                        }
                         outerContainer.remove();
                         appToDock.remove();
                     }
