@@ -177,7 +177,16 @@ async function loop() {
             if (storedToken) token = storedToken;
             if (!storedToken) {
                 token = await huopaAPI.openRoturLogin();
-                await tryLogin();
+                if (token) {
+                    await tryLogin();
+                } else {
+                    const error = document.createElement("h2");
+                    error.textContent = "Failed to get account credentials!";
+                    document.body.append(error);
+                    ws.close();
+                    return;
+                }
+                
             } else {
                 tryLogin();
             }

@@ -248,62 +248,44 @@ window.huopadesktop = (() => {
 
     const createRoturLoginWindow = async (app) => {
         return new Promise( async(resolve, reject) => {
-            const container = await createAppContainer(`Rotur Login`);
-            const titleText = quantum.document.createElement("h1");
-            titleText.textContent = `Login to Rotur`;
-            const infoText = quantum.document.createElement("p");
-            infoText.textContent = `By logging in, you agree to give your Rotur Token to ${app}`;
-            container.append(titleText);
-            container.id = `app-Rotur Login`;
-            titleText.style = "color: white; text-align: center; margin: 1em;"
-            infoText.style = "color: white; text-align: center; margin: 0.5em;"
-            container.append(infoText);
-            const usernameInput = quantum.document.createElement("input");
-            const passwordInput = quantum.document.createElement("input");
-
-            usernameInput.placeholder = "Username";
-            passwordInput.placeholder = "Password";
-            passwordInput.type = "password"
-            usernameInput.style.display = "block";
-            passwordInput.style.display = "block";
-            usernameInput.style.margin = "1em auto";
-            passwordInput.style.margin = "1em auto";
-
-            const submitButton = quantum.document.createElement("button");
-            submitButton.textContent = "Login";
-            container.append(usernameInput);
-            container.append(passwordInput);
-            submitButton.style.margin = "1em auto";
-            container.append(submitButton);
-            const resultText = quantum.document.createElement("p");
-            resultText.style = "color: white; text-align: center; margin: 0.5em;";
-            container.append(resultText);
-            submitButton.onclick = async () => {
                 try {
-                    const response = await fetch(`https://social.rotur.dev/get_user?username=${usernameInput.value}&password=${CryptoJS.MD5(passwordInput.value).toString()}`);
-                    const data = await response.json();
-                    
-                    if (data.error) {
-                        if (data.error === "Terms-Of-Service are not accepted or outdated") {
-                            resultText.textContent = "You have to accept the terms of service on the official Rotur website before using Rotur on HuopaOS.";
-                            await new Promise(r => setTimeout(r, 1000));
-                            window.open("https://rotur.dev/terms-of-service", "_blank");
-                        } else {
-                            resultText.textContent = "Failed to login to Rotur! Error: " + data.error;
-                            return reject(data.error);
+                    await new Promise(r => setTimeout(r, 1000));
+                    const result = await new Promise(async(resolve, reject) => {
+                        const win = window.open(`https://rotur.dev/auth?return_to=${window.location.origin}/HuopaOS/AuthSuccess`, "_blank");
+                        if (!win) {
+                            console.error("Login window doesn't exist!");
+                            reject("Fail");
                         }
-                        
+                        const interval = setInterval(() => {
+                            if (win.closed) {
+                                console.error("Login window closed!");
+                                clearInterval(interval);
+                                reject("Fail");
+                            }
+                            try {
+                                if (win.location.origin === window.location.origin) {
+                                    const token = win.location.search.replace("?token=", "")
+                                    if (token) {
+                                        clearInterval(interval)
+                                        win.close();
+                                        resolve(token);
+                                    } else {
+                                        reject("Fail")
+                                    }
+                                }
+                            } catch {}
+                        }, 200)
+                    });
+                    if (result === "Fail") {
+                        reject("Fail");
+                        return;
                     }
-
-                    resultText.textContent = "Logged into Rotur! You may close this window.";
-                    resolve(data.key);
+                    resolve(result);
+                    return;
                 } catch (error) {
-                    resultText.textContent = "Error fetching user data: " + error;
                     console.error("Login error:", error);
                     reject(error);
                 }
-            };
-
 
         })
         
