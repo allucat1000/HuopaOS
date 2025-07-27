@@ -4,6 +4,7 @@ function setWindowDataLoop() {
     setTimeout(setWindowDataLoop, 250);
 }
 huopaAPI.setWindowColor("#00000000", "#00000000");
+huopaAPI.removeTitlebar();
 huopaAPI.setWindowBlur("0px");
 setWindowDataLoop()
 document.body.style.overflow = "hidden";
