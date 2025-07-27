@@ -42,7 +42,9 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "1.1.7";
+    const version = "1.1.8";
+    const processDigitList = {};
+    const processArrayList = []
     // Priv Sys Funcs
     const dataURIToBlob = async (dataURI) => {
         const [meta, base64Data] = dataURI.split(',');
@@ -87,7 +89,7 @@ window.huopadesktop = (() => {
                 if (!await internalFS.getFile("/home/applications/App Store.js.icon")) {
                     await internalFS.createPath("/home/applications/App Store.js.icon", "file", `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-cart-icon lucide-shopping-cart"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>`);
                 }
-                await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/Desktop.js`, "/systen/coreapplications/.Desktop.js");
+                await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/Desktop.js`, "/system/coreapplications/.Desktop.js");
                 if (!await internalFS.getFile("/system/coreapplications/.Desktop.js.icon")) {
                     await internalFS.createPath("/system/coreapplications/.Desktop.js.icon", "file", `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>`);
                 }
@@ -103,6 +105,8 @@ window.huopadesktop = (() => {
                 if (!await internalFS.getFile("/home/applications/Terminal.js.icon")) {
                     await internalFS.createPath("/home/applications/Terminal.icon", "file", `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square-terminal-icon lucide-square-terminal"><path d="m7 11 2-2-2-2"/><path d="M11 13h4"/><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/></svg>`);
                 }
+                await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/Processes.js`, "/home/applications/Processes.js");
+
                 await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/Preview.js`, "/home/applications/Preview.js");
                 if (!await internalFS.getFile("/home/applications/Preview.js.icon")) {
                     await internalFS.createPath("/home/applications/Preview.js.icon", "file", `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-image-icon lucide-image"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>`);
@@ -506,6 +510,7 @@ window.huopadesktop = (() => {
         iframe.id = `code-${appId}-${digits}`;
         iframe.classList.add("app");
         iframe.dataset.digitId = digits;
+        processArrayList.push(digits)
         iframe.style.width = "calc(100%)";
         iframe.style.height = "calc(100%)";
         iframe.style.position = "absolute";
@@ -664,7 +669,6 @@ window.huopadesktop = (() => {
 
     const runApp = async (appId, appCodeString, appPath, startData, extra) => {
         if (killSwitch) return;
-
         const container = await createAppContainer(appId, appPath, extra);
         const handlers = huopaAPIHandlers(container);
 
@@ -920,6 +924,9 @@ window.huopadesktop = (() => {
 
             closeApp: () => {
                 const digitId = appContainer.parentElement.id;
+                const i = processArrayList.indexOf(digitId);
+                if (i !== -1) processArrayList.splice(i, 1);
+                delete processDigitList[digitId];
                 const codeElem = quantum.document.getElementById(`code-${appId}-${digitId}`);
                 if (codeElem) {
                     codeElem.remove();
@@ -929,7 +936,7 @@ window.huopadesktop = (() => {
                     windowList.splice(index, 1);
                 }
                 appContainer.parentElement.remove();
-                
+                const appToDock = quantum.document.querySelector(`[data-dock-digit-id="${digitId}"]`);
                 if (appToDock) {
                     appToDock.remove();
                 }
@@ -1081,7 +1088,7 @@ window.huopadesktop = (() => {
                 const input = quantum.document.createElement("input");
                 const title = quantum.document.createElement("h2");
                 title.textContent = "Choose a filename and path";
-                title.style = "margin: 0.5em auto; display: block; text-align: center;";
+                title.style = "margin: 1em auto; display: block; text-align: center;";
                 input.style = "margin: 0.5em auto; display: block; width: 35%";
                 input.placeholder = "eg: /home/test.txt";
                 popup.append(title, input);
@@ -1132,8 +1139,62 @@ window.huopadesktop = (() => {
             setWindowBlur: (blur) => {
                 if (blur) appContainer.parentElement.style.backdropFilter = `blur(${blur})`;
             },
-        };
 
+            getProcesses: () => {
+                return JSON.stringify([processArrayList, processDigitList]);
+            },
+
+            quitProcess: (id) => {
+                const digitId = appContainer.parentElement.id;
+                if (processDigitList[digitId].elevated = true) {
+                    const win = quantum.document.getElementById(id);
+                    const i = processArrayList.indexOf(id);
+                    if (i !== -1) processArrayList.splice(i, 1);
+                    delete processDigitList[id];
+                    const appToDock = quantum.document.querySelector(`[data-dock-digit-id="${digitId}"]`);
+                    if (appToDock) {
+                        appToDock.remove();
+                    }
+                    if (win) win.remove();
+                } else {
+                    console.error("closeProcess: The process requires administrator rights for this function!")
+                    return;
+                }
+            },
+
+            requestElevation: () => {
+                return new Promise((resolve) => {
+                    const digitId = appContainer.parentElement.id;
+                    const popup = quantum.document.createElement("div");
+                    popup.style = "position: absolute; left: 0; top: 0; background-color: rgba(0, 0, 0, 0.4); width: 100%; height: 100%;";
+                    const accept = quantum.document.createElement("button");
+                    const decline = quantum.document.createElement("button");
+                    const title = quantum.document.createElement("h2");
+                    title.textContent = "Administrator Prompt";
+                    const subtitle = quantum.document.createElement("h3");
+                    subtitle.textContent = "Do you want to give this process administrator rights?";
+                    title.style = "margin: 1em auto; display: block; text-align: center;";
+                    subtitle.style = "margin: 1em auto; display: block; text-align: center;";
+                    accept.style = "margin: 0.5em auto; display: block; width: 50%";
+                    accept.textContent = "Approve";
+                    decline.style = "margin: 0.5em auto; display: block; width: 50%";
+                    decline.textContent = "Reject";
+                    popup.append(title, subtitle, accept, decline);
+                    appContainer.append(popup);
+
+                    accept.onclick = () => {
+                        processDigitList[digitId].elevated = true;
+                        popup.remove();
+                        resolve(true);
+                    };
+
+                    decline.onclick = () => {
+                        popup.remove();
+                        resolve(false);
+                    };
+                });
+            },
+        }
     };
 
 
@@ -1479,7 +1540,11 @@ window.huopadesktop = (() => {
         for (let i = 0; i < 10; i++) {
             digits += Math.floor(Math.random() * 10);
         }
-
+        let elevated = false;
+        if (extra === "elevated") {
+            elevated = true;
+        }
+        processDigitList[digits] = {"elevated":elevated, "name":appId, "id":digits}
         await createSysDaemon("appContBordUpdater", () => {
             const loop = async () => {
                 const override = quantum.document.querySelector(`[data-border-override="${digits}"]`);
@@ -1506,6 +1571,9 @@ window.huopadesktop = (() => {
         }
        
         closeButton.addEventListener("click", () => {
+            const i = processArrayList.indexOf(digits);
+            if (i !== -1) processArrayList.splice(i, 1);
+            delete processDigitList[digits];
             const codeElem = quantum.document.getElementById(`code-${appId}-${digits}`);
             if (codeElem) {
                 codeElem.remove();
@@ -1611,6 +1679,9 @@ window.huopadesktop = (() => {
                     break;
                 default:
                     if (e.code === "KeyW") {
+                        const i = processArrayList.indexOf(digits);
+                        if (i !== -1) processArrayList.splice(i, 1);
+                        delete processDigitList[digits];
                         const codeElem = quantum.document.getElementById(`code-${appId}-${digits}`);
                         if (codeElem) {
                             codeElem.remove();
