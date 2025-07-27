@@ -1,6 +1,6 @@
 function setWindowDataLoop() {
     huopaAPI.setWindowPosition("0", "0");
-    huopaAPI.setWindowSize("calc(100%)", "calc(100%)");
+    huopaAPI.setWindowSize("calc(100%)", "calc(100% - 2px;)");
     setTimeout(setWindowDataLoop, 250);
 }
 huopaAPI.setWindowColor("#00000000", "#00000000");
