@@ -1,10 +1,9 @@
 function setWindowDataLoop() {
     huopaAPI.setWindowPosition("0", "0");
-    huopaAPI.setWindowSize("calc(100%)", "calc(100% - 2px;)");
+    huopaAPI.setWindowSize("calc(100%)", "calc(100% - 2px)");
     setTimeout(setWindowDataLoop, 250);
 }
 huopaAPI.setWindowColor("#00000000", "#00000000");
-huopaAPI.removeTitlebar();
 huopaAPI.setWindowBlur("0px");
 setWindowDataLoop()
 document.body.style.overflow = "hidden";

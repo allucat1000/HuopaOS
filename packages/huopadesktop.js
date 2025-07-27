@@ -1597,7 +1597,9 @@ window.huopadesktop = (() => {
         if (extra !== "core") {
             titleBar.appendChild(closeButton);
         }
-        outerContainer.append(titleBar);
+        if (extra !== "core") {
+            outerContainer.append(titleBar);
+        }
         container.append(topBarSplitter);
         outerContainer.append(container);
         outerContainer.style.display = "block";
