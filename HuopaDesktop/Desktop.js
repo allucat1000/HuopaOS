@@ -1,6 +1,6 @@
 function setWindowDataLoop() {
-    huopaAPI.setWindowPosition("-50px", "-50px");
-    huopaAPI.setWindowSize("calc(100% + 100px)", "calc(100% + 100px)");
+    huopaAPI.setWindowPosition("0", "0");
+    huopaAPI.setWindowSize("calc(100%)", "calc(100%)");
     setTimeout(setWindowDataLoop, 250);
 }
 huopaAPI.setWindowColor("#00000000", "#00000000");
@@ -36,7 +36,7 @@ async function renderDesktop() {
                 el.classList.remove("selected");
             }
         }
-        desktopDiv.style = "display: inline: width: 100%; height: 100%; display: flex; flex-wrap: wrap; flex-direction: row; padding: 0em 3.5em;"
+        desktopDiv.style = "display: inline: width: 100%; height: 100%; display: flex; flex-wrap: wrap; flex-direction: row; padding: 0;"
 
         for (const file of desktopData) {
             let fileIconSrc;
