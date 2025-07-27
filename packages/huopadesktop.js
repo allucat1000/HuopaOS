@@ -1151,7 +1151,7 @@ window.huopadesktop = (() => {
                     const i = processArrayList.indexOf(id);
                     if (i !== -1) processArrayList.splice(i, 1);
                     delete processDigitList[id];
-                    const appToDock = quantum.document.querySelector(`[data-dock-digit-id="${digitId}"]`);
+                    const appToDock = quantum.document.querySelector(`[data-dock-digit-id="${id}"]`);
                     if (appToDock) {
                         appToDock.remove();
                     }
