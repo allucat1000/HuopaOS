@@ -180,6 +180,7 @@ input[type="checkbox"]:checked {
   opacity: 0;
   transform: translateY(20px);
   transition: opacity 0.15s ease, transform 0.15s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6), 0 0 1px rgba(255, 255, 255, 0.04);
 }
 
 /* Scrollbars (disabled for now)

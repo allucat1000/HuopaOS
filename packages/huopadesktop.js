@@ -42,7 +42,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "1.1.6";
+    const version = "1.1.7";
     // Priv Sys Funcs
     const dataURIToBlob = async (dataURI) => {
         const [meta, base64Data] = dataURI.split(',');
@@ -86,6 +86,10 @@ window.huopadesktop = (() => {
                 await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/App%20Store.js`, "/home/applications/App Store.js");
                 if (!await internalFS.getFile("/home/applications/App Store.js.icon")) {
                     await internalFS.createPath("/home/applications/App Store.js.icon", "file", `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-cart-icon lucide-shopping-cart"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>`);
+                }
+                await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/Desktop.js`, "/systen/coreapplications/.Desktop.js");
+                if (!await internalFS.getFile("/system/coreapplications/.Desktop.js.icon")) {
+                    await internalFS.createPath("/system/coreapplications/.Desktop.js.icon", "file", `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>`);
                 }
                 await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/Calculator.js`, "/home/applications/Calculator.js");
                 if (!await internalFS.getFile("/home/applications/Calculator.js.icon")) {
@@ -658,10 +662,10 @@ window.huopadesktop = (() => {
 
     const huopaAPIMap = new WeakMap();
 
-    const runApp = async (appId, appCodeString, appPath, startData) => {
+    const runApp = async (appId, appCodeString, appPath, startData, extra) => {
         if (killSwitch) return;
 
-        const container = await createAppContainer(appId, appPath);
+        const container = await createAppContainer(appId, appPath, extra);
         const handlers = huopaAPIHandlers(container);
 
         const huopaAPI = new Proxy({}, {
@@ -771,7 +775,14 @@ window.huopadesktop = (() => {
                 "write":"",
                 "modify":"",
             }) {
-                if (path.startsWith("/system/env/appconfig") || path.toLowerCase() === "/system/packages/huopadesktop.js") {
+                const blockList = ["/system/packages/huopadesktop.js"]
+                for (const blockPath of blockList) {
+                    if (blockPath.includes(path)) {
+                        console.error("[huopaAPI SAFETY]: App tried writing in blocked storage!");
+                        return "[HuopaDesktop FS Security]: No permissions";
+                    }
+                }
+                if (path.startsWith("/system/env/appconfig")) {
                     console.warn("[huopaAPI SAFETY]: App tried writing in safeStorage using default write command!");
                     return "[HuopaDesktop FS Security]: No permissions";
                 }
@@ -1230,7 +1241,11 @@ window.huopadesktop = (() => {
             windowEl.children[9].style.pointerEvents = "none";
             for (const window of windowList) {
                 if (window[0] === windowEl.id) continue;
-                window[1].children[9].style.pointerEvents = "none";
+                if (window[1]?.children[9]) {
+                    window[1].children[9].style.pointerEvents = "none";
+                } else if (window[1]?.children[1]) {
+                    window[1].children[1].style.pointerEvents = "none";
+                }
             }
             windowEl.focus();
             isDragging = true;
@@ -1268,7 +1283,11 @@ window.huopadesktop = (() => {
             windowEl.children[9].style.pointerEvents = "auto";
             for (const window of windowList) {
                 if (window[0] === windowEl.id) continue;
-                window[1].children[9].style.pointerEvents = "auto";
+                if (window[1]?.children[9]) {
+                    window[1].children[9].style.pointerEvents = "auto";
+                } else if (window[1]?.children[1]) {
+                    window[1].children[1].style.pointerEvents = "auto";
+                }
             }
             isDragging = false;
             quantum.document.removeEventListener("mousemove", onMouseMove);
@@ -1289,7 +1308,11 @@ window.huopadesktop = (() => {
             win.children[9].style.pointerEvents = "none";
             for (const window of windowList) {
                 if (window[0] === win.id) continue;
-                window[1].children[9].style.pointerEvents = "none";
+                if (window[1]?.children[9]) {
+                    window[1].children[9].style.pointerEvents = "none";
+                } else if (window[1]?.children[1]) {
+                    window[1].children[1].style.pointerEvents = "none";
+                }
             }
             const dx = ev.clientX - startX;
             const dy = ev.clientY - startY;
@@ -1341,7 +1364,11 @@ window.huopadesktop = (() => {
             win.children[9].style.pointerEvents = "auto";
             for (const window of windowList) {
                 if (window[0] === win.id) continue;
-                window[1].children[9].style.pointerEvents = "auto";
+                if (window[1]?.children[9]) {
+                    window[1].children[9].style.pointerEvents = "auto";
+                } else if (window[1]?.children[1]) {
+                    window[1].children[1].style.pointerEvents = "auto";
+                }
             }
             quantum.document.removeEventListener("mousemove", onMouseMove);
             quantum.document.removeEventListener("mouseup", onMouseUp);
@@ -1351,7 +1378,7 @@ window.huopadesktop = (() => {
         quantum.document.addEventListener("mouseup", onMouseUp);
     }
 
-    const createAppContainer = async (appId, appPath) => {
+    const createAppContainer = async (appId, appPath, extra) => {
         const outerContainer = quantum.document.createElement("div");
         const winSpawnX = window.innerWidth / 2;
         const blur = await internalFS.getFile("/system/env/systemconfig/settings/customization/bgblur.txt");
@@ -1383,19 +1410,20 @@ window.huopadesktop = (() => {
             { dir: 'bottom-left',  cursor: 'nesw-resize', style: { bottom: '-2px', left: '-2px', width: '8px', height: '8px' }},
             { dir: 'bottom-right', cursor: 'nwse-resize', style: { bottom: '-2px', right: '-2px', width: '8px', height: '8px' }},
         ];
+        if (extra !== "core") {
+            for (const r of resizers) {
+                const el = quantum.document.createElement("div");
+                el.dataset.direction = r.dir;
+                el.style.position = "absolute";
+                el.style.zIndex = "1000";
+                el.style.cursor = r.cursor;
+                el.style.userSelect = "none";
+                el.style.background = "transparent";
+                Object.assign(el.style, r.style);
+                outerContainer.appendChild(el);
 
-        for (const r of resizers) {
-            const el = quantum.document.createElement("div");
-            el.dataset.direction = r.dir;
-            el.style.position = "absolute";
-            el.style.zIndex = "1000";
-            el.style.cursor = r.cursor;
-            el.style.userSelect = "none";
-            el.style.background = "transparent";
-            Object.assign(el.style, r.style);
-            outerContainer.appendChild(el);
-
-            el.addEventListener("mousedown", onResizeStart);
+                el.addEventListener("mousedown", onResizeStart);
+            }         
         }
         const titleBar = quantum.document.createElement("div");
         titleBar.style = `
@@ -1467,12 +1495,16 @@ window.huopadesktop = (() => {
         })
         appToDock.append(appToDockImg);
         appToDock.dataset.dockDigitId = digits;
-        appBar.append(appToDock);
-        appToDock.onclick = async() => {
-            appZIndex = appZIndex + 10;
-            outerContainer.style.display = "block";
-            outerContainer.style.zIndex = appZIndex;
+        if (extra !== "core") {
+            appBar.append(appToDock);
+            appToDock.onclick = async() => {
+                appZIndex = appZIndex + 10;
+                outerContainer.focus();
+                outerContainer.style.display = "block";
+                outerContainer.style.zIndex = appZIndex;
+            }
         }
+       
         closeButton.addEventListener("click", () => {
             const codeElem = quantum.document.getElementById(`code-${appId}-${digits}`);
             if (codeElem) {
@@ -1494,15 +1526,21 @@ window.huopadesktop = (() => {
         titleBar.append(appIcon);
         appTitle.dataset.titleDigitId = digits;
         titleBar.append(appTitle);
-        titleBar.appendChild(closeButton);
+        if (extra !== "core") {
+            titleBar.appendChild(closeButton);
+        }
         outerContainer.append(titleBar);
         container.append(topBarSplitter);
         outerContainer.append(container);
         outerContainer.style.display = "block";
         outerContainer.tabIndex = "0";
-        outerContainer.focus();
+        if (extra !== "core") {
+            outerContainer.focus();
+        }
         windowList.push([digits, outerContainer]);
-        createDraggableWindow(outerContainer);
+        if (extra !== "core") {
+            createDraggableWindow(outerContainer);
+        }
         outerContainer.addEventListener("keydown", async(e) => {
             if (Number(outerContainer.style.zIndex) !== appZIndex) {
                 return;
@@ -1655,7 +1693,7 @@ window.huopadesktop = (() => {
             appListDiv.style = "height: 18em; overflow: auto; position: relative; overflow-x: hidden;"
             startMenuDiv.append(appListDiv);
             for (let i = 0; i < appList.length; i++) {
-                if (appList[i].endsWith(".js")) {
+                if (appList[i].endsWith(".js") && !appList[i].startsWith(".")) {
                     const appButton = quantum.document.createElement("button");
                     const cleanedAppName = appList[i].replace("/home/applications/", "");
                     const appTitle = quantum.document.createElement("p");
@@ -1943,6 +1981,13 @@ window.huopadesktop = (() => {
                 }
                 desktop.style.opacity = "1";
             });
+
+            const coreApps = JSON.parse(await internalFS.getFile("/system/coreapplications"));
+            for (const app of coreApps) {
+                const appName = app.split("/").pop().slice(0, -3);
+                const code = await internalFS.getFile(app);
+                await runApp(appName, code, app, undefined, "core");
+            }
 
 
         } catch (error) {

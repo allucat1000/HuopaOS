@@ -7,6 +7,12 @@ if (typeof loadParams === "object" && loadParams.mode === "fileSelector") {
     await huopaAPI.setTitle("File Selector - Choose a file");
     fileSelectorMode = true;
     returnId = loadParams.returnId;
+    renderFileList("/");
+} else if (loadParams) {
+    const dir = await isDir(loadParams);
+    if (dir) renderFileList(loadParams);
+} else {
+    renderFileList("/");
 }
 async function renderFileList(path) {
     if (fileListDiv) {
@@ -205,5 +211,3 @@ async function isDir(path) {
         return false;
     }
 }
-
-renderFileList("/");
