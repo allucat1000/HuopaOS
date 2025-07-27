@@ -1599,8 +1599,8 @@ window.huopadesktop = (() => {
         }
         if (extra !== "core") {
             outerContainer.append(titleBar);
+            container.append(topBarSplitter);
         }
-        container.append(topBarSplitter);
         outerContainer.append(container);
         outerContainer.style.display = "block";
         outerContainer.tabIndex = "0";
