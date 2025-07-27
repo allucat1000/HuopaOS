@@ -42,7 +42,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "1.2.0";
+    const version = "1.2.1";
     const processDigitList = {};
     const processArrayList = []
     // Priv Sys Funcs
@@ -1301,11 +1301,10 @@ window.huopadesktop = (() => {
             skipFirstMouseMove = true;
             windowEl.children[9].style.pointerEvents = "none";
             for (const window of windowList) {
-                if (window[0] === windowEl.id) continue;
                 if (window[1]?.children[9]) {
                     window[1].children[9].style.pointerEvents = "none";
-                } else if (window[1]?.children[1]) {
-                    window[1].children[1].style.pointerEvents = "none";
+                } else if (window[1]?.children[0]) {
+                    window[1].children[0].style.pointerEvents = "none";
                 }
             }
             windowEl.focus();
@@ -1346,8 +1345,8 @@ window.huopadesktop = (() => {
                 if (window[0] === windowEl.id) continue;
                 if (window[1]?.children[9]) {
                     window[1].children[9].style.pointerEvents = "auto";
-                } else if (window[1]?.children[1]) {
-                    window[1].children[1].style.pointerEvents = "auto";
+                } else if (window[1]?.children[0]) {
+                    window[1].children[0].style.pointerEvents = "auto";
                 }
             }
             isDragging = false;
@@ -1371,8 +1370,8 @@ window.huopadesktop = (() => {
                 if (window[0] === win.id) continue;
                 if (window[1]?.children[9]) {
                     window[1].children[9].style.pointerEvents = "none";
-                } else if (window[1]?.children[1]) {
-                    window[1].children[1].style.pointerEvents = "none";
+                } else if (window[1]?.children[0]) {
+                    window[1].children[0].style.pointerEvents = "none";
                 }
             }
             const dx = ev.clientX - startX;
@@ -1427,8 +1426,8 @@ window.huopadesktop = (() => {
                 if (window[0] === win.id) continue;
                 if (window[1]?.children[9]) {
                     window[1].children[9].style.pointerEvents = "auto";
-                } else if (window[1]?.children[1]) {
-                    window[1].children[1].style.pointerEvents = "auto";
+                } else if (window[1]?.children[0]) {
+                    window[1].children[0].style.pointerEvents = "auto";
                 }
             }
             quantum.document.removeEventListener("mousemove", onMouseMove);
