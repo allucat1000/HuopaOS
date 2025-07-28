@@ -52,7 +52,7 @@ document.body.append(createProcessButton);
 async function loadProcs() {
     const procIds = JSON.parse(await huopaAPI.getProcesses())[0];
     const procInfo = JSON.parse(await huopaAPI.getProcesses())[1];
-    if (!oldProcList || !arraysEqual(oldProcList, procIds)) {
+    if (!oldProcList || !arraysEqual(oldProcList, procInfo)) {
         if (procListDiv) procListDiv.remove();
         procListDiv = document.createElement("div");
         for (const procI in procIds) {
@@ -72,9 +72,9 @@ async function loadProcs() {
             })
             procName.style = "margin: 0.5em;"
             if (proc.elevated) {
-                procName.textContent = `${proc.name} (${procI}) [Elevated] [${proc.id}]`;
+                procName.textContent = `${proc.title} (${procI}) [Elevated] [${proc.id}]`;
             } else {
-                procName.textContent = `${proc.name} (${procI}) [${proc.id}]`;
+                procName.textContent = `${proc.title} (${procI}) [${proc.id}]`;
             }
             procDiv.append(procName);
             if (elevated) procDiv.append(quitProcButton);
@@ -83,7 +83,7 @@ async function loadProcs() {
         document.body.append(procListDiv);
     }
     
-    oldProcList = procIds;
+    oldProcList = procInfo;
     setTimeout(loadProcs, 250);
 }
 loadProcs()

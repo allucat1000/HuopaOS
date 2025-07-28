@@ -950,6 +950,7 @@ window.huopadesktop = (() => {
 
             setTitle: (content) => {
                 const digitId = appContainer.parentElement.id;
+                processDigitList[digitId].title = content
                 const title = quantum.document.querySelector(`[data-title-digit-id="${digitId}"]`);
                 title.textContent = content;
             },
@@ -1516,7 +1517,7 @@ window.huopadesktop = (() => {
         if (extra === "elevated") {
             elevated = true;
         }
-        processDigitList[digits] = {"elevated":elevated, "name":appId, "id":digits}
+        processDigitList[digits] = {"elevated":elevated, "name":appId, "id":digits, "title":appId}
         await createSysDaemon("appContBordUpdater", () => {
             const loop = async () => {
                 const override = quantum.document.querySelector(`[data-border-override="${digits}"]`);
