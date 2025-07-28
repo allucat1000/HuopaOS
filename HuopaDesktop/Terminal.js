@@ -284,7 +284,7 @@ ${await huopaAPI.getFile(fullPath)}`);
                     await addLine(`[line=red]open: Given path is not supposed to be a directory![/line]`)
                 } else {
                     if (path.endsWith(".js") && values[1]?.toLowerCase() !== "-v") {
-                        if (values[2] === "-e" && elevated) {
+                        if (values[1] === "-e" && elevated) {
                             await huopaAPI.runApp(fullPath, undefined, true);
                         } else {
                             await huopaAPI.runApp(fullPath);
@@ -292,16 +292,7 @@ ${await huopaAPI.getFile(fullPath)}`);
                         await addLine(`open: Executed app at path "${fullPath}"`);
                     } else {
                         const exists = await huopaAPI.getFile(`/home/applications/${values[2].replace("-","")}.js`);
-                        const exists2 = await huopaAPI.getFile(`/home/applications/${values[1].replace("-","")}.js`);
-                        if (exists || exists2) {
-                            if (exists2) {
-                                if (values[2] === "-e" && elevated) {
-                                    await huopaAPI.runApp(`/home/applications/${values[1].replace("-","")}.js`, fullPath, true);
-                                } else {
-                                    await huopaAPI.runApp(`/home/applications/${values[1].replace("-","")}.js`, fullPath);
-                                }
-                                return
-                            }
+                        if (exists) {
                             if (values[3] === "-e" && elevated) {
                                 await huopaAPI.runApp(`/home/applications/${values[2].replace("-","")}.js`, fullPath, true);
                             } else {

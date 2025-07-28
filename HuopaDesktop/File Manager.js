@@ -2,6 +2,7 @@ let fileListDiv;
 let pathSelected;
 let fileSelectorMode = false;
 let returnId;
+const elevated = JSON.parse(await huopaAPI.getProcessData()).elevated;
 
 if (typeof loadParams === "object" && loadParams.mode === "fileSelector") {
     await huopaAPI.setTitle("File Selector - Choose a file");
@@ -156,6 +157,10 @@ async function renderFileList(path) {
                             if (openInCode && await huopaAPI.getFile("/home/applications/Code.js")) {
                                 await huopaAPI.runApp("/home/applications/Code.js", file);
                             } else {
+                                if (elevated) {
+                                    await huopaAPI.runApp("/home/applications/Preview.js", file, true);
+                                    return;
+                                }
                                 await huopaAPI.runApp("/home/applications/Preview.js", file);
                             }
                             
