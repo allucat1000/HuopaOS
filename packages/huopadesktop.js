@@ -42,7 +42,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "1.2.5";
+    const version = "1.2.6";
     const processDigitList = {};
     const processArrayList = []
     // Priv Sys Funcs
@@ -778,7 +778,7 @@ window.huopadesktop = (() => {
 
 
 
-            openFileImport: async function(accept = "*", type = "text", allowMultiple = false) {
+            openFileImport: async function(accept = "*", type = "auto", allowMultiple = false) {
                 const files = await new Promise((resolve, reject) => {
                     const input = quantum.document.createElement("input");
                     input.type = "file";
@@ -798,17 +798,33 @@ window.huopadesktop = (() => {
                     appContainer.appendChild(input);
                     input.click();
                 });
+                const detectType = (file) => {
+                    if (type !== "auto") return type;
 
+                    const mime = file.type || "";
+                    const name = file.name.toLowerCase();
+
+                    if (mime.startsWith("text/") || /\.(txt|md|json|js|ts|html|css|csv|xml|yml|yaml)$/i.test(name)) {
+                        return "text";
+                    } else if (mime.startsWith("image/") || mime.startsWith("video/") || mime.startsWith("audio/") || /\.(png|jpe?g|gif|svg|webp|mp4|mp3)$/i.test(name)) {
+                        return "dataURL";
+                    } else {
+                        return "binary";
+                    }
+                };
                 const readFile = (file) => new Promise((resolve, reject) => {
                     const reader = new FileReader();
+
+                    const inferredType = detectType(file);
+
                     reader.onload = () => resolve(reader.result);
                     reader.onerror = () => reject(new Error("Failed to read file"));
 
-                    if (type === "text") {
+                    if (inferredType === "text") {
                         reader.readAsText(file);
-                    } else if (type === "dataURL") {
+                    } else if (inferredType === "dataURL") {
                         reader.readAsDataURL(file);
-                    } else if (type === "binary") {
+                    } else if (inferredType === "binary") {
                         reader.readAsArrayBuffer(file);
                     } else {
                         reject(new Error(`Unsupported file type "${type}"!`));
