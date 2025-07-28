@@ -291,25 +291,25 @@ ${await huopaAPI.getFile(fullPath)}`);
                         }
                         await addLine(`open: Executed app at path "${fullPath}"`);
                     } else {
-                        const exists = await huopaAPI.getFile(`/home/applications/${values[1]}.js`);
-                        const exists2 = await huopaAPI.getFile(`/home/applications/${values[0]}.js`);
+                        const exists = await huopaAPI.getFile(`/home/applications/${values[2].replace("-","")}.js`);
+                        const exists2 = await huopaAPI.getFile(`/home/applications/${values[1].replace("-","")}.js`);
                         if (exists || exists2) {
                             if (exists2) {
-                                if (values[1] === "-e" && elevated) {
-                                    await huopaAPI.runApp(`/home/applications/${values[0]}.js`, fullPath, true);
+                                if (values[2] === "-e" && elevated) {
+                                    await huopaAPI.runApp(`/home/applications/${values[1].replace("-","")}.js`, fullPath, true);
                                 } else {
-                                    await huopaAPI.runApp(`/home/applications/${values[0]}.js`, fullPath);
+                                    await huopaAPI.runApp(`/home/applications/${values[1].replace("-","")}.js`, fullPath);
                                 }
                                 return
                             }
-                            if (values[2] === "-e" && elevated) {
-                                await huopaAPI.runApp(`/home/applications/${values[1]}.js`, fullPath, true);
+                            if (values[3] === "-e" && elevated) {
+                                await huopaAPI.runApp(`/home/applications/${values[2].replace("-","")}.js`, fullPath, true);
                             } else {
-                                await huopaAPI.runApp(`/home/applications/${values[1]}.js`, fullPath);
+                                await huopaAPI.runApp(`/home/applications/${values[2].replace("-","")}.js`, fullPath);
                             }
                             return
                         } else {
-                            if (values[1] === "-e" && elevated) {
+                            if (values[2] === "-e" && elevated) {
                                 await huopaAPI.runApp("/home/applications/Preview.js", fullPath, true);
                             } else {
                                 await huopaAPI.runApp("/home/applications/Preview.js", fullPath);
