@@ -40,6 +40,21 @@ if (code === "[HuopaDesktop FS Security]: No permissions") {
         imgPreview.style.objectFit = "contain";
         document.body.append(imgPreview);
         return;
+    } else if (path.endsWith(".mp3")) {
+        const soundPreview = document.createElement("audio");
+        soundPreview.controls = true;
+        soundPreview.src = code;
+        soundPreview.style.margin = "1em auto";
+        soundPreview.style.display = "block";
+        soundPreview.style.width = "50%";
+        soundPreview.style.height = "5em";
+        const currentPathTitle = document.createElement("h2");
+        currentPathTitle.style = "color: white; display: block; text-align: center; margin: 0.5em; margin-top: 1.15em;";
+        const dynamicPath = path.split("/").pop();
+        currentPathTitle.textContent = dynamicPath;
+        document.body.append(currentPathTitle);
+        document.body.append(soundPreview);
+        return;
     }
     const saveButton = document.createElement("button");
     await setAttrs(saveButton, {
