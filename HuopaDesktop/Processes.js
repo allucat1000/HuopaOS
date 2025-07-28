@@ -8,7 +8,7 @@ setAttrs(createProcessButton, {
     "onclick":async() => {
         let newProcElev = false;
         const popup = document.createElement("div");
-        popup.style = "background-color: rgba(0, 0, 0, 0.7); width: 100%; height: 100%; position: absolute; top: 0; left: 0; margin: 0; padding: 0;";
+        popup.style = "background-color: rgba(0, 0, 0, 0.7); width: 100%; height: 100%; position: absolute; top: 0; left: 0; margin: 0; padding: 0; z-index: 999";
         const text = document.createElement("h2");
         text.textContent = "Create a process";
         text.style.textAlign = "center";
@@ -36,7 +36,7 @@ setAttrs(createProcessButton, {
                 const exists = await huopaAPI.getFile(input.value)
                 if (input.value.length > 0 && exists) {
                     popup.remove();
-                    if (elevatedCheckbox.value === "on") {
+                    if (elevatedCheckbox.checked) {
                         huopaAPI.runApp(input.value, undefined, true);
                     } else {
                         huopaAPI.runApp(input.value, undefined, false);
