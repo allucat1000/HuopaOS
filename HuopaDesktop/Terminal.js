@@ -284,8 +284,12 @@ ${await huopaAPI.getFile(fullPath)}`);
                     await addLine(`[line=red]open: Given path is not supposed to be a directory![/line]`)
                 } else {
                     if (path.endsWith(".js") && values[1]?.toLowerCase() !== "-v") {
+                        if (values[2] === "-e" && elevated) {
+                            await huopaAPI.runApp(fullPath, undefined, true);
+                        } else {
+                            await huopaAPI.runApp(fullPath);
+                        }
                         await addLine(`open: Executed app at path "${fullPath}"`);
-                        await huopaAPI.runApp(fullPath);
                     } else {
                         const exists = await huopaAPI.getFile(`/home/applications/${values[1]}.js`);
                         const exists2 = await huopaAPI.getFile(`/home/applications/${values[0]}.js`);
