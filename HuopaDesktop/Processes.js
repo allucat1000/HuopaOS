@@ -36,7 +36,12 @@ setAttrs(createProcessButton, {
                 const exists = await huopaAPI.getFile(input.value)
                 if (input.value.length > 0 && exists) {
                     popup.remove();
-                    huopaAPI.runApp(input.value, undefined, elevatedCheckbox.value);
+                    if (elevatedCheckbox.value === "on") {
+                        huopaAPI.runApp(input.value, undefined, true);
+                    } else {
+                        huopaAPI.runApp(input.value, undefined, false);
+                    }
+                    
                 }
                 if (input.value.length < 1) popup.remove();
             }
