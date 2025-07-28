@@ -1072,7 +1072,7 @@ window.huopadesktop = (() => {
                 GitHubAPI.listFolder(credentials, user, repo, folder);
             },
 
-            openSaveDialog: () => {
+            openSaveDialog: (def) => {
                 const popup = quantum.document.createElement("div");
                 popup.style = "position: absolute; left: 0; top: 0; background-color: rgba(0, 0, 0, 0.4); width: 100%; height: 100%;";
                 const input = quantum.document.createElement("input");
@@ -1081,6 +1081,7 @@ window.huopadesktop = (() => {
                 title.style = "margin: 1em auto; display: block; text-align: center;";
                 input.style = "margin: 0.5em auto; display: block; width: 35%";
                 input.placeholder = "eg: /home/test.txt";
+                if (def) input.value = def;
                 popup.append(title, input);
                 appContainer.append(popup);
                 return new Promise(async(resolve, reject) => {
