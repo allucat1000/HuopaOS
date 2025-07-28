@@ -26,6 +26,7 @@ if (code === "[HuopaDesktop FS Security]: No permissions") {
         let imgPreview
         if (path.endsWith(".mp4")) {
             imgPreview = document.createElement("video");
+            imgPreview.controls = true;
         } else {
             imgPreview = document.createElement("img");
         }
