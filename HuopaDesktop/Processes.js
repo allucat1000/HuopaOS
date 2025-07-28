@@ -2,6 +2,48 @@ const elevated = await huopaAPI.requestElevation()
 if (elevated) huopaAPI.setTitle("Processes [Elevated]")
 let procListDiv;
 let oldProcList;
+const createProcessButton = document.createElement("button"); 
+setAttrs(createProcessButton, {
+    "textContent":"Create a process",
+    "onclick":async() => {
+        let newProcElev = false;
+        const popup = document.createElement("div");
+        popup.style = "background-color: rgba(0, 0, 0, 0.7); width: 100%; height: 100%; position: absolute; top: 0; left: 0; margin: 0; padding: 0;";
+        const text = document.createElement("h2");
+        text.textContent = "Create a process";
+        text.style.textAlign = "center";
+        text.style.margin = "1em auto";
+        const input = document.createElement("input");
+        input.placeholder = "Type a path for an application";
+        input.style.width = "50%";
+        input.style.display = "block";
+        input.style.textAlign = "center";
+        const elevatedCheckbox = document.createElement("input");
+        await setAttrs(elevatedCheckbox, {
+            "style":"display: block; margin: 0.5em auto;",
+            "type":"checkbox"
+        });
+        const elevatedPrompt = document.createElement("h3");
+        await setAttrs(elevatedPrompt, {
+            "textContent":"Spawn this process as elevated?",
+            "style":"text-align: center; margin: 1em auto;"
+        });
+        popup.append(text, input);
+        if (elevated) popup.append(elevatedPrompt, elevatedCheckbox);
+        document.body.append(popup);
+        input.addEventListener("keydown", async(e) => {
+            if (e.key === "Enter") {
+                const exists = await huopaAPI.getFile(input.value)
+                if (input.value.length > 0 && exists) {
+                    popup.remove();
+                    huopaAPI.runApp(input.value, undefined, elevatedCheckbox.value);
+                }
+                if (input.value.length < 1) popup.remove();
+            }
+        })
+    }
+})
+document.body.append(createProcessButton);
 async function loadProcs() {
     const procIds = JSON.parse(await huopaAPI.getProcesses())[0];
     const procInfo = JSON.parse(await huopaAPI.getProcesses())[1];

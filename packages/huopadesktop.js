@@ -42,7 +42,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "1.2.1";
+    const version = "1.2.2";
     const processDigitList = {};
     const processArrayList = []
     // Priv Sys Funcs
@@ -761,9 +761,10 @@ window.huopadesktop = (() => {
                 "write":"",
                 "modify":"",
             }) {
+                const digitId = appContainer.parentElement.id;
                 const blockList = ["/system/packages/huopadesktop.js"]
                 for (const blockPath of blockList) {
-                    if (blockPath.includes(path)) {
+                    if (blockPath.includes(path) && !processDigitList[digitId].elevated) {
                         console.error("[huopaAPI SAFETY]: App tried writing in blocked storage!");
                         return "[HuopaDesktop FS Security]: No permissions";
                     }
@@ -873,7 +874,7 @@ window.huopadesktop = (() => {
                 return await internalFS.getFile("/system/env/appconfig/"+ appId.replace(".js", "") + "/" + path);
             },
 
-            runApp: async(path, startParams) => {
+            runApp: async(path, startParams, elevated = false) => {
                 if (!path || !path.endsWith(".js")) {
                     if (!path) {
                         console.warn("No path given for app execution. Request cancelled.");
@@ -885,7 +886,14 @@ window.huopadesktop = (() => {
                 }
                 const appName = path.split("/").pop().slice(0, -3);
                 const code = await internalFS.getFile(path);
-                await runApp(appName, code, path, startParams);
+                const digitId = appContainer.parentElement.id;
+                if (elevated && processDigitList[digitId].elevated) {
+                    await runApp(appName, code, path, startParams, "elevated");
+                } else {
+                    await runApp(appName, code, path, startParams);
+                }
+                
+                
             },
  
             openFileDialog: async (options = {}, appName) => {
@@ -1128,7 +1136,7 @@ window.huopadesktop = (() => {
 
             quitProcess: (id) => {
                 const digitId = appContainer.parentElement.id;
-                if (processDigitList[digitId].elevated = true) {
+                if (processDigitList[digitId].elevated === true) {
                     const win = quantum.document.getElementById(id);
                     const i = processArrayList.indexOf(id);
                     if (i !== -1) processArrayList.splice(i, 1);
@@ -1191,52 +1199,13 @@ window.huopadesktop = (() => {
             createBugAlertWindow(event.data.appName, event.data.message);
             return;
         }
-        if (type && type === "bindEventForward") {
-            const elementId = data[0];
-            const attrName = data[1];
-            const el = elementRegistry[elementId];
-            if (el) {
-                if (attrName === "onclick") {
-                    const clickHandler = () => {
-                        event.source.postMessage({ type: "click", elementId }, "*");
-                    };
-                    el.addEventListener("click", clickHandler);
-                } else if (attrName === "oninput"){
-                    const inputHandler = () => {
-                        event.source.postMessage({ type: "input", elementId }, "*");
-                    };
-                    el.addEventListener("input", inputHandler);
-                } else if (attrName === "onkeypress") {
-                    const keyHandler = (e) => {
-                        event.source.postMessage({ type: "keypress", elementId, key: e.key}, "*");
-                    };
-                    el.addEventListener("keydown", keyHandler);
-                } else {
-                    const eventHandler = () => {
-                        event.source.postMessage({ type: "eventListener", listener: attrName, elementId }, "*");
-                    };
-                    el.addEventListener(attrName, eventHandler);
-                }
-                
 
-            if (id) {
-                event.source.postMessage({ type: "apiResponse", id, result: true }, "*");
-            }
-        } else {
-            if (id) {
-                console.warn(`Element ${elementId} not found in elementRegistry.`);
-                event.source.postMessage({ type: "apiResponse", id, error: "Element not found" }, "*");
-            }
+        const huopaAPI = huopaAPIMap.get(event.source);
+        if (!huopaAPI || typeof huopaAPI[type] !== "function") {
+            console.warn(`No handler for huopaAPI method '${type}'`);
+            createBugAlertWindow(appId, `Error: No handler for huopaAPI method ${type}`);
+            return;
         }
-        return;
-    }
-
-    const huopaAPI = huopaAPIMap.get(event.source);
-    if (!huopaAPI || typeof huopaAPI[type] !== "function") {
-        console.warn(`No handler for huopaAPI method '${type}'`);
-        createBugAlertWindow(appId, `Error: No handler for huopaAPI method ${type}`);
-        return;
-    }
 
         try {
             let result;
