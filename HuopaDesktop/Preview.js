@@ -37,7 +37,7 @@ if (code === "[HuopaDesktop FS Security]: No permissions") {
         imgPreview.style.borderRadius = "0.5em";
         imgPreview.style.width = "100%";
         imgPreview.style.height = "100%";
-        imgPreview.objectFit = "contain";
+        imgPreview.style.objectFit = "contain";
         document.body.append(imgPreview);
         return;
     }
