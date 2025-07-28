@@ -42,7 +42,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "1.2.2";
+    const version = "1.2.3";
     const processDigitList = {};
     const processArrayList = []
     // Priv Sys Funcs
@@ -1184,6 +1184,11 @@ window.huopadesktop = (() => {
                     };
                 });
             },
+
+            getProcessData: () => {
+                const digitId = appContainer.parentElement.id;
+                return JSON.stringify(processDigitList[digitId]);
+            }
         }
     };
 

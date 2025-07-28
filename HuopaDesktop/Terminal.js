@@ -102,7 +102,8 @@ document.documentElement.onclick = () => {
     input.focus();
 }
 // Code
-addLine("_HuopaOS Terminal_")
+addLine("_HuopaOS Terminal_");
+const elevated = JSON.parse(await huopaAPI.getProcessData()).elevated;
 let loggedIntoGithub = false;
 if (await huopaAPI.safeStorageRead("githubToken")) {
     loggedIntoGithub = true;
@@ -286,11 +287,30 @@ ${await huopaAPI.getFile(fullPath)}`);
                         await addLine(`open: Executed app at path "${fullPath}"`);
                         await huopaAPI.runApp(fullPath);
                     } else {
-                        if (values[1]?.toLowerCase() !== "-code" || values[0]?.toLowerCase() !== "-code") {
-                            if (!await huopaAPI.getFile("/home/applications/Code.js")) return;
-                            await huopaAPI.runApp("/home/applications/Code.js", fullPath);
+                        const exists = await huopaAPI.getFile(`/home/applications/${values[1]}.js`);
+                        const exists2 = await huopaAPI.getFile(`/home/applications/${values[0]}.js`);
+                        if (exists || exists2) {
+                            if (exists2) {
+                                if (values[1] === "-e" && elevated) {
+                                    await huopaAPI.runApp(`/home/applications/${values[0]}.js`, fullPath, true);
+                                } else {
+                                    await huopaAPI.runApp(`/home/applications/${values[0]}.js`, fullPath);
+                                }
+                                return
+                            }
+                            if (values[2] === "-e" && elevated) {
+                                await huopaAPI.runApp(`/home/applications/${values[1]}.js`, fullPath, true);
+                            } else {
+                                await huopaAPI.runApp(`/home/applications/${values[1]}.js`, fullPath);
+                            }
+                            return
                         } else {
-                            await huopaAPI.runApp("/home/applications/Preview.js", fullPath);
+                            if (values[1] === "-e" && elevated) {
+                                await huopaAPI.runApp("/home/applications/Preview.js", fullPath, true);
+                            } else {
+                                await huopaAPI.runApp("/home/applications/Preview.js", fullPath);
+                            }
+                            
                         }
                     }
                 }
