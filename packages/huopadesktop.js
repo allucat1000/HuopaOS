@@ -251,7 +251,7 @@ window.huopadesktop = (() => {
                 try {
                     await new Promise(r => setTimeout(r, 1000));
                     const result = await new Promise(async(resolve, reject) => {
-                        const win = window.open(`https://rotur.dev/auth?return_to=${window.location.origin}/HuopaOS/AuthSuccess`, "_blank");
+                        const win = window.open(`https://rotur.dev/auth?styles=https://origin.mistium.com/Resources/auth.css&return_to=${window.location.origin}/HuopaOS/AuthSuccess`, "_blank");
                         if (!win) {
                             console.error("Login window doesn't exist!");
                             reject("Fail");
