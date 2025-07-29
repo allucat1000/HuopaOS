@@ -42,7 +42,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "1.2.6";
+    const version = "1.2.7";
     const processDigitList = {};
     const processArrayList = []
     // Priv Sys Funcs
@@ -1281,7 +1281,7 @@ window.huopadesktop = (() => {
                     window[1].children[0].style.pointerEvents = "none";
                 }
             }
-            windowEl.focus();
+            windowEl.focus({ preventScroll: true });
             isDragging = true;
 
             const rect = windowEl.getBoundingClientRect();
@@ -1537,7 +1537,7 @@ window.huopadesktop = (() => {
             appBar.append(appToDock);
             appToDock.onclick = async() => {
                 appZIndex = appZIndex + 10;
-                outerContainer.focus();
+                outerContainer.focus({ preventScroll: true });
                 outerContainer.style.display = "block";
                 outerContainer.style.zIndex = appZIndex;
             }
@@ -1578,7 +1578,7 @@ window.huopadesktop = (() => {
         outerContainer.style.display = "block";
         outerContainer.tabIndex = "0";
         if (extra !== "core") {
-            outerContainer.focus();
+            outerContainer.focus({ preventScroll: true });
         }
         windowList.push([digits, outerContainer]);
         if (extra !== "core") {
