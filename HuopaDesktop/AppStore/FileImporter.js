@@ -10,9 +10,42 @@ importButton.onclick = async () => {
     const file = await huopaAPI.openFileImport();
     if (file) {
         path = await huopaAPI.openSaveDialog("/home/desktop/" + file.name);
-        if (path) {
+        const dir = await isDir(path);
+        const exists = await huopaAPI.getFile(path)
+        if (exists && !dir) {
             await huopaAPI.writeFile(path, "file", file.content);
+        } else if (exists) {
+            huopaAPI.createNotification("Failed to import file!", "The path you entered for the save location is a directory!");
+        } else {
+            huopaAPI.createNotification("Failed to import file!", "The path you entered for the save location doen't exist!");
         }
         
+    }
+}
+
+async function isDir(path) {
+    try {
+        const normalizedPath = path.endsWith("/") ? path.slice(0, -1) : path;
+        const lastSegment = normalizedPath.split("/").pop();
+        if (lastSegment.includes(".") && !lastSegment.startsWith(".")) {
+            return false;
+        }
+        
+        const fileContent = await huopaAPI.getFile(normalizedPath);
+        if (path === "/") return true;
+        let parsed;
+        try {
+            parsed = JSON.parse(fileContent);
+        } catch {
+            return false;
+        }
+
+        if (!Array.isArray(parsed)) return false;
+        if (!parsed.every(item => typeof item === "string")) return false;
+        
+        return true;
+    } catch (err) {
+        await huopaAPI.error(err);
+        return false;
     }
 }
