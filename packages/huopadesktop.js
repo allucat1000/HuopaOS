@@ -1592,6 +1592,7 @@ window.huopadesktop = (() => {
             const docked = await internalFS.getFile("/system/env/systemconfig/settings/customization/dockedTaskbar.txt");
             switch (e.key) {
                 case "ArrowLeft":
+                    e.preventDefault()
                     outerContainer.style.left = "0";
                     outerContainer.style.top = "0";
                     outerContainer.style.right = "";
@@ -1607,6 +1608,7 @@ window.huopadesktop = (() => {
                     break;
                 
                 case "ArrowRight":
+                    e.preventDefault()
                     outerContainer.style.left = "";
                     outerContainer.style.right = "0";
                     outerContainer.style.top = "0";
@@ -1620,6 +1622,7 @@ window.huopadesktop = (() => {
                     break;
                
                 case "ArrowUp":
+                    e.preventDefault()
                     outerContainer.style.left = "0";
                     outerContainer.style.right = "";
                     outerContainer.style.top = "0";
@@ -1629,6 +1632,7 @@ window.huopadesktop = (() => {
                     break;
                 
                 case "ArrowDown":
+                    e.preventDefault()
                     outerContainer.style.left = "0";
                     outerContainer.style.right = "";
                     if (docked === true) {
@@ -1641,6 +1645,7 @@ window.huopadesktop = (() => {
                     outerContainer.style.width = "calc(100% - 4px)";
                     break;
                 case "Enter":
+                    e.preventDefault()
                     outerContainer.style.left = "0";
                     outerContainer.style.right = "";
                     outerContainer.style.top = "0";
@@ -1654,6 +1659,7 @@ window.huopadesktop = (() => {
                     break;
                 default:
                     if (e.code === "KeyW") {
+                        e.preventDefault()
                         const i = processArrayList.indexOf(digits);
                         if (i !== -1) processArrayList.splice(i, 1);
                         delete processDigitList[digits];
