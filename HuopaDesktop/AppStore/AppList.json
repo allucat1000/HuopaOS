@@ -35,10 +35,10 @@
         "description":"A code editor for HuopaOS using Monaco.",
         "version":"101"
     }, 
-    
+
     {
         "name":"FileImporter.js",
         "description":"A tool for importing files from your computer.",
-        "version":"101"
+        "version":"102"
     }
 ]
