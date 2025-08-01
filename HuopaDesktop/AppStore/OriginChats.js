@@ -78,37 +78,7 @@ async function loop() {
     const messageList = document.createElement("div");
     messageList.style = "position: absolute; right: 0; top: 0; width: 100%; height: calc(100% - 5em); display: flex; flex-direction: column-reverse; overflow: auto; overflow-x: hidden;";
     const chatBar = document.createElement("input");
-    const uploadButton = document.createElement("div");
-    const uploadInput = document.createElement("input");
-    const uploadIcon = document.createElement("img");
-    await setAttrs(uploadIcon, {
-        "src":"data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20class%3D%22lucide%20lucide-circle-plus-icon%20lucide-circle-plus%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%2210%22%2F%3E%3Cpath%20d%3D%22M8%2012h8%22%2F%3E%3Cpath%20d%3D%22M12%208v8%22%2F%3E%3C%2Fsvg%3E",
-        "style":"cursor: pointer;"
-    })
-    await setAttrs(uploadInput, {
-        "style":"width: 20px; height: 20px; opacity: 0; z-index: 99; outline-style: none; position: absolute; padding: 0.5em; cursor: pointer;",
-        "type":"file",
-        "id":"uploadInput",
-        "accept":""
-    })
-    uploadInput.addEventListener("change", async() => {
-        const file = uploadInput?.files[0];
-        if (file) {
-            const returned = await uploadFile(file);
-            if (!returned) {
-                chatBar.value = `Failed to upload file! Check the DevTools console for more info. ${chatBar.value}`;
-                uploadInput.files = "";
-                return;
-            }
-            chatBar.value = returned + " " + chatBar.value
-            uploadInput.files = "";
-        }
-    })
-    await setAttrs(uploadButton, {
-        "style":"width: 25px; height: 25px; position: absolute; right: 1em; bottom: 1.77em; z-index: 999; display: flex; align-items: center; justify-content: center; background-color: rgba(65, 65, 65, 0.65); border-radius: 50%; padding: 0.25em; cursor: pointer;"
-    })
-    uploadButton.append(uploadIcon);
-    uploadButton.append(uploadInput);
+    
     let loading;
     const loadingEl = document.createElement("h2");
     let editingMessage = false; 
@@ -347,7 +317,6 @@ async function loop() {
                 mainDiv.append(channelListEl);
                 mainDiv.append(accountDiv);
                 mainDiv.append(messageArea);
-                messageArea.append(uploadButton);
                 messageArea.append(chatBar);
                 messageArea.append(messageList);
                 chatBar.onkeydown = async (e) => {
