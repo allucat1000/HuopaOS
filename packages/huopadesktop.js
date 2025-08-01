@@ -42,7 +42,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "1.2.7";
+    const version = "1.2.8";
     const processDigitList = {};
     const processArrayList = []
     // Priv Sys Funcs
@@ -1716,12 +1716,7 @@ window.huopadesktop = (() => {
             shutdownButton.style = "background-color: rgba(45, 45, 45, 0.7); border-color: rgba(105, 105, 105, 0.6); border-style: solid; border-radius: 0.5em; position: absolute; cursor: pointer; right: 0.5em; bottom: 0.5em; color: white; padding: 0.5em;"
             shutdownButton.textContent = "Shutdown";
             shutdownButton.onclick = async () => {
-                mainDiv.innerHTML = ""; killSwitch = true;
-                sys.addLine(`The system has shut down! Date (Unix epoch): ${Date.now()}`); 
-                await new Promise(resolve => setTimeout(resolve, 2000));
-                window.location.href = window.location.href;
-                
-
+                window.close()
             }
             startMenuDiv.append(shutdownButton);
             let appList = JSON.parse(await internalFS.getFile("/home/applications") || "[]");

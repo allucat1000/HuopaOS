@@ -112,6 +112,7 @@ async function loop() {
     let loading;
     const loadingEl = document.createElement("h2");
     let editingMessage = false; 
+    let editedMessageId;
     let validatorKey = undefined;
     let messageTable = {};
     let delAllowed = false;
@@ -177,16 +178,7 @@ async function loop() {
             if (storedToken) token = storedToken;
             if (!storedToken) {
                 token = await huopaAPI.openRoturLogin();
-                if (token) {
-                    await tryLogin();
-                } else {
-                    const error = document.createElement("h2");
-                    error.textContent = "Failed to get account credentials!";
-                    document.body.append(error);
-                    ws.close();
-                    return;
-                }
-                
+                await tryLogin();
             } else {
                 tryLogin();
             }
@@ -362,14 +354,27 @@ async function loop() {
                     if (e.key === "Enter") {
                         if (openedChannel) {
                             const message = chatBar.value;
-                            if (!message) return;
+                            if (!message) {
+                                editingMessage = false;
+                                editedMessageId = undefined;
+                                return;
+                            }
                             if (messageLengthLimit && message.length > messageLengthLimit) {
                                 chatBar.value = "";
                                 chatBar.placeholder = `You can only post messages up to '' characters!`;
                                 await new Promise((res) => setTimeout(res, 1000));
                                 chatBar.placeholder = `Send a message in "#${openedChannel}" | Max message length: ${messageLengthLimit} characters`;
                             } else {
-                                const messageToSend = `{"cmd":"message_new", "channel": "${openedChannel}", "content": ${JSON.stringify(message)}}`;
+                                let messageToSend;
+                                if (editingMessage) {
+                                    messageToSend = `{"cmd":"message_edit", "channel": "${openedChannel}", "content": ${JSON.stringify(message)}, "id":"${editedMessageId}"}`;
+                                    editingMessage = false;
+                                    editedMessageId = undefined;
+                                    chatBar.placeholder = `Send a message in "#${openedChannel}" | Max message length: ${messageLengthLimit} characters`;
+                                } else {
+                                    messageToSend = `{"cmd":"message_new", "channel": "${openedChannel}", "content": ${JSON.stringify(message)}}`;
+                                }
+                                
                                 ws.send(messageToSend);
                                 chatBar.value = "";
                             }
@@ -452,7 +457,7 @@ async function loop() {
                 const msg = messageTable[data.id];
                 const children = msg.children
                 const textEl = children[1];
-                textEl.textContent = msg.content;
+                textEl.textContent = data.content;
             });
 
             wsHandlers.set("channels_get", async(data) => {
@@ -583,6 +588,7 @@ async function loop() {
                     const text = document.createElement("p");
                     let changeButtons = false;
                     const deleteButton = document.createElement("button");
+                    const editButton = document.createElement("button");
                     if (msg.user === userObj.username || delAllowed) {
                         changeButtons = true
                         await setAttrs(deleteButton, {
@@ -592,12 +598,24 @@ async function loop() {
                                 ws.send(`{"cmd":"message_delete", "id":"${msg.id}", "channel":"${openedChannel}"}`)
                             }
                         });
+                        await setAttrs(editButton, {
+                            "style":"position: absolute; top: -0.5em; color: white; right: 3.5em; padding: 0.5em 0.75em; display: none;",
+                            "textContent":"Edit",
+                            "onclick": async() => {
+                                chatBar.placeholder = `Editing a message... | Max message length: ${messageLengthLimit} characters`;
+                                chatBar.value = msg.content;
+                                editingMessage = true;
+                                editedMessageId = msg.id;
+                            }
+                        });
                         msgDiv.addEventListener("mouseenter", async() => {
                             if (!ratelimited) {
+                                editButton.style.display = "block";
                                 deleteButton.style.display = "block";
                             }
                         });
                         msgDiv.addEventListener("mouseleave", async() => {
+                            editButton.style.display = "none";
                             deleteButton.style.display = "none";
                         });
                     }
@@ -648,8 +666,9 @@ async function loop() {
                     } else {
                         imgEl.style.marginTop = "2.5em";
                     }
-                    if (imgEl) {msgDiv.append(imgEl);}
+                    if (imgEl) msgDiv.append(imgEl);
                     if (changeButtons) {
+                        msgDiv.append(editButton);
                         msgDiv.append(deleteButton);
                     }
                     messageList.append(msgDiv);
@@ -673,6 +692,7 @@ async function loop() {
                 const text = document.createElement("p");
                 let changeButtons = false;
                 const deleteButton = document.createElement("button");
+                const editButton = document.createElement("button");
                 if (msg.user === userObj.username || delAllowed) {
                     changeButtons = true
                     await setAttrs(deleteButton, {
@@ -682,13 +702,25 @@ async function loop() {
                             ws.send(`{"cmd":"message_delete", "id":"${msg.id}", "channel":"${openedChannel}"}`)
                         }
                     });
+                    await setAttrs(editButton, {
+                        "style":"position: absolute; top: -0.5em; color: white; right: 3.5em; padding: 0.5em 0.75em; display: none;",
+                        "textContent":"Edit",
+                        "onclick": async() => {
+                            chatBar.placeholder = `Editing a message... | Max message length: ${messageLengthLimit} characters`;
+                            chatBar.value = msg.content;
+                            editingMessage = true;
+                            editedMessageId = msg.id;
+                        }
+                    });
                     msgDiv.addEventListener("mouseenter", async() => {
                         if (!ratelimited) {
+                            editButton.style.display = "block";
                             deleteButton.style.display = "block";
                         }
                     });
                     msgDiv.addEventListener("mouseleave", async() => {
-                       deleteButton.style.display = "none";
+                        editButton.style.display = "none";
+                        deleteButton.style.display = "none";
                     });
                 }
                 await setAttrs(user, {
@@ -740,6 +772,7 @@ async function loop() {
                 }
                 if (imgEl) msgDiv.append(imgEl);
                 if (changeButtons) {
+                    msgDiv.append(editButton);
                     msgDiv.append(deleteButton);
                 }
                 messageList.prepend(msgDiv);
