@@ -441,13 +441,13 @@ async function appTabLoad() {
     bootAppList = JSON.parse(bootAppList);
     for (const bootApp of bootAppList) {
         const bootAppDiv = document.createElement("div");
-        bootAppDiv.style = "margin: 0.5em auto; display: block; padding: 0.5em; background-color: rgba(45, 45, 45, 0.65); border: rgba(105, 105, 105, 0.65) 1px solid; width: calc(100% - 1em); border-radius: 0.5em; position: relative;";
+        bootAppDiv.style = "margin: 0.5em auto; display: block; padding: 0.5em; background-color: rgba(45, 45, 45, 0.65); border: rgba(105, 105, 105, 0.65) 1px solid; width: calc(100% - 2em); border-radius: 0.5em; position: relative;";
         const name = bootApp.split("/").pop();
         const nameEl = document.createElement("p");
         nameEl.style.margin = "0";
         nameEl.textContent = name;
         const removeEl = document.createElement("button");
-        removeEl.style = "position: absolute; right: 0.5em; padding: 0; background-color: transparent; border-style: none; top: 50%; transform: translateY(-50%);";
+        removeEl.style = "position: absolute; right: 0.66em; padding: 0; background-color: transparent; border-style: none; top: 50%; transform: translateY(-50%);";
         removeEl.textContent = "Remove";
         removeEl.onclick = () => {
             huopaAPI.deleteFile(bootApp);
