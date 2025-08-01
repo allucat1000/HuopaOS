@@ -11,7 +11,6 @@ importButton.onclick = async () => {
     if (file) {
         path = await huopaAPI.openSaveDialog("/home/desktop/" + file.name);
         const parent = path.split("/").slice(0, -1).join("/");
-        console.log(parent);
         const dir = await isDir(parent);
         const exists = await huopaAPI.getFile(parent)
         if (exists && dir) {

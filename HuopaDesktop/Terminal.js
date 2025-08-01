@@ -143,7 +143,7 @@ async function runCmd(value) {
                     promptEnabled = true;
                     input.value = "";
                     await waitUntil(() => !promptEnabled);
-                    if (promptVal = false) return; else {
+                    if (promptVal.toLowerCase() === "n") return; else {
                         await huopaAPI.writeFile(savepath, "file", data);
                         return;
                     }
