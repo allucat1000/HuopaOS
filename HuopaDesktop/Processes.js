@@ -89,6 +89,11 @@ async function loadProcs() {
 loadProcs()
 
 function arraysEqual(a, b) {
-    if (a.length !== b.length) return false;
-    return a.every((val, i) => val === b[i]);
+    try {
+        if (a.length !== b.length) return false;
+        return a.every((val, i) => val === b[i]);
+    } catch (error) {
+        return false
+    }
+    
 }

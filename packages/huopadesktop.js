@@ -933,7 +933,7 @@ window.huopadesktop = (() => {
                 const i = processArrayList.indexOf(digitId);
                 if (i !== -1) processArrayList.splice(i, 1);
                 delete processDigitList[digitId];
-                const codeElem = quantum.document.getElementById(`code-${appId}-${digitId}`);
+                const codeElem = quantum.document.getElementById(`code-${processDigitList.name}-${digitId}`);
                 if (codeElem) {
                     codeElem.remove();
                 }

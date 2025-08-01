@@ -208,9 +208,10 @@ async function wallpapersTabLoad() {
     importButton.append(importText);
     wallpaperListDiv.append(importButton);
     importButton.onclick = async () => {
-        const file = await huopaAPI.openFileImport(".png,.jpg,.webp,.jpeg,.gif,.webm,.mp4", "dataURL");
+        path = await huopaAPI.openFileDialog();
+        const file = await huopaAPI.getFile(path)
         if (file) {
-            await huopaAPI.writeFile("/system/env/wallpapers/" + file.name, "file", file.content);
+            await huopaAPI.writeFile("/system/env/wallpapers/" + path.split("/").pop(), "file", file);
             mainScreenDiv.remove()
             await wallpapersTabLoad();
         }
