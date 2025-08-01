@@ -83,14 +83,14 @@ async function mainScreen() {
         dockTabLoad();
     };
 
-    /* const appTab = document.createElement("button");
+    const appTab = document.createElement("button");
 
     const appTabIcon = document.createElement("img");
     const appTabIconSrc = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-app-window-mac-icon lucide-app-window-mac"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="M6 8h.01"/><path d="M10 8h.01"/><path d="M14 8h.01"/></svg>';
     appTabIcon.style = "margin-right: 0.33em;"
     appTabIcon.src = "data:image/svg+xml;utf8," + encodeURIComponent(appTabIconSrc);
     const appTabLabel = document.createElement("label");
-    appTabLabel.textContent = "Default apps"
+    appTabLabel.textContent = "Boot Apps"
     appTab.append(appTabIcon);
     appTab.append(appTabLabel);
     appTabLabel.style.cursor = "pointer"
@@ -108,7 +108,7 @@ async function mainScreen() {
     appTab.onclick = () => {
         mainScreenDiv.remove();
         appTabLoad();
-    }; */
+    };
 }
 async function wallpapersTabLoad() {
     await huopaAPI.setTitle("Settings — Wallpapers");
@@ -189,7 +189,7 @@ async function wallpapersTabLoad() {
     const importImg = document.createElement("img");
     importImg.style.marginBottom = "0.25em;"
     const importText = document.createElement("p");
-    importText.textContent = "Add wallpaper from computer";
+    importText.textContent = "Add wallpaper";
     importImg.src = "data:image/svg+xml;utf8," + encodeURIComponent(iconSrc)
     const importButton = document.createElement("button");
     importButton.width = "25%";
@@ -388,6 +388,75 @@ async function dockTabLoad() {
     dockOpacDiv.append(opacSlider);
     dockOpacDiv.append(opacLabel);
 
+}
+
+async function appTabLoad() {
+    await huopaAPI.setTitle("Settings — Boot Apps");
+    const mainScreenDiv = document.createElement("div");
+    const title = document.createElement("h1");
+    title.textContent = "Boot Apps";
+    title.style = "text-align: center; color: white; margin: 1em;";
+    document.body.append(mainScreenDiv);
+    mainScreenDiv.append(title);
+
+    const backButton = document.createElement("button");
+    backButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left-icon lucide-arrow-left"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>';
+    backButton.style = "padding: 1em; position: fixed; left: 0.5em; bottom: 0.5em; display: flex; width: 45px; height: 45px; align-items: center; justify-content: center;";
+    mainScreenDiv.append(backButton);
+    backButton.onclick = async () => {
+        mainScreenDiv.remove();
+        await mainScreen();
+    };
+    const iconSrc = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up-from-line-icon lucide-arrow-up-from-line"><path d="m18 9-6-6-6 6"/><path d="M12 3v14"/><path d="M5 21h14"/></svg>';
+    const importImg = document.createElement("img");
+    importImg.style.marginBottom = "0.25em;"
+    const importText = document.createElement("p");
+    importText.textContent = "Add boot app";
+    importImg.src = "data:image/svg+xml;utf8," + encodeURIComponent(iconSrc)
+    const importButton = document.createElement("button");
+    importButton.width = "25%";
+    importButton.style.margin = "1em auto";
+    importButton.style.overflow = "hidden";
+    importButton.style.padding = "1em 2em";
+    importButton.style.display = "block"
+
+    importButton.append(importImg);
+    importButton.append(importText);
+    mainScreenDiv.append(importButton);
+    importButton.onclick = async () => {
+        path = await huopaAPI.openFileDialog();
+        const file = await huopaAPI.getFile(path)
+        if (file) {
+            await huopaAPI.writeFile("/system/bootapps/" + path.split("/").pop(), "file", file);
+            mainScreenDiv.remove()
+            await appTabLoad()
+        }
+    };
+
+    let bootAppList = await huopaAPI.getFile("/system/bootapps");
+    if (!bootAppList) {
+        bootAppList = "[]";
+        await huopaAPI.writeFile("/system/bootapps", "dir", "[]")
+    }
+    bootAppList = JSON.parse(bootAppList);
+    for (const bootApp of bootAppList) {
+        const bootAppDiv = document.createElement("div");
+        bootAppDiv.style = "margin: 0.5em auto; display: block; padding: 0.5em; background-color: rgba(45, 45, 45, 0.65); border: rgba(105, 105, 105, 0.65) 1px solid; width: calc(100% - 1em); border-radius: 0.5em; position: relative;";
+        const name = bootApp.split("/").pop();
+        const nameEl = document.createElement("p");
+        nameEl.style.margin = "0";
+        nameEl.textContent = name;
+        const removeEl = document.createElement("button");
+        removeEl.style = "position: absolute; right: 0.5em; padding: 0; background-color: transparent; border-style: none; top: 50%; transform: translateY(-50%);";
+        removeEl.textContent = "Remove";
+        removeEl.onclick = () => {
+            huopaAPI.deleteFile(bootApp);
+            bootAppDiv.remove();
+        }
+        bootAppDiv.append(nameEl);
+        bootAppDiv.append(removeEl);
+        mainScreenDiv.append(bootAppDiv);
+    }
 }
 
 function extractFrameAsPNG(videoSrc, seekTime = 1) {

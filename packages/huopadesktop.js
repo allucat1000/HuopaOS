@@ -42,7 +42,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "1.2.9";
+    const version = "1.3.0";
     const processDigitList = {};
     const processArrayList = []
     // Priv Sys Funcs
@@ -92,6 +92,9 @@ window.huopadesktop = (() => {
                 await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/Desktop.js`, "/system/coreapplications/.Desktop.js");
                 if (!await internalFS.getFile("/system/coreapplications/.Desktop.js.icon")) {
                     await internalFS.createPath("/system/coreapplications/.Desktop.js.icon", "file", `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>`);
+                }
+                if (!await internalFS.getFile("/system/bootapps")) {
+                    await internalFS.createPath("/system/bootapps", "dir", "[]");
                 }
                 await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/Calculator.js`, "/home/applications/Calculator.js");
                 if (!await internalFS.getFile("/home/applications/Calculator.js.icon")) {
@@ -912,7 +915,7 @@ window.huopadesktop = (() => {
                 
             },
  
-            openFileDialog: async (options = {}, appName) => {
+            openFileDialog: async (allowed) => {
                     try {
                         const data = await runAppWithReturn("/home/applications/File Manager.js", "fileSelector");
                         return data;
@@ -2034,6 +2037,13 @@ window.huopadesktop = (() => {
                 const appName = app.split("/").pop().slice(0, -3);
                 const code = await internalFS.getFile(app);
                 await runApp(appName, code, app, undefined, "core");
+            }
+
+            const startupApps = JSON.parse(await internalFS.getFile("/system/bootapps"));
+            for (const app of startupApps) {
+                const appName = app.split("/").pop().slice(0, -3);
+                const code = await internalFS.getFile(app);
+                await runApp(appName, code, app);
             }
 
 
