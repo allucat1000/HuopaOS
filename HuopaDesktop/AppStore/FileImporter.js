@@ -11,12 +11,13 @@ importButton.onclick = async () => {
     if (file) {
         path = await huopaAPI.openSaveDialog("/home/desktop/" + file.name);
         const parent = path.split("/").slice(0, -1).join("/");
+        console.log(parent);
         const dir = await isDir(parent);
         const exists = await huopaAPI.getFile(parent)
-        if (exists && !dir) {
+        if (exists && dir) {
             await huopaAPI.writeFile(path, "file", file.content);
         } else if (exists) {
-            huopaAPI.createNotification("Failed to import file!", "The path you entered for the save location is a directory!");
+            huopaAPI.createNotification("Failed to import file!", "The path you entered for the save location is in a file!");
         } else {
             huopaAPI.createNotification("Failed to import file!", "The path you entered for the save location doen't exist!");
         }

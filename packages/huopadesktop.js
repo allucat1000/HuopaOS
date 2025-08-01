@@ -42,7 +42,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "1.2.8";
+    const version = "1.2.9";
     const processDigitList = {};
     const processArrayList = []
     // Priv Sys Funcs

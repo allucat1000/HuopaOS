@@ -9,7 +9,7 @@ if (loadParams) {
     });
     document.body.append(chooseTitle);
     path = await huopaAPI.openFileDialog();
-   chooseTitle.remove()
+    chooseTitle.remove()
 }
 
 const textEditorField = document.createElement("textarea");

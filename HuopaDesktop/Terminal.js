@@ -77,17 +77,25 @@ inputDiv.append(startText);
 inputDiv.append(input);
 document.body.append(inputDiv);
 let currentPath = "/system";
+let promptEnabled = false;
+let promptVal;
 input.onkeydown = async(e) => {
     if (e.key === "Enter") {
         const value = input.value;
-        await addLine("$ " + value);
-        await runCmd(value);
         input.value = "";
+        await addLine("$ " + value);
+        if (promptEnabled) {
+            promptVal = value;
+            promptEnabled = false;
+        } else {
+            await runCmd(value)
+        };
+        
         input.focus();
         document.documentElement.scrollTop = document.documentElement.scrollHeight;
     }
 }
-let prompt = false;
+
 await setAttrs(startText, {
     "style":"padding: 0; margin: 0; white-space: nowrap;",
     "textContent":currentPath + " $\u00A0"
@@ -113,18 +121,49 @@ async function runCmd(value) {
     const values = rawArgs.slice(1).map(arg => arg.replace(/^["']|["']$/g, ""));
 
     switch (cmd) {
+        case "copy":{
+            let copypath = values[0];
+            let savepath = values[1];
+            copypath = resolvePath(copypath);
+            savepath = resolvePath(savepath);
+            const exists1 = await pathExists(copypath);
+            const exists2 = await pathExists(savepath);
+            if (!exists1) {
+                await addLine(`[line=red]copy: Given path doesn't exist![/line]`);
+                return;
+            }
+            const dir1 = await isDir(copypath);
+            const dir2 = await isDir(savepath)
+            if (dir1 || dir2) {
+                await addLine(`[line=red]copy: Given path is not supposed to be a directory![/line]`)
+            } else {
+                const data = await huopaAPI.getFile(copypath);
+                if (exists2) {
+                    addLine("File to save to exists already! Overwrite? (Y/n)")
+                    promptEnabled = true;
+                    input.value = "";
+                    await waitUntil(() => !promptEnabled);
+                    if (promptVal = false) return; else {
+                        await huopaAPI.writeFile(savepath, "file", data);
+                        return;
+                    }
+                }
+                await huopaAPI.writeFile(savepath, "file", data);
+            }
+            break;
+        }
         case "cat":
             if (values) {
                 const path = values[0];
-                const fullPath = resolvePath(values[0]);
+                const fullPath = resolvePath(path);
                 const exists = await pathExists(fullPath);
                 if (!exists) {
-                    await addLine(`[line=red]open: Given path doesn't exist![/line]`);
+                    await addLine(`[line=red]cat: Given path doesn't exist![/line]`);
                     return;
                 }
                 const dir = await isDir(fullPath);
                 if (dir) {
-                    await addLine(`[line=red]open: Given path is not supposed to be a directory![/line]`)
+                    await addLine(`[line=red]cat: Given path is not supposed to be a directory![/line]`)
                 } else {
                     await addLine(`Content of "${fullPath}":
 ${await huopaAPI.getFile(fullPath)}`);
@@ -496,4 +535,16 @@ async function pathExists(path) {
     } else {
         return false;
     }
+}
+
+
+function waitUntil(conditionFn, checkInterval = 50) {
+  return new Promise(resolve => {
+    const interval = setInterval(() => {
+        if (conditionFn()) {
+            clearInterval(interval);
+            resolve();
+        }
+    }, checkInterval);
+});
 }
