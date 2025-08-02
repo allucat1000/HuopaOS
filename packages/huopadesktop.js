@@ -1217,8 +1217,8 @@ window.huopadesktop = (() => {
             },
 
             applicationStorageRead: async(data, appId) => {
-                const data = await internalFS.getFile("/system/applicationStorage/" + appId + "/" + data[0]);
-                return data;
+                const returnData = await internalFS.getFile("/system/applicationStorage/" + appId + "/" + data[0]);
+                return returnData;
             }
         }
     };
