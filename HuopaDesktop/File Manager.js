@@ -4,6 +4,7 @@ let fileListDiv;
 let topBarList;
 let sideBarList;
 let pathSelected;
+let bottomMargin;
 let fileSelectorMode = false;
 let returnId;
 let favouriteFolders = await huopaAPI.applicationStorageRead("favouriteFolders.json");
@@ -31,6 +32,8 @@ async function renderFileList(path) {
         fileListDiv.remove()
         sideBarList.remove()
     }
+    bottomMargin = document.createElement("div");
+    bottomMargin.style.marginBottom = "4em";
     const favouriteTitle = document.createElement("p");
     favouriteTitle.textContent = "Favourites";
     favouriteTitle.style.textAlign = "center";
@@ -44,7 +47,7 @@ async function renderFileList(path) {
     sideBarList = document.createElement("div");
     sideBarList.append(favouriteTitle);
     sideBarList.style = "width: 9.5em; height: 100%; top: 0; left: 0; position: absolute; background-color: rgba(55, 55, 55, 0.4);"
-    topBarList.style = "display: flex; align-items: center; justify-content: start; padding: 0.25em; margin-top: 0.33em; position: fixed; top: -5px; background-color: rgba(55, 55, 55, 0.4); width: calc(100% - 10em); right: 0;";
+    topBarList.style = "display: flex; align-items: center; justify-content: start; padding: 0.25em; margin-top: 0.33em; position: fixed; top: -5px; background-color: rgba(55, 55, 55, 0.4); width: calc(100% - 10em); right: 0; margin-bottom: 4em;";
 
     for (const folder of favouriteFolders) {
         const fileDiv = document.createElement("div");
@@ -161,6 +164,7 @@ async function renderFileList(path) {
     document.body.append(topBarList)
     document.body.append(sideBarList)
     document.body.append(fileListDiv);
+    document.body.append(bottomMargin);
     const styleTag = document.createElement("style");
     styleTag.textContent = ".file-selected { filter: brightness(1.25); } .disabled { opacity: 0.5; } ";
     document.body.append(styleTag);
