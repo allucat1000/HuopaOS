@@ -42,7 +42,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "1.3.3";
+    const version = "1.3.4";
     const processDigitList = {};
     const processArrayList = []
     // Priv Sys Funcs
@@ -2140,7 +2140,13 @@ window.huopadesktop = (() => {
                 const code = await internalFS.getFile(app);
                 await runApp(appName, code, app);
             }
-
+            document.addEventListener("keydown", async(e) => {
+                if (e.code === "KeyT" && e.altKey) {
+                    e.preventDefault();
+                    const termCode = await internalFS.getFile("/home/applications/Terminal.js");
+                    runApp("Terminal.js", termCode, "/home/applications/Terminal.js");
+                }
+            })
 
         } catch (error) {
             induceCrash(error);

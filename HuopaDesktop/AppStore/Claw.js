@@ -93,7 +93,6 @@ async function createPostSendDiv() {
                 if (response.ok) {
                     const postObj =  await response.json();
                     const post = postObj[0];
-                    console.log(post);
                     const postDiv = document.createElement("div");
                     const author = document.createElement("h3");
                     const pfp = document.createElement("img");
