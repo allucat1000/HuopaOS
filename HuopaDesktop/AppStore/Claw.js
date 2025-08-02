@@ -135,7 +135,7 @@ const postList = document.createElement("div");
 document.body.append(postList)
 const response = await fetch("https://social.rotur.dev/feed?limit=25&offset=0");
 if (response.ok) {
-    const feed = response.json();
+    const feed = await response.json();
     if (Array.isArray(feed)) {
         loadingText.remove();
         for (const post of feed) {
