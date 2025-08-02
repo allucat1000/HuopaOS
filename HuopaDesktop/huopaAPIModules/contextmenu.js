@@ -22,7 +22,7 @@ return {
         });
 
         document.addEventListener('click', () => {
-            contextMenu.remove();
+            if (contextMenu) contextMenu.remove();
         });
     },
 
