@@ -1595,7 +1595,7 @@ window.huopadesktop = (() => {
         if (extra === "elevated") {
             elevated = true;
         }
-        processDigitList[digits] = {"elevated":elevated, "name":appId, "id":digits, "title":appId}
+        processDigitList[digits] = {elevated:elevated, name:appId, id:digits, title:appId, extra:extra};
         await createSysDaemon("appContBordUpdater", () => {
             const loop = async () => {
                 const override = quantum.document.querySelector(`[data-border-override="${digits}"]`);
