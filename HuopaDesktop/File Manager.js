@@ -1,7 +1,10 @@
 let fileListDiv;
+let topBarList;
+let sideBarList;
 let pathSelected;
 let fileSelectorMode = false;
 let returnId;
+document.body.style.overflow = "hidden";
 const elevated = JSON.parse(await huopaAPI.getProcessData()).elevated;
 
 if (typeof loadParams === "object" && loadParams.mode === "fileSelector") {
@@ -16,18 +19,21 @@ if (typeof loadParams === "object" && loadParams.mode === "fileSelector") {
     renderFileList("/");
 }
 async function renderFileList(path) {
+    huopaAPI.setTitle("File Manager - " + path)
     if (fileListDiv) {
+        topBarList.remove()
         fileListDiv.remove()
+        sideBarList.remove()
     }
     fileListDiv = document.createElement("div");
     fileListDiv.id = "fileList";
     const backButton = document.createElement("button");
     const deleteButton = document.createElement("button");
-    const topBarList = document.createElement("div");
-    const separator = document.createElement("div");
-    separator.style = "margin-bottom: 4em;";
-    fileListDiv.style = "width: 100%; height: calc(100% - 20px); display: flex; flex-direction: column; margin-bottom: -0.25em;";
-    topBarList.style = "display: flex; align-items: center; justify-content: start; padding: 0.25em; margin-top: 0.33em; position: fixed; top: -5px; background-color: rgba(45, 45, 45, 0.5); width: 100%; left: 0;";
+    topBarList = document.createElement("div");
+    fileListDiv.style = "width: calc(100% - 10em); height: calc(100% - 20px); display: flex; flex-direction: column; margin-bottom: -0.25em; position: absolute; top: 4em; overflow: scroll; right: 0;";
+    sideBarList = document.createElement("div");
+    sideBarList.style = "width: 9.5em; height: 100%; top: 0; left: 0; position: absolute; background-color: rgba(55, 55, 55, 0.4);"
+    topBarList.style = "display: flex; align-items: center; justify-content: start; padding: 0.25em; margin-top: 0.33em; position: fixed; top: -5px; background-color: rgba(55, 55, 55, 0.4); width: calc(100% - 10em); right: 0;";
     await setAttrs(backButton, {
         "innerHTML":'<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left-icon lucide-arrow-left"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>',
         "style":"margin: 0.5em; display: inline; opacity: 1; display: flex; justify-content: center; align-items: center;"
@@ -89,10 +95,10 @@ async function renderFileList(path) {
     
     const currentPathTitle = document.createElement("p");
     currentPathTitle.style = "color: white; display: inline; text-align: left; margin: 0.5em; font-size: 1.5em;"
-    currentPathTitle.textContent = path;
+    currentPathTitle.textContent = truncate(path, 30);
     topBarList.append(currentPathTitle);
-    fileListDiv.append(topBarList);
-    fileListDiv.append(separator);
+    document.body.append(topBarList)
+    document.body.append(sideBarList)
     document.body.append(fileListDiv);
     const styleTag = document.createElement("style");
     styleTag.textContent = ".file-selected { filter: brightness(1.25); } .disabled { opacity: 0.5; } ";
@@ -216,5 +222,13 @@ async function isDir(path) {
     } catch (err) {
         await huopaAPI.error(err);
         return false;
+    }
+}
+
+function truncate(text, maxlength) {
+    if (text.length >= maxlength) {
+        return text.slice(0, maxlength) + "..."
+    } else {
+        return text;
     }
 }

@@ -1472,10 +1472,11 @@ window.huopadesktop = (() => {
             display: flex;
             flex-wrap: wrap;
             align-content: flex-start;
+            position: relative;
         `;
         const appIcon = quantum.document.createElement("img");
         appIcon.draggable = "false";
-        appIcon.style = "margin-left: 0.75em; user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;";
+        appIcon.style = "margin-left: 0.75em; user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; position: absolute; top: 50%; transform: translateY(-50%);";
         const appIconSrc = await internalFS.getFile(appPath + ".icon");
         if (!appIconSrc) {
             const defaultSVG = `
@@ -1488,7 +1489,7 @@ window.huopadesktop = (() => {
         }
         const appTitle = quantum.document.createElement("h3");
         appTitle.textContent = appId.replace(/\.js$/, "");;
-        appTitle.style = "font-family: sans-serif; margin: 0.5em; font-weight: normal"
+        appTitle.style = "font-family: sans-serif; margin: 0.5em; font-weight: normal; margin-left: 2em; text-wrap-mode: nowrap;"
         titleBar.className = "titlebar";
         const container = quantum.document.createElement("div");
         container.className = "app-container";
