@@ -1226,7 +1226,6 @@ window.huopadesktop = (() => {
                 const digitId = appContainer.parentElement.id;
                 if (processDigitList[digitId].elevated === true) {
                     const win = quantum.document.getElementById(id);
-                    console.log(data);
                     if (data) win.style.transition = data;
                 } else {
                     console.error("setProcessWindowAnimation: The process requires administrator rights for this function!")

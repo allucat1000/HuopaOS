@@ -71,7 +71,7 @@ async function createPostSendDiv() {
         const postTextArea = document.createElement("textarea");
         postCreateDiv.append(postTextArea);
         const postButton = document.createElement("button");
-        postButton.margin = "0.5em auto";
+        postButton.style.margin = "0.5em auto";
         postButton.textContent = "Send post";
         postCreateDiv.append(postButton);
         const postSendInfoText = document.createElement("p");
@@ -91,7 +91,9 @@ async function createPostSendDiv() {
                 postSendInfoText.textContent = "";
                 const response = await fetch("https://social.rotur.dev/feed?limit=1&offset=0");
                 if (response.ok) {
-                    const post = await response.json()[0];
+                    const postObj =  await response.json();
+                    const post = postObj[0];
+                    console.log(post);
                     const postDiv = document.createElement("div");
                     const author = document.createElement("h3");
                     const pfp = document.createElement("img");
