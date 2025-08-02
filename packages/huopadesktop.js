@@ -139,6 +139,11 @@ window.huopadesktop = (() => {
                     const data = await response3.text();
                     await internalFS.createPath("/system/env/modules/originchats.js", "file", data);
                 }
+                const response4 = await fetch(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/huopaAPIModules/contextmenu.js`);
+                if (response4.ok) {
+                    const data = await response4.text();
+                    await internalFS.createPath("/system/env/modules/contextmenu.js", "file", data);
+                }
                 await sys.addLine("[line=blue]Downloading and installing wallpapers...[/line]")
                 let wallpaper1Success;
                 let wallpaper2Success;
