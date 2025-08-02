@@ -987,10 +987,17 @@ window.huopadesktop = (() => {
 
             hideWindow: () => {
                 appContainer.parentElement.style.display = "none";
+                const digitId = appContainer.parentElement.id;
+                processDigitList[digitId].hidden = true;
+                const appToDock = quantum.document.querySelector(`[data-dock-digit-id="${digitId}"]`);
+                appToDock.style.display = "none";
             },
 
             showWindow: () => {
+                processDigitList[digitId].hidden = false;
                 appContainer.parentElement.style.display = "block";
+                const appToDock = quantum.document.querySelector(`[data-dock-digit-id="${digitId}"]`);
+                appToDock.style.display = "block";
             },
             
             createNotification: async (title, content) => {
@@ -1198,7 +1205,7 @@ window.huopadesktop = (() => {
                     if (width) win.style.width = width;
                     if (height) win.style.height = height;
                 } else {
-                    console.error("resizeProcessWindow: The process requires administrator rights for this function!")
+                    console.error("setProcessWindowSize: The process requires administrator rights for this function!")
                     return;
                 }
             },
@@ -1210,7 +1217,19 @@ window.huopadesktop = (() => {
                     if (left) win.style.left = left;
                     if (left) win.style.top = top;
                 } else {
-                    console.error("resizeProcessWindow: The process requires administrator rights for this function!")
+                    console.error("setProcessWindowPosition: The process requires administrator rights for this function!")
+                    return;
+                }
+            },
+
+            setProcessWindowAnimation: (id, data) => {
+                const digitId = appContainer.parentElement.id;
+                if (processDigitList[digitId].elevated === true) {
+                    const win = quantum.document.getElementById(id);
+                    console.log(data);
+                    if (data) win.style.transition = data;
+                } else {
+                    console.error("setProcessWindowAnimation: The process requires administrator rights for this function!")
                     return;
                 }
             },
@@ -1221,7 +1240,7 @@ window.huopadesktop = (() => {
                     const win = quantum.document.getElementById(id);
                     return `["${win.style.left}", "${win.style.top}"]`
                 } else {
-                    console.error("resizeProcessWindow: The process requires administrator rights for this function!")
+                    console.error("getProcessWindowPosition: The process requires administrator rights for this function!")
                     return;
                 }
             },
@@ -1232,7 +1251,7 @@ window.huopadesktop = (() => {
                     const win = quantum.document.getElementById(id);
                     return `["${win.style.width}", "${win.style.height}"]`
                 } else {
-                    console.error("resizeProcessWindow: The process requires administrator rights for this function!")
+                    console.error("getProcessWindowSize: The process requires administrator rights for this function!")
                     return;
                 }
             },
@@ -1595,7 +1614,7 @@ window.huopadesktop = (() => {
         if (extra === "elevated") {
             elevated = true;
         }
-        processDigitList[digits] = {elevated:elevated, name:appId, id:digits, title:appId, extra:extra};
+        processDigitList[digits] = {elevated:elevated, name:appId, id:digits, title:appId, extra:extra, hidden:false};
         await createSysDaemon("appContBordUpdater", () => {
             const loop = async () => {
                 const override = quantum.document.querySelector(`[data-border-override="${digits}"]`);

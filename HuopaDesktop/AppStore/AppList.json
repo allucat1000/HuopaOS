@@ -7,6 +7,12 @@
     }, 
 
     {
+        "name":"TilingWinManager.js",
+        "description":"A tiling window manager for HuopaOS with customizable settings!",
+        "version":"100"
+    },
+
+    {
         "name":"Code.js",
         "description":"A code editor for HuopaOS using Monaco.",
         "version":"101"
