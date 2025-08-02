@@ -5,6 +5,8 @@ style.textContent = `
         color: white;
     }
 `;
+const ContextMenu = await importModule("contextmenu");
+ContextMenu.disableDefault();
 document.body.append(style);
 async function loop() {
     let ws;
@@ -13,7 +15,7 @@ async function loop() {
     let serverToOpen = await huopaAPI.applicationStorageRead("currentServerOpen.txt");
     let extraConfig = await huopaAPI.applicationStorageRead("config.json");
     if (await huopaAPI.getFile("/home/applications/OriginChats")) await huopaAPI.deleteFile("/home/applications/OriginChats")
-    if (!serverList) {
+    if (!serverList || !JSON.parse(serverList)[0]) {
         firstOpen = true;
         serverList = '["chats.mistium.com"]';
         await huopaAPI.applicationStorageWrite("serverlist.json", "file", serverList);
@@ -217,6 +219,19 @@ async function loop() {
                     const serverUrl = serverList[serverI];
                     const icon = await huopaAPI.applicationStorageRead(`serverIconStore/${serverUrl}`);
                     const serverIcon = document.createElement("img");
+                    await ContextMenu.set(serverIcon, [
+                        {
+                            name:"Remove",
+                            "function":async() => {   
+                                const index = serverList.indexOf(serverUrl)
+                                if (index !== -1) {
+                                    serverList.splice(index, 1);
+                                }
+                                await huopaAPI.applicationStorageWrite("serverlist.json", "file", JSON.stringify(serverList));
+                                serverIcon.remove();
+                            }
+                        }
+                    ])
                     if (icon) {
                         await setAttrs(serverIcon, {
                             "src":icon,

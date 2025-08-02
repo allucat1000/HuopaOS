@@ -172,6 +172,15 @@ async function renderFileList(path) {
         
         for (const file of fileList) {
             const fileDiv = document.createElement("div");
+            await ContextMenu.set(fileDiv, [
+                {
+                    name:"Delete",
+                    "function":async() => {   
+                        await huopaAPI.deleteFile(file)
+                        renderFileList(path);
+                    }
+                }
+            ])
             fileDiv.style = "width: calc(100% - 20px); margin: 0em auto; border-radius: 0.5em; border: rgba(105, 105, 105, 0.65) 2.5px solid; margin: 0.25em; display: flex; cursor: pointer;";
             const fileName = document.createElement("label");
             const dynamicFilePath = file.replace(path + "/", "")
