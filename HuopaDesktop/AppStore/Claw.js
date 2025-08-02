@@ -159,7 +159,7 @@ if (response.ok) {
 
             
             postDiv.style = "margin: 1em; border-radius: 0.5em; background-color: rgba(65, 65, 65, 0.5); border-style: solid; border-color: rgba(105, 105, 105, 0.65); text-align: left; color: white; padding: 1em; overflow: hidden; position: relative;";
-            author.margin = "0 0.5em";
+            author.style.margin = "0 0.5em";
             author.style.paddingBottom = "0.15em"
 ;
             const osSendInfo = document.createElement("p");
