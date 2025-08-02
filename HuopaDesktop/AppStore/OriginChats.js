@@ -70,6 +70,7 @@ async function loop() {
     let userColors;
     let roles;
     let openedChannel;
+    let serverCreatePopup;
     const mainDiv = document.createElement("div");
     const wsHandlers = new Map();
     let channelMsgs;
@@ -238,6 +239,7 @@ async function loop() {
                             "style":"width: 32px; height: 32px; border-radius: 0.5em; margin: 0.5em; cursor: pointer;",
                             "onclick": async () => {
                                 await huopaAPI.applicationStorageWrite("currentServerOpen.txt", "file", serverI)
+                                if (serverCreatePopup) serverCreatePopup.remove()
                                 mainArea.remove();
                                 sidebarEl.remove();
                                 ws.close();
@@ -254,10 +256,14 @@ async function loop() {
                     "style":"width: 36px; height: 36px; border-radius: 0.5em; background-color: rgba(35, 35, 35, 0.5); border: rgba(105, 105, 105, 0.65) 1px solid; color: white; padding: 0;",
                     "textContent":"+",
                     "onclick": async() => {
+                        serverCreatePopup = document.createElement("div");
                         const serverUrlInput = document.createElement("input");
+                        await setAttrs(serverCreatePopup, {
+                            style:"position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.65); z-index: 999;"
+                        })
                         await setAttrs(serverUrlInput, {
-                            "style":"width: 1000%; height: 45px; position: absolute; right: -825px; padding: 0.5em; top: 50%; transform: translateY(-50%); z-index: 9999;",
-                            "placeholder":"Enter a server URL here (example: 'myserver.myusername.com'):"
+                            style:"width: 400px; height: 45px; position: absolute; left: 50%; padding: 0.5em; top: 50%; transform: translate(-50%, -50%); z-index: 9999;",
+                            placeholder:"Enter a server URL here (example: 'myserver.myusername.com'):"
                         });
                         serverUrlInput.onkeydown = async (e) => {
                             if (e.key === "Enter") {
@@ -270,18 +276,19 @@ async function loop() {
                                         await huopaAPI.applicationStorageWrite("serverlist.json", "file", JSON.stringify(serverList));
                                         await huopaAPI.applicationStorageWrite("currentServerOpen.txt", "file", serverList.length - 1)
                                     }
-                                    
-                                    (mainArea).remove();
-                                    (sidebarEl).remove;
+                                    if (serverCreatePopup) serverCreatePopup.remove();
+                                    mainArea.remove();
+                                    sidebarEl.remove();
                                     ws.close();
                                     loop();
                                 } else {
+                                    if (serverCreatePopup) serverCreatePopup.remove();
                                     (serverUrlInput).remove();
                                 }
-                                
                             }
                         };
-                        sidebarEl.append(serverUrlInput);
+                        document.body.append(serverCreatePopup);
+                        serverCreatePopup.append(serverUrlInput);
                     }
                 });
                 sidebarEl.append(addServerButton);
@@ -320,6 +327,7 @@ async function loop() {
                     "style":"position: absolute; right: 0.75em; cursor: pointer;",
                     "onclick":async() => {
                         await huopaAPI.safeStorageWrite("token.txt", "file", undefined);
+                        if (serverCreatePopup) serverCreatePopup.remove()
                         mainDiv.remove();
                         sidebarEl.remove();
                         ws.close()
