@@ -584,7 +584,7 @@ window.huopadesktop = (() => {
                         window.addEventListener("DOMContentLoaded", () => resolve(), { once: true });
                         });
                         document.body.style.height = "calc(100vh - 40px)";
-                        document.body.append(systemStyles);
+                        document.head.append(systemStyles);
                         await eval("(async () => {" + ${JSON.stringify(appCode)} + "})()");
                     } catch (e) {
                         try {
@@ -1982,7 +1982,9 @@ window.huopadesktop = (() => {
             clockDiv.append(clockCurrentTime);
             clockDiv.append(clockCurrentDate);
             let batteryDiv;
+            let canUseBattery = false;
             if ('getBattery' in navigator) {
+                canUseBattery = await navigator.getBattery().level !== 1 || !await navigator.getBattery().charging;
                 batteryDiv = quantum.document.createElement("div");
                 batteryDiv.id = "batteryDiv";
                 batteryDiv.style = "padding: 0em; margin: 0em; border-radius: 0; border-style: none; border-width: 0px; text-align: center; width: 5em;"
@@ -2021,7 +2023,7 @@ window.huopadesktop = (() => {
             appBar.id = "appBar";
             dock.append(startMenuButton);
             dock.append(appBar);
-            if (batteryDiv) dock.append(batteryDiv);
+            if (batteryDiv && canUseBattery) dock.append(batteryDiv);
             dock.append(clockDiv);
 
             startMenuButton.onclick = async function() {
