@@ -69,6 +69,7 @@ async function loop() {
     let messageLengthLimit;
     let userColors;
     let roles;
+    let currentChannelPerms
     let openedChannel;
     let serverCreatePopup;
     const mainDiv = document.createElement("div");
@@ -363,7 +364,19 @@ async function loop() {
                                     messageToSend = `{"cmd":"message_edit", "channel": "${openedChannel}", "content": ${JSON.stringify(message)}, "id":"${editedMessageId}"}`;
                                     editingMessage = false;
                                     editedMessageId = undefined;
-                                    chatBar.placeholder = `Send a message in "#${openedChannel}" | Max message length: ${messageLengthLimit} characters`;
+                                    let sendAllowed
+                                    for (const role of roles) {
+                                        if (currentChannelPerms.send.includes(role)) {
+                                            sendAllowed = true
+                                        }
+                                    }
+                                    if (sendAllowed === true) {
+                                        chatBar.placeholder = `Send a message in "#${openedChannel}" | Max message length: ${messageLengthLimit} characters`;
+                                        chatBar.disabled = false;
+                                    } else {
+                                        chatBar.disabled = true;
+                                        chatBar.placeholder = `You cannot send messages in this channel`;
+                                    }
                                 } else {
                                     messageToSend = `{"cmd":"message_new", "channel": "${openedChannel}", "content": ${JSON.stringify(message)}}`;
                                 }
@@ -489,6 +502,7 @@ async function loop() {
                     const channelPerms = channelSave.permissions;
                     channelDiv.onclick = async() => {
                         try {
+                            currentChannelPerms = channelPerms
                             let viewAllowed
                             for (const role of roles) {
                                 if (channelPerms.view.includes(role)) {
@@ -598,6 +612,7 @@ async function loop() {
                                 chatBar.placeholder = `Editing a message... | Max message length: ${messageLengthLimit} characters`;
                                 chatBar.value = msg.content;
                                 editingMessage = true;
+                                chatBar.disabled = false;
                                 editedMessageId = msg.id;
                             }
                         });
@@ -702,6 +717,7 @@ async function loop() {
                             chatBar.placeholder = `Editing a message... | Max message length: ${messageLengthLimit} characters`;
                             chatBar.value = msg.content;
                             editingMessage = true;
+                            chatBar.disabled = false;
                             editedMessageId = msg.id;
                         }
                     });
