@@ -4,6 +4,10 @@ let sideBarList;
 let pathSelected;
 let fileSelectorMode = false;
 let returnId;
+let favouriteFolders = await huopaAPI.applicationStorageRead("favouriteFolders.json");
+if (!favouriteFolders) { await huopaAPI.applicationStorageWrite("favouriteFolders.json", "file", "[]"); favouriteFolders = '["/", "/system", "/home/applications", "/home/downloads"]'; }
+favouriteFolders = JSON.parse(favouriteFolders);
+
 document.body.style.overflow = "hidden";
 const elevated = JSON.parse(await huopaAPI.getProcessData()).elevated;
 
@@ -25,15 +29,35 @@ async function renderFileList(path) {
         fileListDiv.remove()
         sideBarList.remove()
     }
+    const favouriteTitle = document.createElement("p");
+    favouriteTitle.textContent = "Favourites";
+    favouriteTitle.style.textAlign = "center";
     fileListDiv = document.createElement("div");
     fileListDiv.id = "fileList";
     const backButton = document.createElement("button");
     const deleteButton = document.createElement("button");
+    const starButton = document.createElement("button");
     topBarList = document.createElement("div");
     fileListDiv.style = "width: calc(100% - 10em); height: calc(100% - 20px); display: flex; flex-direction: column; margin-bottom: -0.25em; position: absolute; top: 4em; overflow: scroll; right: 0;";
     sideBarList = document.createElement("div");
+    sideBarList.append(favouriteTitle);
     sideBarList.style = "width: 9.5em; height: 100%; top: 0; left: 0; position: absolute; background-color: rgba(55, 55, 55, 0.4);"
     topBarList.style = "display: flex; align-items: center; justify-content: start; padding: 0.25em; margin-top: 0.33em; position: fixed; top: -5px; background-color: rgba(55, 55, 55, 0.4); width: calc(100% - 10em); right: 0;";
+
+    for (const folder of favouriteFolders) {
+        const fileDiv = document.createElement("div");
+        fileDiv.style = "width: calc(100% - 20px); border-radius: 0.5em; border: rgba(105, 105, 105, 0.65) 2.5px solid; margin: 0.25em auto; display: flex; cursor: pointer;";
+        const fileName = document.createElement("label");
+        let dynamicFilePath = folder.split("/").pop()
+        if (folder === "/") dynamicFilePath = "root"
+        fileName.textContent = toTitleCase(dynamicFilePath);
+        fileName.style = "color: white; display: block; text-align: left; padding: 0.6em 0; cursor: pointer; margin: 0 auto; text-align: center;";
+        fileDiv.append(fileName);
+        fileDiv.onclick = () => {
+            renderFileList(folder);
+        }
+        sideBarList.append(fileDiv);
+    }
     await setAttrs(backButton, {
         "innerHTML":'<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left-icon lucide-arrow-left"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>',
         "style":"margin: 0.5em; display: inline; opacity: 1; display: flex; justify-content: center; align-items: center;"
@@ -42,6 +66,25 @@ async function renderFileList(path) {
         "innerHTML":'<svg width="16" height="16" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 1.75a3.25 3.25 0 0 1 3.245 3.066L15.25 5h5.25a.75.75 0 0 1 .102 1.493L20.5 6.5h-.796l-1.28 13.02a2.75 2.75 0 0 1-2.561 2.474l-.176.006H8.313a2.75 2.75 0 0 1-2.714-2.307l-.023-.174L4.295 6.5H3.5a.75.75 0 0 1-.743-.648L2.75 5.75a.75.75 0 0 1 .648-.743L3.5 5h5.25A3.25 3.25 0 0 1 12 1.75Zm6.197 4.75H5.802l1.267 12.872a1.25 1.25 0 0 0 1.117 1.122l.127.006h7.374c.6 0 1.109-.425 1.225-1.002l.02-.126L18.196 6.5ZM13.75 9.25a.75.75 0 0 1 .743.648L14.5 10v7a.75.75 0 0 1-1.493.102L13 17v-7a.75.75 0 0 1 .75-.75Zm-3.5 0a.75.75 0 0 1 .743.648L11 10v7a.75.75 0 0 1-1.493.102L9.5 17v-7a.75.75 0 0 1 .75-.75Zm1.75-6a1.75 1.75 0 0 0-1.744 1.606L10.25 5h3.5A1.75 1.75 0 0 0 12 3.25Z" fill="#fff"/></svg>',
         "style":"display: flex; justify-content: center; align-items: center;"
     });
+    await setAttrs(starButton, {
+        "innerHTML":'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-star-icon lucide-star"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/></svg>',
+        "style":"display: flex; justify-content: center; align-items: center;"
+    });
+    if (favouriteFolders.includes(path)) {
+        starButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#ffffff" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-star-icon lucide-star"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/></svg>'
+    } 
+    starButton.onclick = async() => {
+        if (favouriteFolders.includes(path)) {
+            const index = favouriteFolders.indexOf(path)
+            if (index !== -1) {
+                favouriteFolders.splice(index, 1);
+            }
+        } else {
+            favouriteFolders.push(path)
+        }
+        await huopaAPI.applicationStorageWrite("favouriteFolders.json", "file", JSON.stringify(favouriteFolders));
+        renderFileList(path);
+    }
     if (path === "/") {
         backButton.style.opacity = "0.5";
         backButton.style.cursor = "default";
@@ -83,14 +126,17 @@ async function renderFileList(path) {
         button.style.width = "30px";
         button.style.height = "30px";
         button.style.padding = "0.5em";
+        button.style.margin = "0.25em";
     }
 
     await buttonCss(backButton);
     await buttonCss(deleteButton);
+    await buttonCss(starButton);
 
     topBarList.append(backButton);
     if (!fileSelectorMode) {
         topBarList.append(deleteButton);
+        topBarList.append(starButton);
     }
     
     const currentPathTitle = document.createElement("p");
@@ -231,4 +277,10 @@ function truncate(text, maxlength) {
     } else {
         return text;
     }
+}
+
+function toTitleCase(str) {
+  return str.replace(/\w\S*/g, function(txt){
+    return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+  });
 }

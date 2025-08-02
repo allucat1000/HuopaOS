@@ -42,7 +42,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "1.3.0";
+    const version = "1.3.1";
     const processDigitList = {};
     const processArrayList = []
     // Priv Sys Funcs
@@ -77,6 +77,7 @@ window.huopadesktop = (() => {
                     bootcmd: "boot",
                     version: version
                 };
+                if (!await internalFS.getFile("/home/downloads")) internalFS.createPath("/home/downloads", "dir", "[]");
                 await internalFS.createPath("/system/env/config.json", "file", JSON.stringify(bootConfig));
                 await sys.addLine("Boot config created!");
                 await sys.addLine("Installing system apps...");

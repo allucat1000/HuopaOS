@@ -324,7 +324,8 @@ ${await huopaAPI.getFile(fullPath)}`);
                         }
                         await addLine(`open: Executed app at path "${fullPath}"`);
                     } else {
-                        const exists = await huopaAPI.getFile(`/home/applications/${values[2].replace("-","")}.js`);
+                        let exists;
+                        if (values[2]) exists = await huopaAPI.getFile(`/home/applications/${values[2].replace("-","")}.js`);
                         if (exists) {
                             if (values[3] === "-e" && elevated) {
                                 await huopaAPI.runApp(`/home/applications/${values[2].replace("-","")}.js`, fullPath, true);
