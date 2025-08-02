@@ -2140,7 +2140,7 @@ window.huopadesktop = (() => {
                 const code = await internalFS.getFile(app);
                 await runApp(appName, code, app);
             }
-            quantum.document.addEventListener("keydown", async(e) => {
+            quantum.document.addEventListener("keyup", async(e) => {
                 if (e.code === "KeyT" && e.altKey) {
                     e.preventDefault();
                     const termCode = await internalFS.getFile("/home/applications/Terminal.js");
