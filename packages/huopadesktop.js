@@ -1213,11 +1213,11 @@ window.huopadesktop = (() => {
 
             // Use these for config files and such. Don't use these for tokens and other secret things (use safeStorage)!
             applicationStorageWrite: (data, appId) => {
-                internalFS.createPath("/system/applicationStorage/" + appId + "/" + data[0], data[1], data[2]);
+                internalFS.createPath("/system/applicationStorage/" + appId.replace(".js", "") + "/" + data[0], data[1], data[2]);
             },
 
             applicationStorageRead: async(data, appId) => {
-                const returnData = await internalFS.getFile("/system/applicationStorage/" + appId + "/" + data[0]);
+                const returnData = await internalFS.getFile("/system/applicationStorage/" + appId.replace(".js", "") + "/" + data[0]);
                 return returnData;
             }
         }
