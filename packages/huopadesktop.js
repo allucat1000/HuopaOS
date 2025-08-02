@@ -42,7 +42,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "1.3.1";
+    const version = "1.3.2";
     const processDigitList = {};
     const processArrayList = []
     // Priv Sys Funcs
@@ -1153,6 +1153,18 @@ window.huopadesktop = (() => {
                 }
             },
 
+            getWindowPosition: () => {
+                return `["${appContainer.parentElement.style.left}", "${appContainer.parentElement.style.top}"]`
+            },
+
+            getWindowSize: () => {
+                return `["${appContainer.parentElement.style.width}", "${appContainer.parentElement.style.height}"]`
+            },
+
+            getWindowColor: () => {
+                return `["${appContainer.parentElement.style.backgroundColor}", "${appContainer.parentElement.style.borderColor}"]`
+            },
+
             setWindowBlur: (blur) => {
                 if (blur) appContainer.parentElement.style.backdropFilter = `blur(${blur})`;
             },
@@ -1175,6 +1187,52 @@ window.huopadesktop = (() => {
                     if (win) win.remove();
                 } else {
                     console.error("closeProcess: The process requires administrator rights for this function!")
+                    return;
+                }
+            },
+
+            setProcessWindowSize: (id, width, height) => {
+                const digitId = appContainer.parentElement.id;
+                if (processDigitList[digitId].elevated === true) {
+                    const win = quantum.document.getElementById(id);
+                    if (width) win.style.width = width;
+                    if (height) win.style.height = height;
+                } else {
+                    console.error("resizeProcessWindow: The process requires administrator rights for this function!")
+                    return;
+                }
+            },
+
+            setProcessWindowPosition: (id, left, top) => {
+                const digitId = appContainer.parentElement.id;
+                if (processDigitList[digitId].elevated === true) {
+                    const win = quantum.document.getElementById(id);
+                    if (left) win.style.left = left;
+                    if (left) win.style.top = top;
+                } else {
+                    console.error("resizeProcessWindow: The process requires administrator rights for this function!")
+                    return;
+                }
+            },
+
+            getProcessWindowPosition: (id) => {
+                const digitId = appContainer.parentElement.id;
+                if (processDigitList[digitId].elevated === true) {
+                    const win = quantum.document.getElementById(id);
+                    return `["${win.style.left}", "${win.style.top}"]`
+                } else {
+                    console.error("resizeProcessWindow: The process requires administrator rights for this function!")
+                    return;
+                }
+            },
+
+            getProcessWindowSize: (id) => {
+                const digitId = appContainer.parentElement.id;
+                if (processDigitList[digitId].elevated === true) {
+                    const win = quantum.document.getElementById(id);
+                    return `["${win.style.width}", "${win.style.height}"]`
+                } else {
+                    console.error("resizeProcessWindow: The process requires administrator rights for this function!")
                     return;
                 }
             },
