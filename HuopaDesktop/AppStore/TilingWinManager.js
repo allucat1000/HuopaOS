@@ -4,13 +4,13 @@ if (!elevated) {
     huopaAPI.closeApp();
 }
 huopaAPI.hideWindow();
+let config = await huopaAPI.applicationStorageRead("config.json");
+if (!config) {
+    config = `{"transition":"0.1s", "padding":"10"}`;
+    await huopaAPI.applicationStorageWrite("config.json", "file", config);
+}
+config = JSON.parse(config);
 async function setWindowPositions() {
-    let config = await huopaAPI.applicationStorageRead("config.json");
-    if (!config) {
-        config = `{"transition":"0.1s", "padding":"10"}`;
-        await huopaAPI.applicationStorageWrite("config.json", "file", config);
-    }
-    config = JSON.parse(config);
     const parsed = JSON.parse(await huopaAPI.getProcesses());
     const rawWinArrList = parsed[0];
     const winDigitList = parsed[1];
@@ -73,6 +73,6 @@ async function setWindowPositions() {
         }
 
     }
-    setTimeout(setWindowPositions, 100);
+    setTimeout(setWindowPositions, 50);
 }
 setWindowPositions();
