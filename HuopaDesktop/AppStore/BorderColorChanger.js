@@ -1,5 +1,6 @@
 await huopaAPI.hideWindow();
-let colors = await huopaAPI.getFile("/home/applications/BorderColorChanger/colors.json");
+let colors = await huopaAPI.applicationStorageRead("colors.json");
+if (await huopaAPI.getFile("/home/applications/BorderColorChanger")) await huopaAPI.deleteFile("/home/applications/BorderColorChanger");
 if (!colors) {
     colors = [
         "#FF0000", "#FF3300", "#FF6600", "#FF9900", "#FFCC00", "#FFFF00",
@@ -9,7 +10,7 @@ if (!colors) {
         "#CC00FF", "#FF00FF", "#FF00CC", "#FF0099", "#FF0066", "#FF0033",
         "#FF0000"
     ];
-    await huopaAPI.writeFile("/home/applications/BorderColorChanger/colors.json", "file", JSON.stringify(colors));
+    await huopaAPI.applicationStorageWrite("colors.json", "file", JSON.stringify(colors));
     huopaAPI.createNotification("BorderColorChanger", "Thanks for trying out this border color changer!");
 } else {
     huopaAPI.createNotification("BorderColorChanger", "The border color changer has started!");

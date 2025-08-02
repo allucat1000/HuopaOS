@@ -9,19 +9,20 @@ document.body.append(style);
 async function loop() {
     let ws;
     let serverList;
-    serverList = await huopaAPI.getFile("/home/applications/OriginChats/serverlist.json");
-    let serverToOpen = await huopaAPI.getFile("/home/applications/OriginChats/currentServerOpen.txt");
-    let extraConfig = await huopaAPI.getFile("/home/applications/OriginChats/config.json");;
+    serverList = await huopaAPI.applicationStorageRead("serverlist.json");
+    let serverToOpen = await huopaAPI.applicationStorageRead("currentServerOpen.txt");
+    let extraConfig = await huopaAPI.applicationStorageRead("config.json");
+    if (await huopaAPI.getFile("/home/applications/OriginChats")) await huopaAPI.deleteFile("/home/applications/OriginChats")
     if (!serverList) {
         firstOpen = true;
         serverList = '["chats.mistium.com"]';
-        await huopaAPI.writeFile("/home/applications/OriginChats/serverlist.json", "file", serverList);
+        await huopaAPI.applicationStorageWrite("serverlist.json", "file", serverList);
         serverToOpen = "0"
-        await huopaAPI.writeFile("/home/applications/OriginChats/currentServerOpen.txt", "file", serverToOpen);
+        await huopaAPI.applicationStorageWrite("currentServerOpen.txt", "file", serverToOpen);
     }
     if (!extraConfig) {
         extraConfig = '{"messageLogger":false,"notifications":false}';
-        await huopaAPI.writeFile("/home/applications/OriginChats/config.json", "file", extraConfig);
+        await huopaAPI.applicationStorageWrite("config.json", "file", extraConfig);
     }
     serverList = JSON.parse(serverList);
     extraConfig = JSON.parse(extraConfig);
@@ -33,13 +34,13 @@ async function loop() {
         return;
     }
     async function connectError() {
-        const icon = await huopaAPI.getFile(`/home/applications/OriginChats/serverIconStore/${url}`);
+        const icon = await huopaAPI.applicationStorageRead(`serverIconStore/${url}`);
         if (!icon) {
             serverList.splice(serverToOpen, 1);
-            await huopaAPI.writeFile("/home/applications/OriginChats/serverlist.json", "file", JSON.stringify(serverList));
+            await huopaAPI.applicationStorageWrite("serverlist.json", "file", JSON.stringify(serverList));
         }
         serverToOpen = "0"
-        await huopaAPI.writeFile("/home/applications/OriginChats/currentServerOpen.txt", "file", serverToOpen);
+       await huopaAPI.applicationStorageWrite("currentServerOpen.txt", "file", serverToOpen);
         const errorMsg = document.createElement("h2");
         await huopaAPI.setTitle("OriginChats - Failed to connect to server");
         await setAttrs(errorMsg, {
@@ -95,7 +96,7 @@ async function loop() {
             connectedToWS = true;
             console.log("WebSocket connected!");
         }
-        await huopaAPI.writeFile("/home/applications/OriginChats/currentServerOpen.txt", "file", "0");
+        await huopaAPI.applicationStorageWrite("currentServerOpen.txt", "file", "0");
         
         await setAttrs(sidebarEl, {
             "style":"position: absolute; width: 50px; height: calc(100% - 5em); left: 0; top: 0; display: flex; flex-direction: column; align-items: center;"
@@ -119,7 +120,7 @@ async function loop() {
                         if (!messageLengthLimit) messageLengthLimit = 65536;
                         validatorKey = (data.val.validator_key);
                         server = data.val.server;
-                        await huopaAPI.writeFile(`/home/applications/OriginChats/serverIconStore/${url}`, "file", server.icon);
+                        await huopaAPI.applicationStorageWrite(`serverIconStore/${url}`, "file", server.icon);
                         await huopaAPI.setTitle(`OriginChats - ${server.name}`);
                         loginPrompt();
                         break;
@@ -200,7 +201,7 @@ async function loop() {
                     await new Promise((res) => setTimeout(res, 10));
                 }
                 appState = "main";
-                await huopaAPI.writeFile("/home/applications/OriginChats/currentServerOpen.txt", "file", serverToOpen);
+                await huopaAPI.applicationStorageWrite("currentServerOpen.txt", "file", serverToOpen);
                 userObj = userData;
                 roles = userObj.roles;
                 ws.send('{"cmd":"users_list"}');
@@ -214,14 +215,14 @@ async function loop() {
                 }
                 for (const serverI in serverList) {
                     const serverUrl = serverList[serverI];
-                    const icon = await huopaAPI.getFile(`/home/applications/OriginChats/serverIconStore/${serverUrl}`);
+                    const icon = await huopaAPI.applicationStorageRead(`serverIconStore/${serverUrl}`);
                     const serverIcon = document.createElement("img");
                     if (icon) {
                         await setAttrs(serverIcon, {
                             "src":icon,
                             "style":"width: 32px; height: 32px; border-radius: 0.5em; margin: 0.5em; cursor: pointer;",
                             "onclick": async () => {
-                                await huopaAPI.writeFile("/home/applications/OriginChats/currentServerOpen.txt", "file", serverI)
+                                await huopaAPI.applicationStorageWrite("currentServerOpen.txt", "file", serverI)
                                 mainArea.remove();
                                 sidebarEl.remove();
                                 ws.close();
@@ -248,11 +249,11 @@ async function loop() {
                                 const value = serverUrlInput.value
                                 if (value) {
                                     if (serverList.includes(value)) {
-                                        await huopaAPI.writeFile("/home/applications/OriginChats/currentServerOpen.txt", "file", serverList.indexOf(value))
+                                        await huopaAPI.applicationStorageWrite("currentServerOpen.txt", "file", serverList.indexOf(value))
                                     } else {
                                         serverList.push(value);
-                                        await huopaAPI.writeFile("/home/applications/OriginChats/serverlist.json", "file", JSON.stringify(serverList));
-                                        await huopaAPI.writeFile("/home/applications/OriginChats/currentServerOpen.txt", "file", serverList.length - 1)
+                                        await huopaAPI.applicationStorageWrite("serverlist.json", "file", JSON.stringify(serverList));
+                                        await huopaAPI.applicationStorageWrite("currentServerOpen.txt", "file", serverList.length - 1)
                                     }
                                     
                                     (mainArea).remove();

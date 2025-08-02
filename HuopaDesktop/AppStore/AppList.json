@@ -20,14 +20,14 @@
     {
         "name":"BorderColorChanger.js",
         "description":"A tool for smoothly changing your window border color in the background. Use the 'colors.json' file to change the colors!",
-        "version":"102",
+        "version":"103",
         "icon":true
     }, 
 
     {
         "name":"OriginChats.js",
         "description":"A messaging client for OriginChat servers.", 
-        "version":"126"
+        "version":"127"
     },
 
     {
