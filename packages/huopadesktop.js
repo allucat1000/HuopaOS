@@ -1209,6 +1209,16 @@ window.huopadesktop = (() => {
             getProcessData: () => {
                 const digitId = appContainer.parentElement.id;
                 return JSON.stringify(processDigitList[digitId]);
+            },
+
+            // Use these for config files and such. Don't use these for tokens and other secret things (use safeStorage)!
+            applicationStorageWrite: (data, appId) => {
+                internalFS.createPath("/system/applicationStorage/" + appId + "/" + data[0], data[1], data[2]);
+            },
+
+            applicationStorageRead: async(data, appId) => {
+                const data = await internalFS.getFile("/system/applicationStorage/" + appId + "/" + data[0]);
+                return data;
             }
         }
     };
@@ -1237,11 +1247,11 @@ window.huopadesktop = (() => {
             let result;
             if (type === "openRoturLogin") {
                 result = await huopaAPI[type]([event.data.appName]);
-            } else if (type === "safeStorageWrite") {  
+            } else if (type === "safeStorageWrite" || type === "applicationStorageWrite") {  
 
                 result = await huopaAPI[type]((Array.isArray(data) ? data : [data].splice(3)), event.data.appName);
 
-            } else if (type === "safeStorageRead"){
+            } else if (type === "safeStorageRead" || type === "applicationStorageRead"){
 
                 result = await huopaAPI[type](Array.isArray(data) ? data : data[0], event.data.appName);
 
