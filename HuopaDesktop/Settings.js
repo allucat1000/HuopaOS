@@ -569,9 +569,9 @@ async function themeTabLoad() {
         themeButton.style.width = "25%";
         themeButton.style.margin = "1em";
         themeButton.style.overflow = "hidden";
-        themeButton.style.minWidth = "200px";
+        themeButton.style.minWidth = "300px";
         themeButton.style.flex = "1 0 100px";
-        themeButton.style.maxWidth = "200px";
+        themeButton.style.maxWidth = "300px";
         themeButton.style.aspectRatio = "16 / 9";
         themeButton.style.padding = "0";
 
