@@ -536,7 +536,7 @@ async function themeTabLoad() {
     await huopaAPI.setTitle("Settings — Themes");
     const mainScreenDiv = document.createElement("div");
     const title = document.createElement("h1");
-    title.textContent = "Themes";
+    title.textContent = "Themes (requires restart)";
     title.style = "text-align: center;  margin: 1em;";
     document.body.append(mainScreenDiv);
     mainScreenDiv.append(title);
@@ -597,5 +597,6 @@ async function themeTabLoad() {
                 return;
             }
         };
-    }
+    };
+    mainScreenDiv.append(themeListDiv);
 }
