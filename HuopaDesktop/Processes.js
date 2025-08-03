@@ -71,10 +71,10 @@ async function loadProcs() {
                 "style":"position: absolute; right: 0.2em; top: 50%; padding: 0.35em 0.5em; transform: translateY(-50%); border-width: 1px;"
             })
             procName.style = "margin: 0.5em;"
-            if (proc.elevated) {
+            if (proc?.elevated) {
                 procName.textContent = `${proc.name} (${procI}) [Elevated]`;
             } else {
-                procName.textContent = `${proc.name} (${procI})`;
+                procName.textContent = `${proc?.name} (${procI})`;
             }
             procDiv.append(procName);
             if (elevated) procDiv.append(quitProcButton);

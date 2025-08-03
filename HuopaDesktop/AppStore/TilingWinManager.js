@@ -9,13 +9,19 @@ if (!config) {
     config = `{"transition":"0.1s", "padding":"10"}`;
     await huopaAPI.applicationStorageWrite("config.json", "file", config);
 }
-let oldWinArrList;
 config = JSON.parse(config);
+let [rawWinArrList, winDigitList] = JSON.parse(await huopaAPI.getProcesses());
+async function processFetch () {
+    while (true) {
+        const parsed = JSON.parse(await huopaAPI.getProcesses());
+        rawWinArrList = parsed[0];
+        winDigitList = parsed[1];
+        await new Promise(resolve => setTimeout(resolve, 10));
+    }
+}
+
 async function setWindowPositions() {
-    const parsed = JSON.parse(await huopaAPI.getProcesses());
-    const rawWinArrList = parsed[0];
-    if (!oldWinArrList || oldWinArrList.join(" ") !== rawWinArrList.join(" ")) {
-        const winDigitList = parsed[1];
+    while (true) {
 
         const winArrList = rawWinArrList.filter(win => {
             const extra = winDigitList[win]?.extra;
@@ -69,14 +75,14 @@ async function setWindowPositions() {
                 const width = `calc(${widthPercent}% - ${borderTotalPx}px)`;
                 const height = `calc(${winHeight} - ${borderTotalPx}px)`;
 
-                await huopaAPI.setProcessWindowPosition(win, left, top);
-                await huopaAPI.setProcessWindowSize(win, width, height);
-                await huopaAPI.setProcessWindowAnimation(win, `opacity 0.15s ease, transform 0.15s ease, width ${config.transition} ease, height ${config.transition} ease, left ${config.transition} ease, top ${config.transition} ease`);
+                huopaAPI.setProcessWindowPosition(win, left, top);
+                huopaAPI.setProcessWindowSize(win, width, height);
+                huopaAPI.setProcessWindowAnimation(win, `opacity 0.15s ease, transform 0.15s ease, width ${config.transition} ease, height ${config.transition} ease, left ${config.transition} ease, top ${config.transition} ease`);
             }
 
-        }
+        };
+        await new Promise(resolve => setTimeout(resolve, 16));
     }
-    oldWinArrList = rawWinArrList;
-    setTimeout(setWindowPositions, 5);
 }
+processFetch();
 setWindowPositions();
