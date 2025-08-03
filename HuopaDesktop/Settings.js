@@ -5,7 +5,7 @@ async function mainScreen() {
     const mainScreenDiv = document.createElement("div");
     const title = document.createElement("h1");
     title.textContent = "Settings";
-    title.style = "text-align: center; color: white; margin: 1em;";
+    title.style = "text-align: center;  margin: 1em;";
     document.body.append(mainScreenDiv);
     mainScreenDiv.append(title);
 
@@ -115,7 +115,7 @@ async function wallpapersTabLoad() {
     const mainScreenDiv = document.createElement("div");
     const title = document.createElement("h1");
     title.textContent = "Wallpapers";
-    title.style = "text-align: center; color: white; margin: 1em;";
+    title.style = "text-align: center;  margin: 1em;";
     document.body.append(mainScreenDiv);
     mainScreenDiv.append(title);
 
@@ -134,14 +134,14 @@ async function wallpapersTabLoad() {
     if (wallpaperList.length < 1) {
         const warning = document.createElement("h2");
         warning.textContent = 'You are in an outdated version of HuopaDesktop with an incorrect wallpaper config! Press "Shutdown" in the start menu and press "C" when you are in the terminal, then run "hpkg update" and "huopadesktop install".';
-        warning.style = "text-align: center; color: white; margin: 1em;";
+        warning.style = "text-align: center;  margin: 1em;";
         mainScreenDiv.append(warning);
         return;
     }
 
     const wallpaperChooseTitle = document.createElement("h2");
     wallpaperChooseTitle.textContent = "Choose your wallpaper";
-    wallpaperChooseTitle.style = "text-align: center; color: white; margin: 1em;";
+    wallpaperChooseTitle.style = "text-align: center;  margin: 1em;";
     mainScreenDiv.append(wallpaperChooseTitle);
 
     const wallpaperListDiv = document.createElement("div");
@@ -224,7 +224,7 @@ async function customizationTabLoad() {
     const mainScreenDiv = document.createElement("div");
     const title = document.createElement("h1");
     title.textContent = "Customization";
-    title.style = "text-align: center; color: white; margin: 1em;";
+    title.style = "text-align: center;  margin: 1em;";
     document.body.append(mainScreenDiv);
     mainScreenDiv.append(title);
 
@@ -241,7 +241,7 @@ async function customizationTabLoad() {
     const bgBlurDiv = document.createElement("div");
     const bgBlurText = document.createElement("p");
     bgBlurText.textContent = "Background blur level — Choose how blurred you want transparent backgrounds to be. (Requires restart for most elements)";
-    bgBlurText.style = "text-align: center; color: white; margin: 0.5em;";
+    bgBlurText.style = "text-align: center;  margin: 0.5em;";
     bgBlurDiv.style = "margin: 2em;";
     bgBlurDiv.append(bgBlurText);
     mainScreenDiv.append(bgBlurDiv);
@@ -271,7 +271,7 @@ async function customizationTabLoad() {
     const bgOpacDiv = document.createElement("div");
     const bgOpacText = document.createElement("p");
     bgOpacText.textContent = "Element opacity — Choose how transparent you want elements to be. (Requires restart for most elements)";
-    bgOpacText.style = "text-align: center; color: white; margin: 0.5em;";
+    bgOpacText.style = "text-align: center;  margin: 0.5em;";
     bgOpacDiv.style = "margin: 2em;";
     bgOpacDiv.append(bgOpacText);
     mainScreenDiv.append(bgOpacDiv);
@@ -299,7 +299,7 @@ async function customizationTabLoad() {
     const appBorderColorDiv = document.createElement("div");
     const appBorderColorTitle = document.createElement("p");
     appBorderColorTitle.textContent = "Window border color — Choose the color of window borders.";
-    appBorderColorTitle.style = "text-align: center; color: white; margin: 0.5em;";
+    appBorderColorTitle.style = "text-align: center;  margin: 0.5em;";
     appBorderColorDiv.style = "margin: 2em; padding-bottom: 1.5em;";
     appBorderColorDiv.append(appBorderColorTitle);
     mainScreenDiv.append(appBorderColorDiv);
@@ -323,7 +323,7 @@ async function dockTabLoad() {
     const mainScreenDiv = document.createElement("div");
     const title = document.createElement("h1");
     title.textContent = "Dock";
-    title.style = "text-align: center; color: white; margin: 1em;";
+    title.style = "text-align: center;  margin: 1em;";
     document.body.append(mainScreenDiv);
     mainScreenDiv.append(title);
 
@@ -339,7 +339,7 @@ async function dockTabLoad() {
     const dockDockedDiv = document.createElement("div");
     const dockDockedTitle = document.createElement("p");
     dockDockedTitle.textContent = "Dock to screen edge — Make the dock fill the screen edges (Requires restart)";
-    dockDockedTitle.style = "text-align: center; color: white; margin: 0.5em;";
+    dockDockedTitle.style = "text-align: center;  margin: 0.5em;";
     dockDockedDiv.style = "margin: 2em; padding-bottom: 1.5em;";
     dockDockedDiv.append(dockDockedTitle);
     mainScreenDiv.append(dockDockedDiv);
@@ -363,7 +363,7 @@ async function dockTabLoad() {
     const dockOpacDiv = document.createElement("div");
     const dockOpacText = document.createElement("p");
     dockOpacText.textContent = "Dock opacity — Choose how transparent you want the dock to be. (Requires restart)";
-    dockOpacText.style = "text-align: center; color: white; margin: 0.5em;";
+    dockOpacText.style = "text-align: center;  margin: 0.5em;";
     dockOpacDiv.style = "margin: 2em;";
     dockOpacDiv.append(dockOpacText);
     mainScreenDiv.append(dockOpacDiv);
@@ -395,7 +395,7 @@ async function appTabLoad() {
     const mainScreenDiv = document.createElement("div");
     const title = document.createElement("h1");
     title.textContent = "Boot Apps";
-    title.style = "text-align: center; color: white; margin: 1em;";
+    title.style = "text-align: center;  margin: 1em;";
     document.body.append(mainScreenDiv);
     mainScreenDiv.append(title);
 

@@ -10,7 +10,7 @@
     document.body.append(btnDiv);
     
     button.textContent = "Click me!";
-    button.style = "padding: 3.5em; background-color: rgba(100, 100, 100, 0.8); border-radius: 1em; border-style: solid; border-color: rgba(65, 65, 65, 0.8); cursor: pointer; color: white;";
+    button.style = "padding: 3.5em; background-color: rgba(100, 100, 100, 0.8); border-radius: 1em; border-style: solid; border-color: rgba(65, 65, 65, 0.8); cursor: pointer; ";
     btnDiv.append(button);
     
     button.onclick = () => {

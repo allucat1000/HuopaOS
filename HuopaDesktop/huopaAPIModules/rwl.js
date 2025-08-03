@@ -41,7 +41,7 @@ async function renderElemSetup(rawData) {
             position: relative;   
             height: 100%;
             width: 100%;
-            color: white;
+            
             opacity: 0;
             text-align: center;
         `;

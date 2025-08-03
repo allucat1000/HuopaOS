@@ -12,11 +12,11 @@ const inputDiv = document.createElement("div");
 const input = document.createElement("input");
 await setAttrs(termDiv, {
     "id":"termDiv",
-    "style":`margin: 1em; margin-bottom: 0; padding: 0; font-family: monospace, sans-serif; color: white;`
+    "style":`margin: 1em; margin-bottom: 0; padding: 0; font-family: monospace, sans-serif; `
 })
-inputDiv.style = `margin: 1em; display: flex; align-items: center; flex-wrap: nowrap; gap: 0.2em; margin: 1em; margin-top: 0; font-family: monospace, sans-serif; color: white;`;
+inputDiv.style = `margin: 1em; display: flex; align-items: center; flex-wrap: nowrap; gap: 0.2em; margin: 1em; margin-top: 0; font-family: monospace, sans-serif; `;
 await setAttrs(input, { 
-    "style":"background-color: transparent; padding: 0; border: none; border-radius: 0; flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow-x: auto; font-family: monospace, sans-serif; padding: 0.5em; outline-style: none; color: white; font-size: 1em; padding-left: 0;"
+    "style":"background-color: transparent; padding: 0; border: none; border-radius: 0; flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow-x: auto; font-family: monospace, sans-serif; padding: 0.5em; outline-style: none;  font-size: 1em; padding-left: 0;"
 });
 termDiv.id = "termDiv";
 async function addLine(text) {

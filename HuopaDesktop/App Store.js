@@ -1,10 +1,10 @@
 const title = document.createElement("h1");
 title.textContent = "HuopaDesktop App Store";
-title.style = "text-align: center; color: white; margin: 1em;";
+title.style = "text-align: center;  margin: 1em;";
 document.body.append(title);
 const loadingText = document.createElement("h3");
 loadingText.textContent = "Loading apps...";
-loadingText.style = "text-align: center; color: white;";
+loadingText.style = "text-align: center; ";
 document.body.append(loadingText);
 
 
@@ -32,7 +32,7 @@ if (response.ok) {
             name.textContent = appName;
             desc.textContent = appInfo;
 
-            appDiv.style = "margin: 1em; border-radius: 0.5em; background-color: rgba(65, 65, 65, 0.5); border-style: solid; border-color: rgba(105, 105, 105, 0.65); text-align: left; color: white; padding: 1.5em; overflow: hidden; position: relative;";
+            appDiv.style = "margin: 1em; border-radius: 0.5em; background-color: rgba(65, 65, 65, 0.5); border-style: solid; border-color: rgba(105, 105, 105, 0.65); text-align: left;  padding: 1.5em; overflow: hidden; position: relative;";
 
             name.style.display = "inline";
             name.style.margin = 0;

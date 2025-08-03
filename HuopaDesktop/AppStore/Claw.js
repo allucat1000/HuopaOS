@@ -1,6 +1,6 @@
 const title = document.createElement("h1");
 title.textContent = "Claw Feed";
-title.style = "text-align: center; color: white; margin: 1em;";
+title.style = "text-align: center;  margin: 1em;";
 document.body.append(title);
 const postCreateDiv = document.createElement("div");
 const loginButton = document.createElement("button");
@@ -15,7 +15,7 @@ document.body.append(loginButton);
 document.body.append(postCreateDiv);
 const loadingText = document.createElement("h3");
 loadingText.textContent = "Loading Claw feed...";
-loadingText.style = "text-align: center; color: white;";
+loadingText.style = "text-align: center; ";
 document.body.append(loadingText);
 let token = "";
 let loggedIn = false
@@ -111,13 +111,13 @@ async function createPostSendDiv() {
                     postDiv.append(userBar);
                     postDiv.append(postContent);
 
-                    postDiv.style = "margin: 1em; border-radius: 0.5em; text-align: left; color: white; padding: 1em; overflow: hidden; position: relative";
+                    postDiv.style = "margin: 1em; border-radius: 0.5em; text-align: left;  padding: 1em; overflow: hidden; position: relative";
                     postDiv.classList.add("primary")
                     author.style.margin = "0 0.5em";
                     author.style.paddingBottom = "0.15em";
                     const osSendInfo = document.createElement("p");
                     if (post.os) {
-                        osSendInfo.style = "position: absolute; right: 0.5em; top: 0.5em; color: rgba(255, 255, 255, 0.3); text-align: right; font-size: 0.5em;";
+                        osSendInfo.style = "position: absolute; right: 0.5em; top: 0.5em; text-align: right; font-size: 0.5em;";
                         osSendInfo.textContent = post.os;
                         postDiv.append(osSendInfo);
                     }
@@ -160,14 +160,14 @@ if (response.ok) {
             postDiv.append(postContent);
 
             
-            postDiv.style = "margin: 1em; border-radius: 0.5em; background-color: rgba(65, 65, 65, 0.5); border-style: solid; border-color: rgba(105, 105, 105, 0.65); text-align: left; color: white; padding: 1em; overflow: hidden; position: relative;";
+            postDiv.style = "margin: 1em; border-radius: 0.5em; text-align: left;  padding: 1em; overflow: hidden; position: relative;";
             postDiv.classList.add("primary")
             author.style.margin = "0 0.5em";
             author.style.paddingBottom = "0.15em"
 ;
             const osSendInfo = document.createElement("p");
             if (post.os) {
-                osSendInfo.style = "position: absolute; right: 0.5em; top: 0.5em; color: rgba(255, 255, 255, 0.3); text-align: right; font-size: 0.5em;";
+                osSendInfo.style = "position: absolute; right: 0.5em; top: 0.5em; text-align: right; font-size: 0.5em;";
                 osSendInfo.textContent = post.os;
                 postDiv.append(osSendInfo);
             }

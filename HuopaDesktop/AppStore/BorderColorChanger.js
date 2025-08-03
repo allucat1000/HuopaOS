@@ -20,7 +20,7 @@ if (!colors) {
 let index = 0
 const errorText = document.createElement("h2");
 await setAttrs(errorText, {
-    "style":"text-align: center; color: white; margin: 1em;",
+    "style":"text-align: center;  margin: 1em;",
     "textContent":"If you see this, you probably clicked on this app's icon in the dock, press the button below to hide the window again."
 })
 const hideWindowButton = document.createElement("button");
