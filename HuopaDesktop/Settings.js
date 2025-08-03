@@ -113,6 +113,34 @@ async function mainScreen() {
         mainScreenDiv.remove();
         appTabLoad();
     };
+
+    const themeTab = document.createElement("button");
+
+    const themeTabIcon = document.createElement("img");
+    const themeTabIconSrc = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-app-window-mac-icon lucide-app-window-mac"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="M6 8h.01"/><path d="M10 8h.01"/><path d="M14 8h.01"/></svg>';
+    themeTabIcon.style = "margin-right: 0.33em;"
+    setAttrs(themeTabIcon, {src: "data:image/svg+xml;utf8," + encodeURIComponent(themeTabIconSrc)})
+;
+    const themeTabLabel = document.createElement("label");
+    themeTabLabel.textContent = "Themes"
+    themeTab.append(themeTabIcon);
+    themeTab.append(themeTabLabel);
+    themeTabLabel.style.cursor = "pointer"
+
+    themeTab.style.display = "flex"
+
+    themeTab.style.justifyContent = "center"
+
+
+    themeTab.style.padding = "1.25em"
+
+    themeTab.style.margin = "1em auto";
+    themeTab.style.width = "65%";
+    mainScreenDiv.append(themeTab);
+    themeTab.onclick = () => {
+        mainScreenDiv.remove();
+        themeTabLoad();
+    };
 }
 async function wallpapersTabLoad() {
     await huopaAPI.setTitle("Settings — Wallpapers");
@@ -502,4 +530,72 @@ function extractFrameAsPNG(videoSrc, seekTime = 1) {
       reject(new Error('Error loading video: ' + e.message));
     });
   });
+}
+
+async function themeTabLoad() {
+    await huopaAPI.setTitle("Settings — Themes");
+    const mainScreenDiv = document.createElement("div");
+    const title = document.createElement("h1");
+    title.textContent = "Themes";
+    title.style = "text-align: center;  margin: 1em;";
+    document.body.append(mainScreenDiv);
+    mainScreenDiv.append(title);
+
+    const backButton = document.createElement("button");
+    backButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left-icon lucide-arrow-left"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>';
+    backButton.style = "padding: 1em; position: fixed; left: 0.5em; bottom: 0.5em; display: flex; width: 45px; height: 45px; align-items: center; justify-content: center;";
+
+    mainScreenDiv.append(backButton);
+    backButton.onclick = async () => {
+        mainScreenDiv.remove()
+        await mainScreen();
+    };
+    const response = await fetch("https://raw.githubusercontent.com/Allucat1000/HuopaOS/main/HuopaDesktop/Themes/ThemeList.json");
+    if (!response.ok) {
+        const warning = document.createElement("h2");
+        warning.textContent = 'Failed to fetch themes!';
+        warning.style = "text-align: center; margin: 1em;";
+        mainScreenDiv.append(warning);
+        console.error("Failed to fetch themes!");
+        return;
+    }
+    const themeList = await response.json();
+
+    const themeListDiv = document.createElement("div");
+    themeListDiv.style = "display: flex; width: 95%; height: 100%; flex-wrap: wrap; justify-content: center; margin: 0.5em auto; padding-bottom: 1.5em;";
+
+    for (const themeName of themeList) {
+        const themeButton = document.createElement("button");
+        themeButton.style.width = "25%";
+        themeButton.style.margin = "1em";
+        themeButton.style.overflow = "hidden";
+        themeButton.style.minWidth = "200px";
+        themeButton.style.flex = "1 0 100px";
+        themeButton.style.maxWidth = "200px";
+        themeButton.style.aspectRatio = "16 / 9";
+        themeButton.style.padding = "0";
+
+        const preview = document.createElement("img");
+
+        preview.style = "border-radius: 0.5em; width: 100%; height: 100%; object-fit: cover; object-position: center;";
+
+        const fileResponse = await fetch("https://raw.githubusercontent.com/Allucat1000/HuopaOS/main/HuopaDesktop/Themes/" + themeName + ".css");
+
+        preview.src = "https://raw.githubusercontent.com/Allucat1000/HuopaOS/main/HuopaDesktop/Themes/" + themeName + ".png";
+        themeButton.append(preview);
+        themeListDiv.append(themeButton);
+
+        themeButton.onclick = async () => {
+            if (fileResponse.ok) {
+                await huopaAPI.writeFile("/system/env/systemStyles.css", "file", await fileResponse.text());
+            } else {
+                const warning = document.createElement("h2");
+                warning.textContent = 'Failed to fetch theme!';
+                warning.style = "text-align: center; margin: 1em;";
+                mainScreenDiv.append(warning);
+                console.error("Failed to fetch theme!");
+                return;
+            }
+        };
+    }
 }
