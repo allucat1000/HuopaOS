@@ -570,10 +570,12 @@ window.huopadesktop = (() => {
                             for (const [key, value] of Object.entries(attrs)) {
                                 if (key === "class") {
                                     element.classList.add(value);
-                                } else if (key === "src" {
+                                } else if (key === "src") {
                                     const computed = getComputedStyle(element);
-                                    const updated = value.replace(/currentColor/g, computed.color);
-                                    element[key] = updated;
+                                    requestAnimationFrame(() => {
+                                        const updated = value.replace("currentColor", computed.color);
+                                        element[key] = updated;
+                                    })
                                 } else {
                                     element[key] = value;
                                 }

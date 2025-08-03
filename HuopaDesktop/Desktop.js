@@ -62,7 +62,8 @@ async function renderDesktop() {
                 openInCode = true;
                 fileIconSrc = '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-icon lucide-file"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>';
             }
-            fileIcon.src = "data:image/svg+xml;utf8," + encodeURIComponent(fileIconSrc);
+            setAttrs(fileIcon, {src: "data:image/svg+xml;utf8," + encodeURIComponent(fileIconSrc)})
+;
             fileIcon.style.display = "block";
             fileIcon.style.margin = "0 auto";
             fileDiv.style.margin = "1em 0";

@@ -14,7 +14,8 @@ async function mainScreen() {
     const wallpapersTabIcon = document.createElement("img");
     const wTabIconSrc = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-wallpaper-icon lucide-wallpaper"><circle cx="8" cy="9" r="2"/><path d="m9 17 6.1-6.1a2 2 0 0 1 2.81.01L22 15V5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>';
     wallpapersTabIcon.style = "margin-right: 0.33em;"
-    wallpapersTabIcon.src = "data:image/svg+xml;utf8," + encodeURIComponent(wTabIconSrc);
+    setAttrs(wallpapersTabIcon, {src: "data:image/svg+xml;utf8," + encodeURIComponent(wTabIconSrc)})
+;
     const wTabLabel = document.createElement("label");
     wTabLabel.textContent = "Wallpapers";
     wallpapersTab.append(wallpapersTabIcon);
@@ -38,7 +39,8 @@ async function mainScreen() {
     const customizationTabIcon = document.createElement("img");
     const cTabIconSrc = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings2-icon lucide-settings-2"><path d="M14 17H5"/><path d="M19 7h-9"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg>';
     customizationTabIcon.style = "margin-right: 0.2em;"
-    customizationTabIcon.src = "data:image/svg+xml;utf8," + encodeURIComponent(cTabIconSrc);
+    setAttrs(customizationTabIcon, {src: "data:image/svg+xml;utf8," + encodeURIComponent(cTabIconSrc)})
+;
     const cTabLabel = document.createElement("label");
     cTabLabel.textContent = "Customization"
     customizationTab.append(customizationTabIcon);
@@ -61,7 +63,8 @@ async function mainScreen() {
     const dockTabIcon = document.createElement("img");
     const dTabIconSrc = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dock-icon lucide-dock"><path d="M2 8h20"/><rect width="20" height="16" x="2" y="4" rx="2"/><path d="M6 16h12"/></svg>';
     dockTabIcon.style = "margin-right: 0.33em;"
-    dockTabIcon.src = "data:image/svg+xml;utf8," + encodeURIComponent(dTabIconSrc);
+    setAttrs(dockTabIcon, {src: "data:image/svg+xml;utf8," + encodeURIComponent(dTabIconSrc)})
+;
     const dTabLabel = document.createElement("label");
     dTabLabel.textContent = "Dock"
     dockTab.append(dockTabIcon);
@@ -88,7 +91,8 @@ async function mainScreen() {
     const appTabIcon = document.createElement("img");
     const appTabIconSrc = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-app-window-mac-icon lucide-app-window-mac"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="M6 8h.01"/><path d="M10 8h.01"/><path d="M14 8h.01"/></svg>';
     appTabIcon.style = "margin-right: 0.33em;"
-    appTabIcon.src = "data:image/svg+xml;utf8," + encodeURIComponent(appTabIconSrc);
+    setAttrs(appTabIcon, {src: "data:image/svg+xml;utf8," + encodeURIComponent(appTabIconSrc)})
+;
     const appTabLabel = document.createElement("label");
     appTabLabel.textContent = "Boot Apps"
     appTab.append(appTabIcon);
@@ -190,7 +194,8 @@ async function wallpapersTabLoad() {
     importImg.style.marginBottom = "0.25em;"
     const importText = document.createElement("p");
     importText.textContent = "Add wallpaper";
-    importImg.src = "data:image/svg+xml;utf8," + encodeURIComponent(iconSrc)
+    setAttrs(importImg, {src: "data:image/svg+xml;utf8," + encodeURIComponent(iconSrc)})
+
     const importButton = document.createElement("button");
     importButton.width = "25%";
     importButton.style.margin = "1em"
@@ -412,7 +417,8 @@ async function appTabLoad() {
     importImg.style.marginBottom = "0.25em;"
     const importText = document.createElement("p");
     importText.textContent = "Add boot app";
-    importImg.src = "data:image/svg+xml;utf8," + encodeURIComponent(iconSrc)
+    setAttrs(importImg, {src: "data:image/svg+xml;utf8," + encodeURIComponent(iconSrc)})
+
     const importButton = document.createElement("button");
     importButton.width = "25%";
     importButton.style.margin = "1em auto";
