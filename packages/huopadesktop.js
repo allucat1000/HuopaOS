@@ -127,7 +127,7 @@ window.huopadesktop = (() => {
                 }
                 
                 const response2 = await fetch("https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/moduleSrc/rwlSrc.js");
-                // RWL is mainly made by Flufi (GH: @ThePandaDever).
+                // RWL is mainly made by Flufi (GH: @Flufi-Boi).
                 // Integrated into HuopaOS by me, Allucat1000.
                 if (response2.ok) {
                     const data = await response2.text();
