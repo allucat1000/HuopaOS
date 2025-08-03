@@ -1588,10 +1588,10 @@ window.huopadesktop = (() => {
         appIcon.draggable = "false";
         appIcon.style = "margin-left: 0.75em; user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; position: absolute; top: 50%; transform: translateY(-50%);";
         const appIconSrc = await internalFS.getFile(appPath + ".icon");
+        const defaultSVG = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-code-icon lucide-file-code"><path d="M10 12.5 8 15l2 2.5"/><path d="m14 12.5 2 2.5-2 2.5"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/></svg>
+        `;
         if (!appIconSrc) {
-            const defaultSVG = `
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-code-icon lucide-file-code"><path d="M10 12.5 8 15l2 2.5"/><path d="m14 12.5 2 2.5-2 2.5"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/></svg>
-            `;
             svgToCorrectColor(appIcon, `data:image/svg+xml;utf8,${encodeURIComponent(defaultSVG)}`)
         } else {
             svgToCorrectColor(appIcon, `data:image/svg+xml;utf8,${encodeURIComponent(appIconSrc)}`)
@@ -1620,7 +1620,11 @@ window.huopadesktop = (() => {
         const appToDockImg = quantum.document.createElement("img");
         appToDockImg.draggable = "false";
         appToDockImg.style = "border-radius: 0.5em; width: 2em; height: 2em; user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;";
-        svgToCorrectColor(appToDock, `data:image/svg+xml;utf8,${encodeURIComponent(appIcon)}`)
+        if (!appIconSrc) {
+            svgToCorrectColor(appToDockImg, `data:image/svg+xml;utf8,${encodeURIComponent(defaultSVG)}`);
+        } else {
+            svgToCorrectColor(appToDockImg, `data:image/svg+xml;utf8,${encodeURIComponent(appIconSrc)}`);
+        }
         let digits = "";
         for (let i = 0; i < 10; i++) {
             digits += Math.floor(Math.random() * 10);
