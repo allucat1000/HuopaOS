@@ -2,7 +2,6 @@ const style = document.createElement("style");
 style.textContent = `
     p{
         margin: 0.25em;
-        color: white;
     }
 `;
 const ContextMenu = await importModule("contextmenu");
@@ -47,7 +46,7 @@ async function loop() {
         await huopaAPI.setTitle("OriginChats - Failed to connect to server");
         await setAttrs(errorMsg, {
             "textContent":"Unable to connect to the server, check whether this is the correct URL. If it is, contact the server owner / administrators for more info. Returning to menu in 3 seconds...",
-            "style":"color: white; margin: 1em; text-align: center;"
+            "style":"margin: 1em; text-align: center;"
         })
         document.body.append(errorMsg);
         await new Promise((res) => setTimeout(res, 3000));
@@ -167,7 +166,7 @@ async function loop() {
                     loginDiv.remove();
                     ws.send(`{"cmd":"auth","validator":"${auth}"}`);
                     await setAttrs(loadingEl, {
-                        "style":"color: white; text-align: center; position: absolute; left: 50%; top: calc(50% - 25px); transform: translate(-50%, -50%);",
+                        "style":"text-align: center; position: absolute; left: 50%; top: calc(50% - 25px); transform: translate(-50%, -50%);",
                         "textContent":"Loading..."
                     });
                     document.body.append(loadingEl);
@@ -254,7 +253,8 @@ async function loop() {
                 const addServerButton = document.createElement("button");
                 
                 await setAttrs(addServerButton, {
-                    "style":"width: 36px; height: 36px; border-radius: 0.5em; background-color: rgba(35, 35, 35, 0.5); border: rgba(105, 105, 105, 0.65) 1px solid; color: white; padding: 0;",
+                    "style":"width: 36px; height: 36px; border-radius: 0.5em; padding: 0;",
+                    "class":"primary",
                     "textContent":"+",
                     "onclick": async() => {
                         serverCreatePopup = document.createElement("div");
@@ -305,13 +305,15 @@ async function loop() {
                 });
 
                 await setAttrs(chatBar, {
-                    "style":"position: absolute; left: 50%; transform: translateX(-50%); bottom: 1.2em; width: calc(100% - 50px); padding: 1em; border-radius: 0.5em; background-color: rgba(35, 35, 35, 0.65); border: rgba(105, 105, 105, 0.65) 1px solid; color: white; font-size: 1em;",
+                    "style":"position: absolute; left: 50%; transform: translateX(-50%); bottom: 1.2em; width: calc(100% - 50px); padding: 1em; border-radius: 0.5em;  font-size: 1em;",
+                    "class":"primary",
                     "placeholder":`Click on a channel to view and send messages!`,
                     "disabled":true
                 });
                 loading = false;
                 const accountDiv = document.createElement("div");
-                accountDiv.style = "bottom: 1em; left: -2.75em; height: 3.5em; width: 310px; border: rgba(105, 105, 105, 0.65) 1px solid; border-radius: 0.5em; background-color: rgba(45, 45, 45, 0.65); position: absolute; display: flex; align-items: center;"
+                accountDiv.style = "bottom: 1em; left: -2.75em; height: 3.5em; width: 310px; border-radius: 0.5em; position: absolute; display: flex; align-items: center;"
+                accountDiv.classList.add("primary")
                 const usernameEl = document.createElement("p");
                 await setAttrs(usernameEl, {
                     "textContent":userData.username,
@@ -477,12 +479,13 @@ async function loop() {
                 });
                 const serverInfo = document.createElement("div");
                 await setAttrs(serverInfo, {
-                    "style":"background-color: rgba(45, 45, 45, 0.5); border-radius: 0.5em; margin-bottom: 0.5em; width: 100%; margin: 1em 0.5em; margin-top: 0.5em; display: flex; align-items: center; border: rgba(105, 105, 105, 0.65) 1px solid;"
+                    "style":"border-radius: 0.5em; margin-bottom: 0.5em; width: 100%; margin: 1em 0.5em; margin-top: 0.5em; display: flex; align-items: center;",
+                    "class":"primary"
                 });
                 const serverName = document.createElement("p");
                 await setAttrs(serverName, {
                     "textContent":server.name,
-                    "style":"color: white; padding: 1em; display: inline;"
+                    "style":"padding: 1em; display: inline;"
                 });
                 const serverIcon = document.createElement("img");
                 await setAttrs(serverIcon, {
@@ -496,7 +499,8 @@ async function loop() {
                 for (channel of channelList) {
                     const channelDiv = document.createElement("div");
                     await setAttrs(channelDiv, {
-                        "style":"padding: 0; width: 100%; margin: 0.5em; background-color: rgba(45, 45, 45, 0.5); border-radius: 0.5em; border: rgba(105, 105, 105, 0.65) 1px solid; cursor: pointer;",
+                        "style":"padding: 0; width: 100%; margin: 0.5em; border-radius: 0.5em; cursor: pointer;",
+                        "class":"primary"
                     });
                     const channelSave = channel;
                     const channelPerms = channelSave.permissions;
@@ -550,13 +554,13 @@ async function loop() {
                     if (channel.type === "text") {
                         const channelName = document.createElement("p");
                         await setAttrs(channelName, {
-                            "style":"padding: 0.5em; color: white; text-align: left;",
+                            "style":"padding: 0.5em; text-align: left;",
                             "textContent":`# ${channel.name}`
                         });
                         
                         channelDiv.append(channelName);
                     } else if (channel.type === "separator") {
-                        channelDiv.style = `padding: ${channel.size / 100}em; width: 100%; margin: 0;`;         
+                        channelDiv.style = `padding: ${channel.size / 100}em; width: 100%; margin: 0; background-color: transparent; border-style: none;`;         
                     }
                     
                     newChannelListEl.append(channelDiv);
@@ -588,7 +592,8 @@ async function loop() {
                     const msgDiv = document.createElement("div");
                                     
                     await setAttrs(msgDiv, {
-                        "style":"width: calc(100% - 1em); padding: 0em; background-color: rgba(35, 35, 35, 0.65); margin: 0.5em; position: relative; border-radius: 0.5em; border: rgba(105, 105, 105, 0.65) 1px solid;"
+                        "style":"width: calc(100% - 1em); padding: 0em; margin: 0.5em; position: relative; border-radius: 0.5em;",
+                        "class":"primary"
                     });
                     messageTable[msg.id] = msgDiv;
                     const user = document.createElement("p");
@@ -606,7 +611,7 @@ async function loop() {
                             }
                         });
                         await setAttrs(editButton, {
-                            "style":"position: absolute; top: -0.5em; color: white; right: 3.5em; padding: 0.5em 0.75em; display: none;",
+                            "style":"position: absolute; top: -0.5em; right: 3.5em; padding: 0.5em 0.75em; display: none;",
                             "textContent":"Edit",
                             "onclick": async() => {
                                 chatBar.placeholder = `Editing a message... | Max message length: ${messageLengthLimit} characters`;
@@ -632,7 +637,7 @@ async function loop() {
                         "textContent":msg.user
                     });
                     await setAttrs(text, {
-                        "style":"padding: 2.5em 0.5em 1em;; color: white; text-align: left; text-wrap: wrap; user-select: text;",
+                        "style":"padding: 2.5em 0.5em 1em; text-align: left; text-wrap: wrap; user-select: text;",
                         "textContent":msg.content
                     });
                     const urlRegex = /(?<!<)https?:\/\/[^\s>]+(?!>)/g;
@@ -693,7 +698,8 @@ async function loop() {
                 messageList.scrollTop = messageList.scrollHeight;
                 const msgDiv = document.createElement("div");
                 await setAttrs(msgDiv, {
-                    "style":"width: calc(100% - 1em); padding: 0em; background-color: rgba(35, 35, 35, 0.65); margin: 0.5em; position: relative; border-radius: 0.5em; border: rgba(105, 105, 105, 0.65) 1px solid;"
+                    "style":"width: calc(100% - 1em); padding: 0em; margin: 0.5em; position: relative; border-radius: 0.5em;",
+                    "class":"primary"
                 });
                 messageTable[msg.id] = msgDiv;
                 const user = document.createElement("p");
@@ -711,7 +717,7 @@ async function loop() {
                         }
                     });
                     await setAttrs(editButton, {
-                        "style":"position: absolute; top: -0.5em; color: white; right: 3.5em; padding: 0.5em 0.75em; display: none;",
+                        "style":"position: absolute; top: -0.5em; right: 3.5em; padding: 0.5em 0.75em; display: none;",
                         "textContent":"Edit",
                         "onclick": async() => {
                             chatBar.placeholder = `Editing a message... | Max message length: ${messageLengthLimit} characters`;
@@ -737,7 +743,7 @@ async function loop() {
                     "textContent":msg.user
                 });
                 await setAttrs(text, {
-                    "style":"padding: 2.5em 0.5em 1em;; color: white; text-align: left; text-wrap: wrap; user-select: text;",
+                    "style":"padding: 2.5em 0.5em 1em; text-align: left; text-wrap: wrap; user-select: text;",
                     "textContent":msg.content
                 });
                 const urlRegex = /(?<!<)https?:\/\/[^\s>]+(?!>)/g;
@@ -808,7 +814,7 @@ async function crashError(error) {
     const errorText = document.createElement("h2");
     await setAttrs(errorText, {
         "textContent":`Whoopsies! Your client has crashed, error log: ${error}`,
-        "style":"color: white; text-align: center; margin: 1em;"
+        "style":"text-align: center; margin: 1em;"
     });
     const retryButton = document.createElement("button");
     await setAttrs(retryButton, {

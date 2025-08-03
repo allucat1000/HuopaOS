@@ -6,10 +6,12 @@ if (!elevated) {
 huopaAPI.hideWindow();
 let config = await huopaAPI.applicationStorageRead("config.json");
 if (!config) {
-    config = `{"transition":"0.1s", "padding":"10"}`;
+    config = `{"transition":"0.1s", "padding":"10", "reservedHeight":"7em", "dockPos":"bottom"}`;
     await huopaAPI.applicationStorageWrite("config.json", "file", config);
 }
 config = JSON.parse(config);
+if (!config.reservedHeight) { config.reservedHeight = "7em"; config.dockPos = "bottom"; await huopaAPI.applicationStorageWrite("config.json", "file", JSON.stringify(config)); }
+
 let [rawWinArrList, winDigitList] = JSON.parse(await huopaAPI.getProcesses());
 async function processFetch () {
     while (true) {
@@ -34,7 +36,7 @@ async function setWindowPositions() {
         const total = winArrList.length;
         if (total !== 0) {
 
-            const reservedHeight = "7em";
+            const reservedHeight = config.reservedHeight;
 
             let bestCols = 1;
             let bestRows = total;
@@ -68,10 +70,13 @@ async function setWindowPositions() {
 
                 const leftPercent = col * winWidth;
                 const widthPercent = winWidth * colSpan;
-
+                let top;
                 const left = `calc(${leftPercent}% + ${borderHalfPx}px)`;
-                const top = `calc(${row} * ${winHeight} + ${borderHalfPx}px)`;
-
+                if (config.dockPos === "bottom") {
+                    top = `calc(${row} * ${winHeight} + ${borderHalfPx}px)`;
+                } else {
+                    top = `calc(${reservedHeight} + ${row} * ${winHeight} + ${borderHalfPx}px)`;
+                }
                 const width = `calc(${widthPercent}% - ${borderTotalPx}px)`;
                 const height = `calc(${winHeight} - ${borderTotalPx}px)`;
 

@@ -59,7 +59,8 @@ async function loadProcs() {
             const procId = procIds[procI];
             const proc = procInfo[procId];
             const procDiv = document.createElement("div");
-            procDiv.style = "width: calc(100% - 0.5em); border-radius: 0.5em; background-color: rgba(45, 45, 45, 0.65); border: rgba(105, 105, 105, 0.65) 1px solid; position: relative; margin: 0.5em auto;";
+            procDiv.style = "width: calc(100% - 0.5em); border-radius: 0.5em; position: relative; margin: 0.5em auto;";
+            procDiv.classList.add("primary");
             const procName = document.createElement("p");
             const quitProcButton = document.createElement("button");
             await setAttrs(quitProcButton, {

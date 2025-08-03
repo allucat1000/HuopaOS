@@ -183,6 +183,20 @@ input[type="checkbox"]:checked {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6), 0 0 1px rgba(255, 255, 255, 0.04);
 }
 
+/* App colours */
+
+.primary {
+  background-color: rgba(45, 45, 45, 0.5);
+  border: rgba(105, 105, 105, 0.65) 1px solid;
+  color: white;
+}
+
+.secondary {
+  background-color: rgba(85, 85, 85, 0.5);
+  border: rgba(105, 105, 105, 0.65) 1px solid;
+  color: white;
+}
+
 /* Scrollbars (disabled for now)
 
 ::-webkit-scrollbar {

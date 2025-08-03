@@ -9,7 +9,7 @@
     {
         "name":"TilingWinManager.js",
         "description":"A tiling window manager for HuopaOS with customizable settings!",
-        "version":"102"
+        "version":"103"
     },
 
     {
@@ -21,7 +21,7 @@
     {
         "name":"OriginChats.js",
         "description":"A messaging client for OriginChat servers.", 
-        "version":"129"
+        "version":"130"
     },
 
 

@@ -46,17 +46,20 @@ async function renderFileList(path) {
     fileListDiv.style = "width: calc(100% - 10em); height: calc(100% - 20px); display: flex; flex-direction: column; margin-bottom: -0.25em; position: absolute; top: 4em; overflow: scroll; right: 0;";
     sideBarList = document.createElement("div");
     sideBarList.append(favouriteTitle);
-    sideBarList.style = "width: 9.5em; height: 100%; top: 0; left: 0; position: absolute; background-color: rgba(55, 55, 55, 0.4);"
-    topBarList.style = "display: flex; align-items: center; justify-content: start; padding: 0.25em; margin-top: 0.33em; position: fixed; top: -5px; background-color: rgba(55, 55, 55, 0.4); width: calc(100% - 10em); right: 0; margin-bottom: 4em;";
+    sideBarList.style = "width: 9.5em; height: 100%; top: 0; left: 0; position: absolute; border-style: none;"
+    sideBarList.classList.add("secondary")
+    topBarList.style = "display: flex; align-items: center; justify-content: start; padding: 0.25em; margin-top: 0.33em; position: fixed; top: -5px; border-style: none; width: calc(100% - 10em); right: 0; margin-bottom: 4em;";
+    topBarList.classList.add("secondary")
 
     for (const folder of favouriteFolders) {
         const fileDiv = document.createElement("div");
-        fileDiv.style = "width: calc(100% - 20px); border-radius: 0.5em; border: rgba(105, 105, 105, 0.65) 2.5px solid; margin: 0.25em auto; display: flex; cursor: pointer;";
+        fileDiv.style = "width: calc(100% - 20px); border-radius: 0.5em; margin: 0.25em auto; display: flex; cursor: pointer;";
+        fileDiv.classList.add("primary")
         const fileName = document.createElement("label");
         let dynamicFilePath = folder.split("/").pop()
         if (folder === "/") dynamicFilePath = "root"
         fileName.textContent = toTitleCase(dynamicFilePath);
-        fileName.style = "color: white; display: block; text-align: left; padding: 0.6em 0; cursor: pointer; margin: 0 auto; text-align: center;";
+        fileName.style = "display: block; text-align: left; padding: 0.6em 0; cursor: pointer; margin: 0 auto; text-align: center;";
         fileDiv.append(fileName);
         fileDiv.onclick = () => {
             renderFileList(folder);
@@ -158,7 +161,7 @@ async function renderFileList(path) {
     }
     
     const currentPathTitle = document.createElement("p");
-    currentPathTitle.style = "color: white; display: inline; text-align: left; margin: 0.5em; font-size: 1.5em;"
+    currentPathTitle.style = "display: inline; text-align: left; margin: 0.5em; font-size: 1.5em;"
     currentPathTitle.textContent = truncate(path, 30);
     topBarList.append(currentPathTitle);
     document.body.append(topBarList)
@@ -185,7 +188,8 @@ async function renderFileList(path) {
                     }
                 }
             ])
-            fileDiv.style = "width: calc(100% - 20px); margin: 0em auto; border-radius: 0.5em; border: rgba(105, 105, 105, 0.65) 2.5px solid; margin: 0.25em; display: flex; cursor: pointer;";
+            fileDiv.style = "width: calc(100% - 20px); margin: 0em auto; border-radius: 0.5em; margin: 0.25em; display: flex; cursor: pointer;";
+            fileDiv.classList.add("primary")
             const fileName = document.createElement("label");
             const dynamicFilePath = file.replace(path + "/", "")
             const fileIcon = document.createElement("img");
@@ -215,7 +219,7 @@ async function renderFileList(path) {
             fileIcon.src = "data:image/svg+xml;utf8," + encodeURIComponent(fileIconSrc);
             fileIcon.style = "display: inline; margin: 0 0.5em; width: 16px";
             fileName.textContent = dynamicFilePath.startsWith("/") ? dynamicFilePath.slice(1) : dynamicFilePath;
-            fileName.style = "color: white; display: block; text-align: left; padding: 0.6em 0; cursor: pointer;";
+            fileName.style = "display: block; text-align: left; padding: 0.6em 0; cursor: pointer;";
             if (perms) {
                 const notDir = !await isDir(file)
                 fileDiv.onclick = async () => {

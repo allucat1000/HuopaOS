@@ -42,7 +42,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "1.3.4";
+    const version = "1.3.5";
     const processDigitList = {};
     const processArrayList = []
     // Priv Sys Funcs
@@ -568,7 +568,11 @@ window.huopadesktop = (() => {
                     try {
                         async function setAttrs(element, attrs) {
                             for (const [key, value] of Object.entries(attrs)) {
-                                element[key] = value;
+                                if (key === "class") {
+                                    element.classList.add(value);
+                                } else {
+                                    element[key] = value;
+                                }
                             }
                         }
                         async function importModule(moduleName) {
@@ -1809,7 +1813,7 @@ window.huopadesktop = (() => {
             startMenuDiv.style.display = "block";
             startMenuDiv.style.backdropFilter = `blur(${blur}px)`;
             const shutdownButton = quantum.document.createElement("button");
-            shutdownButton.style = "background-color: rgba(45, 45, 45, 0.7); border-color: rgba(105, 105, 105, 0.6); border-style: solid; border-radius: 0.5em; position: absolute; cursor: pointer; right: 0.5em; bottom: 0.5em; color: white; padding: 0.5em;"
+            shutdownButton.style = "background-color: rgba(0, 0, 0, 0.2); border-color: rgba(105, 105, 105, 0.6); border-style: solid; border-radius: 0.5em; position: absolute; cursor: pointer; right: 0.5em; bottom: 0.5em; color: white; padding: 0.5em;"
             shutdownButton.textContent = "Shutdown";
             shutdownButton.onclick = async () => {
                 window.close()
@@ -1841,7 +1845,7 @@ window.huopadesktop = (() => {
                     const cleanedAppName = appList[i].replace("/home/applications/", "");
                     const appTitle = quantum.document.createElement("p");
                     appTitle.textContent = cleanedAppName.replace(/\.js$/, "");
-                    appButton.style = "color: white; background-color: rgba(45, 45, 45, 0.7); border-color: rgba(105, 105, 105, 0.6); border-style: solid; border-radius: 0.5em; padding: 0.5em; width: 35em; height: 3em; margin: 0.2em 0.5em; text-align: left; cursor: pointer; display: flex; flex-wrap: wrap; align-content: flex-start;"
+                    appButton.style = "color: white; background-color: rgba(0, 0, 0, 0.2); border-color: rgba(105, 105, 105, 0.6); border-style: solid; border-radius: 0.5em; padding: 0.5em; width: 35em; height: 3em; margin: 0.2em 0.5em; text-align: left; cursor: pointer; display: flex; flex-wrap: wrap; align-content: flex-start;"
                     const appIcon = quantum.document.createElement("img");
                     appIcon.draggable = "false";
                     appIcon.style = "display: inline; padding-right: 0.2em; user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;"
