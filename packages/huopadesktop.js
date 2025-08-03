@@ -42,10 +42,17 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "1.3.6";
+    const version = "1.3.7";
     const processDigitList = {};
     const processArrayList = []
     // Priv Sys Funcs
+    const svgToCorrectColor = (el, icon) => {
+        const computed = getComputedStyle(el);
+        requestAnimationFrame(() => {
+            const updated = icon.replace("currentColor", computed.color);
+            el.src = updated;
+        })
+    }
     const dataURIToBlob = async (dataURI) => {
         const [meta, base64Data] = dataURI.split(',');
 
@@ -454,7 +461,6 @@ window.huopadesktop = (() => {
     async function importLib(content) {
         return new Promise((resolve, reject) => {
         const scriptElement = quantum.document.createElement('script');
-
         scriptElement.src = content
         scriptElement.onload = () => resolve();
         scriptElement.onerror = () => reject(new Error("Failed to load library!"));
@@ -1586,10 +1592,9 @@ window.huopadesktop = (() => {
             const defaultSVG = `
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-code-icon lucide-file-code"><path d="M10 12.5 8 15l2 2.5"/><path d="m14 12.5 2 2.5-2 2.5"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/></svg>
             `;
-
-            appIcon.src = `data:image/svg+xml;utf8,${encodeURIComponent(defaultSVG)}`;
+            svgToCorrectColor(appIcon, `data:image/svg+xml;utf8,${encodeURIComponent(defaultSVG)}`)
         } else {
-            appIcon.src = "data:image/svg+xml;utf8," + encodeURIComponent(appIconSrc);
+            svgToCorrectColor(appIcon, `data:image/svg+xml;utf8,${encodeURIComponent(appIconSrc)}`)
         }
         const appTitle = quantum.document.createElement("h3");
         appTitle.textContent = appId.replace(/\.js$/, "");;
@@ -1615,7 +1620,7 @@ window.huopadesktop = (() => {
         const appToDockImg = quantum.document.createElement("img");
         appToDockImg.draggable = "false";
         appToDockImg.style = "border-radius: 0.5em; width: 2em; height: 2em; user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;";
-        appToDockImg.src = appIcon.src;
+        svgToCorrectColor(appToDock, `data:image/svg+xml;utf8,${encodeURIComponent(appIcon)}`)
         let digits = "";
         for (let i = 0; i < 10; i++) {
             digits += Math.floor(Math.random() * 10);
@@ -1862,10 +1867,9 @@ window.huopadesktop = (() => {
                         const defaultSVG = `
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-code-icon lucide-file-code"><path d="M10 12.5 8 15l2 2.5"/><path d="m14 12.5 2 2.5-2 2.5"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/></svg>
                         `;
-
-                        appIcon.src = `data:image/svg+xml;utf8,${encodeURIComponent(defaultSVG)}`;
+                        svgToCorrectColor(appIcon, `data:image/svg+xml;utf8,${encodeURIComponent(defaultSVG)}`)
                     } else {
-                        appIcon.src = "data:image/svg+xml;utf8," + encodeURIComponent(appIconSrc);
+                        svgToCorrectColor(appIcon, `data:image/svg+xml;utf8,${encodeURIComponent(appIconSrc)}`)
                     }
                     appButton.onclick = async () => {
                         const code = await internalFS.getFile(appList[i]);
@@ -2097,8 +2101,7 @@ window.huopadesktop = (() => {
                                 icon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-battery-icon lucide-battery"><path d="M 22 14 L 22 10"/><rect x="2" y="6" width="16" height="12" rx="2"/></svg>`
                             }
                         }
-                        batteryIcon.src = `data:image/svg+xml;utf8,${encodeURIComponent(icon)}`
-                        
+                        svgToCorrectColor(batteryIcon, `data:image/svg+xml;utf8,${encodeURIComponent(icon)}`)                        
                         setTimeout(loop, 1000);
                     }
                     loop()
