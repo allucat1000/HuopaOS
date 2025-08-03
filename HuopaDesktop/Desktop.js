@@ -77,7 +77,6 @@ async function renderDesktop() {
             fileText.style.textAlign = "center";
             fileText.style.margin = "0.5em 0";
             fileText.style.padding = "0.5em 1em";
-            fileText.style.color = "white";
             fileDiv.append(fileIcon);
             fileDiv.append(fileText);
             fileDiv.onclick = async() => {
