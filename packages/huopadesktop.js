@@ -1564,7 +1564,6 @@ window.huopadesktop = (() => {
         titleBar.style = `
             height: 30px;
             width: 100%;
-            background: rgba(0, 0, 0, 0.15);
             z-index: ${appZIndex + 1};
             padding-bottom: 12px;
             display: flex;
@@ -1572,6 +1571,7 @@ window.huopadesktop = (() => {
             align-content: flex-start;
             position: relative;
         `;
+        titleBar.classList.add("appTitlebar")
         const appIcon = quantum.document.createElement("img");
         appIcon.draggable = "false";
         appIcon.style = "margin-left: 0.75em; user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; position: absolute; top: 50%; transform: translateY(-50%);";
