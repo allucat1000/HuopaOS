@@ -216,8 +216,7 @@ async function renderFileList(path) {
                 openInCode = true;
                 fileIconSrc = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-icon lucide-file"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>';
             }
-            setAttrs(fileIcon, {src: "data:image/svg+xml;utf8," + encodeURIComponent(fileIconSrc)})
-;
+            await setAttrs(fileIcon, {src: "data:image/svg+xml;utf8," + encodeURIComponent(fileIconSrc)});
             fileIcon.style = "display: inline; margin: 0 0.5em; width: 16px";
             fileName.textContent = dynamicFilePath.startsWith("/") ? dynamicFilePath.slice(1) : dynamicFilePath;
             fileName.style = "display: block; text-align: left; padding: 0.6em 0; cursor: pointer;";

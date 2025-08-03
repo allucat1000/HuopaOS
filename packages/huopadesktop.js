@@ -207,7 +207,7 @@ window.huopadesktop = (() => {
                     await internalFS.createPath("/system/env/noStyleUpdate.txt", "file", "false");
                 }
                 let styleDownloadSuccess
-                if (!await huopaAPI.getFile("/system/env/systemStyles.css") && !skipStyles) {
+                if (!await internalFS.getFile("/system/env/systemStyles.css") && !skipStyles) {
                     styleDownloadSuccess = await new Promise(async (resolve, reject) => {
                         try {
                             const response = await fetch(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/Themes/Dark&20Mode.css`);
@@ -578,7 +578,8 @@ window.huopadesktop = (() => {
                                     element.classList.add(value);
                                 } else if (key === "src") {
                                     const computed = getComputedStyle(element);
-                                    requestAnimationFrame(() => {
+                                    requestAnimationFrame(async() => {
+                                        if (!computed.color) { while (!computed.color) { await new Promise(r => setTimeout(r, 10)); }}
                                         const updated = value.replace("currentColor", computed.color);
                                         element[key] = updated;
                                     })

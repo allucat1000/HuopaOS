@@ -63,7 +63,7 @@ input[type="range"]::-moz-range-thumb {
 /* Default button style */
 button {
     display: block;
-    background-color: rgba(30, 77, 90, 0.5);
+    background-color: rgba(52, 130, 151, 0.5);
     border-style: solid;
     border-color: rgba(105, 105, 105, 0.45);
     border-radius: 0.5em;
@@ -142,20 +142,20 @@ input[type="checkbox"]:checked {
 /* Many system elements */
 
 #dock {
-  position: absolute; top: 0; width: 100%; height: 4em; background: rgba(15, 57, 80, 0.1); border: rgba(27, 61, 83, 0.65) 1.5px solid; border-radius: 0; left: 50%; transform: translateX(-50%); display: flex; align-items: center; border-color: #99999989; z-index: 15000;
+  position: absolute; bottom: 20px; width: 96%; height: 4em; background: rgba(90, 197, 255, 0.1); border: rgba(27, 61, 83, 0.65) 1.5px solid; border-radius: 2em; left: 50%; transform: translateX(-50%); display: flex; align-items: center; border-color: #99999989; z-index: 15000;
 }
 
 #startMenuDiv {
   width: 30em;
   height: 385px;
-  background-color: rgba(40, 130, 150, 0.35);
+  background-color: rgba(0, 55, 63, 0.65);
   position: absolute;
   border-radius: 1em;
   border: 2.5px;
   border-style: solid;
   border-color: rgba(45, 120, 140, 0.5);
-  left: 1.5%;
-  top: 6.5em;
+  left: 3%;
+  bottom: 7.5em;
   opacity: 0;
   transform: translateY(10px);
   transition: opacity 0.3s ease, transform 0.3s ease;
@@ -186,19 +186,19 @@ input[type="checkbox"]:checked {
 /* App colours */
 
 .primary {
-  background-color: rgba(25, 69, 79, 0.5);
-  border: rgba(23, 81, 97, 0.65) 1px solid;
+  background-color: rgba(37, 117, 135, 0.5);
+  border: rgba(32, 125, 152, 0.65) 2px solid;
   color: white;
 }
 
 .secondary {
-  background-color: rgba(35, 122, 173, 0.5);
+  background-color: rgba(0, 0, 0, 0);
   border: rgba(37, 114, 106, 0.65) 1px solid;
   color: white;
 }
 
 .popup {
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: rgba(0, 0, 0, 0.2);
 }
 
 .appTitleBar {
