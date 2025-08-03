@@ -107,7 +107,7 @@ window.huopadesktop = (() => {
                 }
                 await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/Terminal.js`, "/home/applications/Terminal.js");
                 if (!await internalFS.getFile("/home/applications/Terminal.js.icon")) {
-                    await internalFS.createPath("/home/applications/Terminal.icon", "file", `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square-terminal-icon lucide-square-terminal"><path d="m7 11 2-2-2-2"/><path d="M11 13h4"/><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/></svg>`);
+                    await internalFS.createPath("/home/applications/Terminal.js.icon", "file", `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square-terminal-icon lucide-square-terminal"><path d="m7 11 2-2-2-2"/><path d="M11 13h4"/><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/></svg>`);
                 }
                 await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/Processes.js`, "/home/applications/Processes.js");
 
