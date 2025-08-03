@@ -42,7 +42,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "1.3.8";
+    const version = "1.3.9";
     const processDigitList = {};
     const processArrayList = []
     // Priv Sys Funcs
@@ -210,7 +210,7 @@ window.huopadesktop = (() => {
                 if (!await internalFS.getFile("/system/env/systemStyles.css") && !skipStyles) {
                     styleDownloadSuccess = await new Promise(async (resolve, reject) => {
                         try {
-                            const response = await fetch(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/Themes/Dark&20Mode.css`);
+                            const response = await fetch(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/Themes/Dark%20Mode.css`);
                             if (response.ok) {
                                 const text = await response.text();
                                 await internalFS.createPath("/system/env/systemStyles.css", "file", text);
