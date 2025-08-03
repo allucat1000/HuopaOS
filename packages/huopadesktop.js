@@ -570,6 +570,10 @@ window.huopadesktop = (() => {
                             for (const [key, value] of Object.entries(attrs)) {
                                 if (key === "class") {
                                     element.classList.add(value);
+                                } else if (key === "src" {
+                                    const computed = getComputedStyle(element);
+                                    const updated = value.replace(/currentColor/g, computed.color);
+                                    element[key] = updated;
                                 } else {
                                     element[key] = value;
                                 }
@@ -585,7 +589,7 @@ window.huopadesktop = (() => {
                         systemStyles.textContent = ${JSON.stringify(styleData)};
                         await new Promise((resolve) => {
                         if (document.body) return resolve();
-                        window.addEventListener("DOMContentLoaded", () => resolve(), { once: true });
+                            window.addEventListener("DOMContentLoaded", () => resolve(), { once: true });
                         });
                         document.body.style.height = "calc(100vh - 40px)";
                         document.head.append(systemStyles);
@@ -1846,7 +1850,7 @@ window.huopadesktop = (() => {
                     const cleanedAppName = appList[i].replace("/home/applications/", "");
                     const appTitle = quantum.document.createElement("p");
                     appTitle.textContent = cleanedAppName.replace(/\.js$/, "");
-                    appButton.style = "background-color: rgba(0, 0, 0, 0.2); border-color: rgba(105, 105, 105, 0.6); border-style: solid; border-radius: 0.5em; padding: 0.5em; width: 35em; height: 3em; margin: 0.2em 0.5em; text-align: left; cursor: pointer; display: flex; flex-wrap: wrap; align-content: flex-start;"
+                    appButton.style = "background-color: transparent; border-color: rgba(105, 105, 105, 0.6); border-style: solid; border-radius: 0.5em; padding: 0.5em; width: 35em; height: 3em; margin: 0.2em 0.5em; text-align: left; cursor: pointer; display: flex; flex-wrap: wrap; align-content: flex-start;"
                     const appIcon = quantum.document.createElement("img");
                     appIcon.draggable = "false";
                     appIcon.style = "display: inline; padding-right: 0.2em; user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;"

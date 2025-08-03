@@ -32,8 +32,8 @@ if (response.ok) {
             name.textContent = appName;
             desc.textContent = appInfo;
 
-            appDiv.style = "margin: 1em; border-radius: 0.5em; background-color: rgba(65, 65, 65, 0.5); border-style: solid; border-color: rgba(105, 105, 105, 0.65); text-align: left;  padding: 1.5em; overflow: hidden; position: relative;";
-
+            appDiv.style = "margin: 1em; border-radius: 0.5em; text-align: left; padding: 1.5em; overflow: hidden; position: relative;";
+            appDiv.classList.add("primary")
             name.style.display = "inline";
             name.style.margin = 0;
 
