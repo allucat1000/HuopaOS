@@ -24,11 +24,6 @@
         "version":"129"
     },
 
-    {
-        "name":"Code.js",
-        "description":"A code editor for HuopaOS using Monaco.",
-        "version":"101"
-    }, 
 
     {
         "name":"Claw.js",
