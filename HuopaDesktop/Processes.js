@@ -8,7 +8,8 @@ setAttrs(createProcessButton, {
     "onclick":async() => {
         let newProcElev = false;
         const popup = document.createElement("div");
-        popup.style = "background-color: rgba(0, 0, 0, 0.7); width: 100%; height: 100%; position: absolute; top: 0; left: 0; margin: 0; padding: 0; z-index: 999";
+        popup.style = "width: 100%; height: 100%; position: absolute; top: 0; left: 0; margin: 0; padding: 0; z-index: 999";
+        popup.classList.add("popup");
         const text = document.createElement("h2");
         text.textContent = "Create a process";
         text.style.textAlign = "center";

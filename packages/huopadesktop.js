@@ -200,10 +200,10 @@ window.huopadesktop = (() => {
                     await internalFS.createPath("/system/env/noStyleUpdate.txt", "file", "false");
                 }
                 let styleDownloadSuccess
-                if (!skipStyles || skipStyles !== "true" ) {
+                if (!await huopaAPI.getFile("/system/env/systemStyles.css") && !skipStyles) {
                     styleDownloadSuccess = await new Promise(async (resolve, reject) => {
                         try {
-                            const response = await fetch(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/_systemStyles.css`);
+                            const response = await fetch(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/Themes/Dark&20Mode.css`);
                             if (response.ok) {
                                 const text = await response.text();
                                 await internalFS.createPath("/system/env/systemStyles.css", "file", text);
@@ -1111,7 +1111,8 @@ window.huopadesktop = (() => {
 
             openSaveDialog: (def) => {
                 const popup = quantum.document.createElement("div");
-                popup.style = "position: absolute; left: 0; top: 0; background-color: rgba(0, 0, 0, 0.4); width: 100%; height: 100%;";
+                popup.style = "position: absolute; left: 0; top: 0; width: 100%; height: 100%;";
+                popup.classList.add("popup")
                 const input = quantum.document.createElement("input");
                 const title = quantum.document.createElement("h2");
                 title.textContent = "Choose a filename and path";
@@ -1263,7 +1264,8 @@ window.huopadesktop = (() => {
                 return new Promise((resolve) => {
                     const digitId = appContainer.parentElement.id;
                     const popup = quantum.document.createElement("div");
-                    popup.style = "position: absolute; left: 0; top: 0; background-color: rgba(0, 0, 0, 0.4); width: 100%; height: 100%;";
+                    popup.style = "position: absolute; left: 0; top: 0; width: 100%; height: 100%;";
+                    popup.classList.add("popup")
                     const accept = quantum.document.createElement("button");
                     const decline = quantum.document.createElement("button");
                     const title = quantum.document.createElement("h2");
@@ -1812,7 +1814,7 @@ window.huopadesktop = (() => {
             startMenuDiv.style.display = "block";
             startMenuDiv.style.backdropFilter = `blur(${blur}px)`;
             const shutdownButton = quantum.document.createElement("button");
-            shutdownButton.style = "background-color: rgba(0, 0, 0, 0.2); border-color: rgba(105, 105, 105, 0.6); border-style: solid; border-radius: 0.5em; position: absolute; cursor: pointer; right: 0.5em; bottom: 0.5em; padding: 0.5em;"
+            shutdownButton.style = "background-color: transparent; border-color: rgba(105, 105, 105, 0.6); border-style: solid; border-radius: 0.5em; position: absolute; cursor: pointer; right: 0.5em; bottom: 0.5em; padding: 0.5em;"
             shutdownButton.textContent = "Shutdown";
             shutdownButton.onclick = async () => {
                 window.close()

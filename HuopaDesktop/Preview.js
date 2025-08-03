@@ -5,7 +5,7 @@ if (loadParams) {
     const chooseTitle = document.createElement("h1");
     await setAttrs(chooseTitle, {
         "textContent":"Choose a file to view",
-        "style":"color: white; text-align: center;"
+        "style":"text-align: center;"
     });
     document.body.append(chooseTitle);
     path = await huopaAPI.openFileDialog();
@@ -18,7 +18,7 @@ if (code === "[HuopaDesktop FS Security]: No permissions") {
     const alert = document.createElement("p");
     await setAttrs(alert, {
         "textContent":"Not right permissions. Unable to read file.",
-        "style":"color: white; text-align: center; margin: 1em;"
+        "style":"text-align: center; margin: 1em;"
     })
     document.body.append(alert);
 } else {
@@ -49,7 +49,7 @@ if (code === "[HuopaDesktop FS Security]: No permissions") {
         soundPreview.style.width = "50%";
         soundPreview.style.height = "5em";
         const currentPathTitle = document.createElement("h2");
-        currentPathTitle.style = "color: white; display: block; text-align: center; margin: 0.5em; margin-top: 1.15em;";
+        currentPathTitle.style = "display: block; text-align: center; margin: 0.5em; margin-top: 1.15em;";
         const dynamicPath = path.split("/").pop();
         currentPathTitle.textContent = dynamicPath;
         document.body.append(currentPathTitle);
@@ -69,7 +69,7 @@ if (code === "[HuopaDesktop FS Security]: No permissions") {
     textEditorField.style.height = "calc(100% - 60px)";
     textEditorField.style.width = "calc(100% - 17px)";
     const currentPathTitle = document.createElement("p");
-    currentPathTitle.style = "color: white; display: inline; text-align: left; margin: 0.5em; font-size: 1em; margin-top: 1.15em;";
+    currentPathTitle.style = "display: inline; text-align: left; margin: 0.5em; font-size: 1em; margin-top: 1.15em;";
     const dynamicPath = path.split("/").pop();
     currentPathTitle.textContent = dynamicPath;
     document.body.append(currentPathTitle);

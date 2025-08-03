@@ -2,14 +2,14 @@
 
 input {
     border-radius: 0.5em;
-    background-color: rgba(45, 45, 45, 0.5);
+    background-color: rgba(255, 255, 255, 0.5);
     border-style: solid;
-    border-color: rgba(105, 105, 105, 0.65);
+    border-color: rgba(200, 200, 200, 0.65);
     border-width: 1px;
     padding: 1em;
     width: 200px;
     outline: none;
-    color: white;
+    color: black;
     margin: 0 auto;
 }
 
@@ -21,8 +21,8 @@ input[type="range"] {
     background: transparent;
     cursor: pointer;
     width: 200px;
-    --slider-track-color: rgba(95, 95, 95, 0.5);
-    --slider-thumb-color: rgba(105, 105, 105, 0.9);
+    --slider-track-color: rgba(255, 255, 255, 0.5);
+    --slider-thumb-color: rgba(200, 200, 200, 0.9);
     --slider-thumb-size: 20px;
     --slider-thumb-border-radius: 50%;
     --slider-track-border-radius: 5px;
@@ -63,11 +63,11 @@ input[type="range"]::-moz-range-thumb {
 /* Default button style */
 button {
     display: block;
-    background-color: rgba(45, 45, 45, 0.5);
+    background-color: rgba(255, 255, 255, 0.5);
     border-style: solid;
     border-color: rgba(105, 105, 105, 0.45);
     border-radius: 0.5em;
-    color: white;
+    color: black;
     padding: 1em;
     cursor: pointer;
 }
@@ -77,11 +77,11 @@ button {
 textarea {
     width: 90%;
     height: 70px;
-    background-color: rgba(35, 35, 35, 0.5);
+    background-color: rgba(255, 255, 255, 0.5);
     margin: 0.5em auto;
     display: block;
     border-radius: 0.5em;
-    color: white;
+    color: black;
     padding: 0.5em;
     resize: none;
 }
@@ -124,8 +124,8 @@ input[type="color"]::-moz-color-swatch {
 input[type="checkbox"] {
   appearance: none;          
   -webkit-appearance: none;
-  background-color: rgba(45, 45, 45, 0.5); 
-  border: 1px solid rgba(105, 105, 105, 0.65);
+  background-color: rgba(255, 255, 255, 0.5); 
+  border: 1px solid rgba(200, 200, 200, 0.65);
   width: 16px;
   height: 16px;
   border-radius: 0.5em;
@@ -142,19 +142,19 @@ input[type="checkbox"]:checked {
 /* Many system elements */
 
 #dock {
-  position: absolute; bottom: 20px; width: 96%; height: 4em; background: rgba(17, 17, 17, 0.65); border: rgba(65, 65, 65, 0.65) 1.5px solid; border-radius: 2em; left: 50%; transform: translateX(-50%); display: flex; align-items: center; border-color: #99999989; z-index: 15000;
+  position: absolute; bottom: 20px; width: 96%; height: 4em; background: rgba(255, 255, 255, 0.3); border: rgba(200, 200, 200, 0.65) 1.5px solid; border-radius: 2em; left: 50%; transform: translateX(-50%); display: flex; align-items: center; border-color: #99999989; z-index: 15000;
 }
 
 #startMenuDiv {
   width: 30em;
   height: 385px;
-  background: rgba(17, 17, 17, 0.65);
+  background-color: rgba(255, 255, 255, 0.35);
   position: absolute;
   border-radius: 1em;
   border: 2.5px;
   border-style: solid;
-  border-color: #99999989;
-  left: 3%;
+  border-color: rgba(200, 200, 200, 0.5);
+  left: 1.5%;
   bottom: 7.5em;
   opacity: 0;
   transform: translateY(10px);
@@ -173,30 +173,38 @@ input[type="checkbox"]:checked {
   height: 500px;
   top: 100px;
   overflow: hidden;
-  background-color: rgba(17, 17, 17, 0.75);
-  border: 2px solid #80808089;
+  background-color: rgba(255, 255, 255, 0.75);
+  border: 1px solid #00000089;
   border-radius: 0.5em;
   margin: 0;
   opacity: 0;
   transform: translateY(20px);
   transition: opacity 0.15s ease, transform 0.15s ease;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6), 0 0 1px rgba(255, 255, 255, 0.04);
+  color: black;
 }
 
 /* App colours */
 
 .primary {
-  background-color: rgba(45, 45, 45, 0.5);
-  border: rgba(105, 105, 105, 0.65) 1px solid;
-  color: white;
+  background-color: rgba(255, 255, 255, 0.65);
+  border: rgba(200, 200, 200, 0.65) 1px solid;
+  color: rgb(0, 0, 0);
 }
 
 .secondary {
-  background-color: rgba(85, 85, 85, 0.5);
-  border: rgba(105, 105, 105, 0.65) 1px solid;
-  color: white;
+  background-color: rgba(215, 215, 215, 0.65);
+  border: rgba(160, 160, 160, 0.65) 1px solid;
+  color: rgb(0, 0, 0);
 }
 
+.popup {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.appTitleBar {
+  background-color: rgba(0, 0, 0, 0);
+}
 /* Scrollbars (disabled for now)
 
 ::-webkit-scrollbar {
@@ -229,6 +237,6 @@ html, body {
 */
 
 html, body {
-  color: white;
+  color: black;
   font-family: sans-serif;
 }
