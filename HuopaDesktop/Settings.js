@@ -290,7 +290,7 @@ async function customizationTabLoad() {
 ;
 
     opacSlider.oninput = async () => {
-        opacLabel.textContent = Math.round(opacSlider.value) * 100 + "%";
+        opacLabel.textContent = Math.round(opacSlider.value * 100) + "%";
         await huopaAPI.writeFile("/system/env/systemconfig/settings/customization/bgopac.txt", "file", opacSlider.value)
     };
     bgOpacDiv.append(opacSlider);
@@ -382,7 +382,7 @@ async function dockTabLoad() {
 ;
 
     opacSlider.oninput = async () => {
-        opacLabel.textContent = Math.round(opacSlider.value) * 100 + "%";
+        opacLabel.textContent = Math.round(opacSlider.value * 100) + "%";
         await huopaAPI.writeFile("/system/env/systemconfig/settings/customization/dockopac.txt", "file", opacSlider.value)
     };
     dockOpacDiv.append(opacSlider);
