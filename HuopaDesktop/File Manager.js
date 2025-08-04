@@ -58,7 +58,7 @@ async function renderFileList(path) {
         const fileName = document.createElement("label");
         let dynamicFilePath = folder.split("/").pop()
         if (folder === "/") dynamicFilePath = "root"
-        fileName.textContent = toTitleCase(dynamicFilePath);
+        fileName.textContent = truncate(toTitleCase(dynamicFilePath), 13);
         fileName.style = "display: block; text-align: left; padding: 0.6em 0; cursor: pointer; margin: 0 auto; text-align: center;";
         fileDiv.append(fileName);
         fileDiv.onclick = () => {
@@ -312,7 +312,5 @@ function truncate(text, maxlength) {
 }
 
 function toTitleCase(str) {
-  return str.replace(/\w\S*/g, function(txt){
-    return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-  });
+  return str.replace(/^([a-z])/, (match, p1) => p1.toUpperCase());
 }
