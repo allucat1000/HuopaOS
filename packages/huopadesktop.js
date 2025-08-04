@@ -513,7 +513,7 @@ window.huopadesktop = (() => {
         iframe.style.position = "absolute";
         iframe.style.top = "0";
         iframe.style.border = "none";
-        iframe.sandbox = "allow-scripts";
+        iframe.sandbox = "allow-scripts allow-pointer-lock";
         container.appendChild(iframe);
         const styleData = await internalFS.getFile("/system/env/systemStyles.css");
         const iframeHTML = `
