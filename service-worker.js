@@ -2,12 +2,12 @@ self.addEventListener("install", (e) => {
   e.waitUntil(
     caches.open("huopaos-cache").then((cache) =>
       cache.addAll([
-        "/",
-        "/index.html",
-        "/main.js",
-        "/manifest.json",
-        "/icon-192.png",
-        "/icon-512.png"
+        "/HuopaOS/",
+        "/HuopaOS/index.html",
+        "/HuopaOS/main.js",
+        "/HuopaOS/manifest.json",
+        "/HuopaOS/icon-192.png",
+        "/HuopaOS/icon-512.png"
       ])
     )
   );
