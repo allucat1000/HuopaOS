@@ -13,6 +13,12 @@
     },
 
     {
+        "name":"Doom.js",
+        "description":"Doom as an app using JS-Dos",
+        "version":"100"
+    },
+
+    {
         "name":"Code.js",
         "description":"A code editor for HuopaOS using Monaco.",
         "version":"101"
