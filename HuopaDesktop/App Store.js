@@ -101,11 +101,11 @@ if (response.ok) {
                 if (installState === false) {
                     installState = "mid";
                     installText.textContent = "Downloading...";
-                    const response = await fetch("https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/AppStore/" + appName, + "/main.js");
+                    const response = await fetch("https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/AppStore/" + appName + "/main.js");
                     if (response.ok) {
                         installText.textContent = "Installing...";
                         for (const file of appArray?.extrafiles) {
-                            const fileresponse = await fetch("https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/AppStore/" + appName, + "/" + file);
+                            const fileresponse = await fetch("https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/AppStore/" + appName + "/" + file);
                             if (fileresponse.ok) {
                                 await huopaAPI.writeFile(`/system/applicationStorage/${appArray.name}/${file}`, "file", fileresponse.text());
                             }
