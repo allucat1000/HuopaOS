@@ -6,6 +6,7 @@ await setAttrs(img, {
 document.body.append(img)
 huopaAPI.setMaxWindowSize(640, 360);
 huopaAPI.setMinWindowSize(640, 360);
+huopaAPI.setWindowConfig("ignoreTile");
 huopaAPI.removeTitlebar();
 async function setWinPos() {
     huopaAPI.setWindowPosition("0", "0");
