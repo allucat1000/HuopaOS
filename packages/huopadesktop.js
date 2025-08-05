@@ -42,7 +42,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "1.4.3";
+    const version = "1.4.4";
     const processDigitList = {};
     const processArrayList = []
     // Priv Sys Funcs
@@ -1665,7 +1665,7 @@ window.huopadesktop = (() => {
         if (extra === "elevated") {
             elevated = true;
         }
-        processDigitList[digits] = {elevated:elevated, name:appId, id:digits, title:appId, extra:extra, hidden:false, minWidth:375, minHeight:42, maxWidth:"100%" ,maxHeight:"100%"};
+        processDigitList[digits] = {elevated:elevated, name:appId, id:digits, title:appId, extra:extra, hidden:false, minWidth:375, minHeight:42, maxWidth:10000 ,maxHeight:10000};
         await createSysDaemon("appContBordUpdater", () => {
             const loop = async () => {
                 const override = quantum.document.querySelector(`[data-border-override="${digits}"]`);
