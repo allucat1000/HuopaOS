@@ -42,7 +42,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "1.3.9";
+    const version = "1.4.0";
     const processDigitList = {};
     const processArrayList = []
     // Priv Sys Funcs
@@ -1312,6 +1312,12 @@ window.huopadesktop = (() => {
                 return JSON.stringify(processDigitList[digitId]);
             },
 
+            setMinWindowSize: (width, height) => {
+                const digitId = appContainer.parentElement.id;
+                if (width) processDigitList[digitId].minWidth = width;
+                if (height) processDigitList[digitId].minHeight = height;
+            },
+
             // Use these for config files and such. Don't use these for tokens and other secret things (use safeStorage)!
             applicationStorageWrite: (data, appId) => {
                 internalFS.createPath("/system/applicationStorage/" + appId.replace(".js", "") + "/" + data[0], data[1], data[2]);
@@ -1442,8 +1448,6 @@ window.huopadesktop = (() => {
             quantum.document.removeEventListener("mouseup", onMouseUp);
         }
     }
-    const minWidth = 375;
-    const minHeight = 42;
     const onResizeStart = (e) => {
         e.preventDefault();
         const dir = e.target.dataset.direction;
@@ -1453,6 +1457,8 @@ window.huopadesktop = (() => {
         const startRect = win.getBoundingClientRect();
 
         function onMouseMove(ev) {
+            const minWidth = processDigitList[win.id].minWidth;
+            const minHeight = processDigitList[win.id].minHeight;
             win.children[9].style.pointerEvents = "none";
             for (const window of windowList) {
                 if (window[0] === win.id) continue;
@@ -1634,7 +1640,7 @@ window.huopadesktop = (() => {
         if (extra === "elevated") {
             elevated = true;
         }
-        processDigitList[digits] = {elevated:elevated, name:appId, id:digits, title:appId, extra:extra, hidden:false};
+        processDigitList[digits] = {elevated:elevated, name:appId, id:digits, title:appId, extra:extra, hidden:false, minWidth:375, minHeight:42};
         await createSysDaemon("appContBordUpdater", () => {
             const loop = async () => {
                 const override = quantum.document.querySelector(`[data-border-override="${digits}"]`);
