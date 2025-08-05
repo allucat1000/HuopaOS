@@ -22,7 +22,7 @@ await scriptLoaded;
 const player = document.createElement("div");
 
 await setAttrs(player, {
-    "style":"width: 100%; height: calc(100% + 32px);"
+    "style":"width: 100%; height: 100%;"
 })
 document.body.append(player)
 const doomDataURI = arrayBufferToDataURI(savedDoom)

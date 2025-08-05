@@ -606,6 +606,7 @@ window.huopadesktop = (() => {
                             window.addEventListener("DOMContentLoaded", () => resolve(), { once: true });
                         });
                         document.head.append(systemStyles);
+                        document.body.style.height = "100vh";
                         await eval("(async () => {" + ${JSON.stringify(appCode)} + "})()");
                     } catch (e) {
                         try {
