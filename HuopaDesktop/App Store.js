@@ -73,7 +73,7 @@ if (response.ok) {
             installButton.append(installText);
             let update = false;
             const installStateIcon = document.createElement("img");
-            if (!ver || ver !== appArray.version) update = true;
+            if (!ver || ver < appArray.version) update = true;
             if (await huopaAPI.getFile("/home/applications/" + appName + ".js") && !update) {
                 installState = true
                 installText.textContent = "Uninstall";

@@ -27,9 +27,11 @@ async function setWindowPositions() {
 
         const winArrList = rawWinArrList.filter(win => {
             const extra = winDigitList[win]?.extra;
+            const config = winDigitList[win]?.config;
             const hidden = winDigitList[win]?.hidden;
             if (hidden) return false;
             if (extra === "core") return false;
+            if (config.includes("ignoreTile")) return false;
             if (!extra || extra === "elevated") return true;
         });
 

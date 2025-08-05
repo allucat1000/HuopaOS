@@ -605,7 +605,6 @@ window.huopadesktop = (() => {
                         if (document.body) return resolve();
                             window.addEventListener("DOMContentLoaded", () => resolve(), { once: true });
                         });
-                        document.body.style.height = "calc(100vh - 40px)";
                         document.head.append(systemStyles);
                         await eval("(async () => {" + ${JSON.stringify(appCode)} + "})()");
                     } catch (e) {
@@ -1024,6 +1023,7 @@ window.huopadesktop = (() => {
             createNotification: async (title, content) => {
                 const notifEl = quantum.document.createElement("div");
                 notifEl.style = "border-radius: 0.5em; width: 20em; position: absolute; top: 0.5em; right: -22em; transition: right ease 1s; z-index: 99999;";
+                notifEl.classList.add("primary");
                 const titleEl = quantum.document.createElement("h3");
                 const descEl = quantum.document.createElement("p");
                 titleEl.style = "padding: 0.75em; margin: 0;";
@@ -1157,7 +1157,7 @@ window.huopadesktop = (() => {
                 const titlebar = appContainer.parentElement.children[8]
                 titlebar.children[0].remove();
                 titlebar.children[0].remove();
-
+                appContainer.style.height = "100%";
                 appContainer.parentElement.children[8].style.position = "absolute";
                 appContainer.parentElement.children[8].style.backgroundColor = "transparent";
                 appContainer.children[0].remove();
@@ -1334,6 +1334,11 @@ window.huopadesktop = (() => {
 
             enableWindowCollision: () => {
                 appContainer.parentElement.pointerEvents = "auto";
+            },
+
+            setWindowConfig: (config) => {
+                const digitId = appContainer.parentElement.id;
+                if (config) processDigitList[digitId].config = config;
             },
 
             // Use these for config files and such. Don't use these for tokens and other secret things (use safeStorage)!

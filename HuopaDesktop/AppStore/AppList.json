@@ -3,7 +3,7 @@
         "name":"BorderColorChanger",
         "description":"A tool for smoothly changing your window border color in the background. Use the 'colors.json' file to change the colors!",
         "author":"Allucat1000",
-        "version":"105",
+        "version":105,
         "icon":true,
         "extrafiles":[]
     }, 
@@ -12,7 +12,15 @@
         "name":"TilingWinManager",
         "description":"A tiling window manager for HuopaOS with customizable settings!",
         "author":"Allucat1000",
-        "version":"103",
+        "version":104,
+        "extrafiles":[]
+    },
+
+    {
+        "name":"GooseCam",
+        "description":"A goose in your screen's corner (Stream hosted by Izkuipers)",
+        "author":"Allucat1000, Izkuipers",
+        "version":100,
         "extrafiles":[]
     },
 
@@ -20,7 +28,7 @@
         "name":"Doom",
         "description":"Doom as an app using JS-Dos",
         "author":"Allucat1000",
-        "version":"100",
+        "version":100,
         "extrafiles":[]
     },
 
@@ -28,7 +36,7 @@
         "name":"Code",
         "description":"A code editor for HuopaOS using Monaco.",
         "author":"Allucat1000",
-        "version":"101",
+        "version":101,
         "extrafiles":[]
     },
 
@@ -36,7 +44,7 @@
         "name":"OriginChats",
         "description":"A messaging client for OriginChat servers.",
         "author":"Allucat1000", 
-        "version":"130",
+        "version":130,
         "extrafiles":[]
     },
 
@@ -45,7 +53,7 @@
         "name":"Claw",
         "description":"A client for the Claw social media platform. Uses the inbuilt Rotur Login portal for HuopaDesktop.", 
         "author":"Allucat1000",
-        "version":"115",
+        "version":115,
         "extrafiles":[]
     },
 
@@ -53,7 +61,7 @@
         "name":"FileImporter",
         "description":"A tool for importing files from your computer.",
         "author":"Allucat1000",
-        "version":"104",
+        "version":104,
         "extrafiles":[]
     },
 
@@ -61,7 +69,7 @@
         "name":"Sideloader",
         "description":"An app that you can use to sideload other apps. It is recommended not to run unknown untrusted apps.", 
         "author":"Allucat1000",
-        "version":"102",
+        "version":102,
         "extrafiles":[]
     },
 
@@ -69,7 +77,7 @@
         "name":"HuopaClicker",
         "description":"A very minimal clicker game. Was the first app to ever be made for HuopaDesktop.",
         "author":"Allucat1000", 
-        "version":"102",
+        "version":102,
         "extrafiles":[]
     }
 ]
