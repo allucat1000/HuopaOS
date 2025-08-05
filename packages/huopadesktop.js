@@ -1012,7 +1012,6 @@ window.huopadesktop = (() => {
                 const digitId = appContainer.parentElement.id;
                 processDigitList[digitId].hidden = true;
                 const appToDock = quantum.document.querySelector(`[data-dock-digit-id="${digitId}"]`);
-                appToDock.style.display = "none";
             },
 
             showWindow: () => {
@@ -1682,7 +1681,12 @@ window.huopadesktop = (() => {
             appToDock.onclick = async() => {
                 appZIndex = appZIndex + 10;
                 outerContainer.focus({ preventScroll: true });
-                outerContainer.style.display = "block";
+                if (outerContainer.style.display = "none") {
+                    outerContainer.style.display = "block";
+                } else {
+                    outerContainer.style.display = "none";
+                }
+                
                 outerContainer.style.zIndex = appZIndex;
             }
         }
