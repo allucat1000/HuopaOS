@@ -127,10 +127,10 @@ if (response.ok) {
                 } else if (installState === true) {
                     installState = "mid";
                     await huopaAPI.deleteFile("/home/applications/" + appName + ".js");
+                    await huopaAPI.deleteFile("/system/applicationStorage/" + appName);
                     installText.textContent = "Install";
                     iconSrc = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-down-to-line-icon lucide-arrow-down-to-line"><path d="M12 17V3"/><path d="m6 11 6 6 6-6"/><path d="M19 21H5"/></svg>';
-                    setAttrs(installStateIcon, {src: "data:image/svg+xml;utf8," + encodeURIComponent(iconSrc)})
-;
+                    setAttrs(installStateIcon, {src: "data:image/svg+xml;utf8," + encodeURIComponent(iconSrc)});
                     installState = false;
                 }
                 
