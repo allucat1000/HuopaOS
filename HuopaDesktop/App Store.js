@@ -50,7 +50,7 @@ if (response.ok) {
             titleDiv.style = "display: flex; align-items: center; margin-bottom: 0.75em;";
             const appIcon = document.createElement("img");
             if (appArray.icon) {
-                const response = await fetch("https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/AppStore/" + appName + ".icon");
+                const response = await fetch("https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/AppStore/" + appName + "/icon.svg");
                 if (response.ok) {
                     appIconSrc = await response.text();
                 } else {
@@ -101,16 +101,21 @@ if (response.ok) {
                 if (installState === false) {
                     installState = "mid";
                     installText.textContent = "Downloading...";
-                    const response = await fetch("https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/AppStore/" + appName);
+                    const response = await fetch("https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/AppStore/" + appName, + "/main.js");
                     if (response.ok) {
                         installText.textContent = "Installing...";
+                        for (const file of appArray?.extrafiles) {
+                            const fileresponse = await fetch("https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/AppStore/" + appName, + "/" + file);
+                            if (fileresponse.ok) {
+                                await huopaAPI.writeFile(`/system/applicationStorage/${appArray.name}/${file}`, "file", fileresponse.text());
+                            }
+                        }
                         const code = await response.text();
                         await huopaAPI.writeFile("/home/applications/" + appName, "file", code);
                         await huopaAPI.safeStorageWrite(appName + "/version.txt", "file", appArray.version)
                         installText.textContent = "Uninstall";
                         iconSrc = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-icon lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
-                        setAttrs(installStateIcon, {src: "data:image/svg+xml;utf8," + encodeURIComponent(iconSrc)})
-;
+                        setAttrs(installStateIcon, {src: "data:image/svg+xml;utf8," + encodeURIComponent(iconSrc)});
                         if (appIconSrc) {
                             await huopaAPI.writeFile("/home/applications/" + appName + ".icon", "file", appIconSrc);
                         }

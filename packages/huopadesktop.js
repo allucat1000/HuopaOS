@@ -42,7 +42,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "1.4.0";
+    const version = "1.4.1";
     const processDigitList = {};
     const processArrayList = []
     // Priv Sys Funcs
@@ -150,6 +150,11 @@ window.huopadesktop = (() => {
                 if (response4.ok) {
                     const data = await response4.text();
                     await internalFS.createPath("/system/env/modules/contextmenu.js", "file", data);
+                }
+                const response5 = await fetch(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/huopaAPIModules/html.js`);
+                if (response5.ok) {
+                    const data = await response5.text();
+                    await internalFS.createPath("/system/env/modules/html.js", "file", data);
                 }
                 await sys.addLine("[line=blue]Downloading and installing wallpapers...[/line]")
                 let wallpaper1Success;
