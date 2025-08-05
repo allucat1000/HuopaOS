@@ -1318,6 +1318,20 @@ window.huopadesktop = (() => {
                 if (height) processDigitList[digitId].minHeight = height;
             },
 
+            setMaxWindowSize: (width, height) => {
+                const digitId = appContainer.parentElement.id;
+                if (width) processDigitList[digitId].maxWidth = width;
+                if (height) processDigitList[digitId].maxHeight = height;
+            },
+
+            disableWindowCollision: () => {
+                appContainer.parentElement.pointerEvents = "none";
+            },
+
+            enableWindowCollision: () => {
+                appContainer.parentElement.pointerEvents = "auto";
+            },
+
             // Use these for config files and such. Don't use these for tokens and other secret things (use safeStorage)!
             applicationStorageWrite: (data, appId) => {
                 internalFS.createPath("/system/applicationStorage/" + appId.replace(".js", "") + "/" + data[0], data[1], data[2]);
@@ -1459,6 +1473,8 @@ window.huopadesktop = (() => {
         function onMouseMove(ev) {
             const minWidth = processDigitList[win.id].minWidth;
             const minHeight = processDigitList[win.id].minHeight;
+            const maxWidth = processDigitList[win.id].maxWidth;
+            const maxHeight = processDigitList[win.id].maxHeight;
             win.children[9].style.pointerEvents = "none";
             for (const window of windowList) {
                 if (window[0] === win.id) continue;
@@ -1475,35 +1491,35 @@ window.huopadesktop = (() => {
             let newHeight = startRect.height;
             let newLeft = startRect.left;
             let newTop = startRect.top;
-
+            
             if (dir.includes("right")) {
-                newWidth = Math.max(minWidth, startRect.width + dx);
+                if (startRect.width + dx < maxWidth) {
+                    newWidth = Math.max(minWidth, startRect.width + dx);
+                } else {
+                    newWidth = Math.max(minWidth, maxWidth);
+                }
+               
             }
 
             if (dir.includes("bottom")) {
-                newHeight = Math.max(minHeight, startRect.height + dy);
-            }
-
-            if (dir.includes("left")) {
-                const proposedWidth = startRect.width - dx;
-                if (proposedWidth >= minWidth) {
-                    newWidth = proposedWidth;
-                    newLeft = startRect.left + dx;
+                if (startRect.height + dy < maxHeight) {
+                    newHeight = Math.max(minHeight, startRect.height + dy);
                 } else {
-                    newWidth = minWidth;
-                    newLeft = startRect.left + (startRect.width - minWidth);
+                    newHeight = Math.max(minHeight, maxHeight);
                 }
+            }
+            if (dir.includes("left")) {
+                let proposedWidth = startRect.width - dx;
+                proposedWidth = Math.min(maxWidth, Math.max(minWidth, proposedWidth));
+                newWidth = proposedWidth;
+                newLeft = startRect.left + (startRect.width - proposedWidth);
             }
 
             if (dir.includes("top")) {
-                const proposedHeight = startRect.height - dy;
-                if (proposedHeight >= minHeight) {
-                    newHeight = proposedHeight;
-                    newTop = startRect.top + dy;
-                } else {
-                    newHeight = minHeight;
-                    newTop = startRect.top + (startRect.height - minHeight);
-                }
+                let proposedHeight = startRect.height - dy;
+                proposedHeight = Math.min(maxHeight, Math.max(minHeight, proposedHeight));
+                newHeight = proposedHeight;
+                newTop = startRect.top + (startRect.height - proposedHeight);
             }
 
             win.style.width = `${newWidth}px`;
@@ -1640,7 +1656,7 @@ window.huopadesktop = (() => {
         if (extra === "elevated") {
             elevated = true;
         }
-        processDigitList[digits] = {elevated:elevated, name:appId, id:digits, title:appId, extra:extra, hidden:false, minWidth:375, minHeight:42};
+        processDigitList[digits] = {elevated:elevated, name:appId, id:digits, title:appId, extra:extra, hidden:false, minWidth:375, minHeight:42, maxWidth:"100%" ,maxHeight:"100%"};
         await createSysDaemon("appContBordUpdater", () => {
             const loop = async () => {
                 const override = quantum.document.querySelector(`[data-border-override="${digits}"]`);
