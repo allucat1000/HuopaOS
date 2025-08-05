@@ -29,7 +29,6 @@ async function setWindowPositions() {
             const extra = winDigitList[win]?.extra;
             const config = winDigitList[win]?.config;
             const hidden = winDigitList[win]?.hidden;
-            console.log(config)
             if (hidden) return false;
             if (extra === "core") return false;
             if (config && config.includes("ignoreTile")) return false;
@@ -40,7 +39,6 @@ async function setWindowPositions() {
         if (total !== 0) {
 
             const reservedHeight = config.reservedHeight;
-
             let bestCols = 1;
             let bestRows = total;
             for (let cols = 1; cols <= total; cols++) {
@@ -74,7 +72,13 @@ async function setWindowPositions() {
                 const leftPercent = col * winWidth;
                 const widthPercent = winWidth * colSpan;
                 let top;
-                const left = `calc(${leftPercent}% + ${borderHalfPx}px)`;
+                let left;
+                if (config.reservedWidthAlign = "left") {
+                    left = `calc(${leftPercent}% + ${borderHalfPx}px)`;
+                } else {
+                    left = `calc(${leftPercent}% + ${borderHalfPx}px)`;
+                }
+                
                 if (config.dockPos === "bottom") {
                     top = `calc(${row} * ${winHeight} + ${borderHalfPx}px)`;
                 } else {
