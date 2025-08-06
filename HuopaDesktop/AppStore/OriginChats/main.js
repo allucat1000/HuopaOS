@@ -41,7 +41,7 @@ async function loop() {
             await huopaAPI.applicationStorageWrite("serverlist.json", "file", JSON.stringify(serverList));
         }
         serverToOpen = "0"
-       await huopaAPI.applicationStorageWrite("currentServerOpen.txt", "file", serverToOpen);
+        await huopaAPI.applicationStorageWrite("currentServerOpen.txt", "file", serverToOpen);
         const errorMsg = document.createElement("h2");
         await huopaAPI.setTitle("OriginChats - Failed to connect to server");
         await setAttrs(errorMsg, {
@@ -238,6 +238,7 @@ async function loop() {
                             "src":icon,
                             "style":"width: 32px; height: 32px; border-radius: 0.5em; margin: 0.5em; cursor: pointer;",
                             "onclick": async () => {
+                                console.log(serverI);
                                 await huopaAPI.applicationStorageWrite("currentServerOpen.txt", "file", serverI)
                                 if (serverCreatePopup) serverCreatePopup.remove()
                                 mainArea.remove();
@@ -507,12 +508,14 @@ async function loop() {
                     channelDiv.onclick = async() => {
                         try {
                             currentChannelPerms = channelPerms
-                            let viewAllowed
+                            let viewAllowed;
                             for (const role of roles) {
+                                if (!channelPerms?.view) continue;
                                 if (channelPerms.view.includes(role)) {
                                     viewAllowed = true
                                 }
                             }
+                            console.log(viewAllowed, loading);
                             if (!viewAllowed || loading === true) return;
                             messageList.innerHTML = "";
                             if (channel.wallpaper) {
@@ -522,15 +525,17 @@ async function loop() {
                             }
                             
                             openedChannel = channelSave.name;
-                            
                             delAllowed = false;
+                            console.log(channelPerms)
                             for (const role of roles) {
+                                if (!channelPerms?.delete) continue;
                                 if (channelPerms.delete.includes(role)) {
                                     delAllowed = true
                                 }
                             }
                             let sendAllowed
                             for (const role of roles) {
+                                if (!channelPerms?.send) continue;
                                 if (channelPerms.send.includes(role)) {
                                     sendAllowed = true
                                 }
@@ -543,10 +548,13 @@ async function loop() {
                                 chatBar.placeholder = `You cannot send messages in this channel`;
                             }
                             channelMsgs = undefined;
+                            console.log("d")
                             await huopaAPI.setTitle(`OriginChats - #${channelSave.name} - ${server.name}`);
                             loading = true;
                             ws.send(`{"cmd":"messages_get", "channel": "${channelSave.name}"}`);
+                            console.log("e");
                         } catch (error) {
+                            console.log(error)
                             crashError(error);
                         }
                         
