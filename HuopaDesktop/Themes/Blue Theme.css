@@ -186,7 +186,7 @@ input[type="checkbox"]:checked {
 /* App colours */
 
 .primary {
-  background-color: rgba(37, 117, 135, 0.5);
+  background-color: rgba(47, 145, 168, 0.4);
   border: rgba(32, 125, 152, 0.65) 2px solid;
   color: white;
 }
