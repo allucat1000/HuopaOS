@@ -548,13 +548,11 @@ async function loop() {
                                 chatBar.placeholder = `You cannot send messages in this channel`;
                             }
                             channelMsgs = undefined;
-                            console.log("d")
                             await huopaAPI.setTitle(`OriginChats - #${channelSave.name} - ${server.name}`);
                             loading = true;
                             ws.send(`{"cmd":"messages_get", "channel": "${channelSave.name}"}`);
-                            console.log("e");
                         } catch (error) {
-                            console.log(error)
+                            console.error(error)
                             crashError(error);
                         }
                         
