@@ -240,3 +240,7 @@ html, body {
   color: white;
   font-family: sans-serif;
 }
+
+body {
+  margin: 0;
+}
