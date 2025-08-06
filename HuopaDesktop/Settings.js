@@ -588,6 +588,7 @@ async function themeTabLoad() {
         themeButton.onclick = async () => {
             if (fileResponse.ok) {
                 await huopaAPI.writeFile("/system/env/systemStyles.css", "file", style);
+                await huopaAPI.requestSystemReboot()
             } else {
                 const warning = document.createElement("h2");
                 warning.textContent = 'Failed to fetch theme!';

@@ -42,10 +42,14 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "1.4.4";
+    const version = "1.4.5";
     const processDigitList = {};
     const processArrayList = []
     // Priv Sys Funcs
+    const rebootSystem = async() => {
+        await new Promise(resolve => setTimeout(resolve, 2500));
+        window.location.reload();
+    }
     const svgToCorrectColor = (el, icon) => {
         const computed = getComputedStyle(el);
         requestAnimationFrame(() => {
@@ -1340,6 +1344,40 @@ window.huopadesktop = (() => {
             setWindowConfig: (config) => {
                 const digitId = appContainer.parentElement.id;
                 if (config) processDigitList[digitId].config = config;
+            },
+
+            requestSystemReboot: () => {
+                return new Promise((resolve) => {
+                    const digitId = appContainer.parentElement.id;
+                    const popup = quantum.document.createElement("div");
+                    popup.style = "position: absolute; left: 0; top: 0; width: 100%; height: 100%;";
+                    popup.classList.add("popup")
+                    const accept = quantum.document.createElement("button");
+                    const decline = quantum.document.createElement("button");
+                    const title = quantum.document.createElement("h2");
+                    title.textContent = "Reboot System?";
+                    const subtitle = quantum.document.createElement("h3");
+                    subtitle.textContent = "The app requested to reboot the system, approve?";
+                    title.style = "margin: 1em auto; display: block; text-align: center;";
+                    subtitle.style = "margin: 1em auto; display: block; text-align: center;";
+                    accept.style = "margin: 0.5em auto; display: block; width: 50%";
+                    accept.textContent = "Approve";
+                    decline.style = "margin: 0.5em auto; display: block; width: 50%";
+                    decline.textContent = "Reject";
+                    popup.append(title, subtitle, accept, decline);
+                    appContainer.append(popup);
+
+                    accept.onclick = () => {
+                        popup.remove();
+                        rebootSystem();
+                        resolve(true);
+                    };
+
+                    decline.onclick = () => {
+                        popup.remove();
+                        resolve(false);
+                    };
+                });
             },
 
             // Use these for config files and such. Don't use these for tokens and other secret things (use safeStorage)!
