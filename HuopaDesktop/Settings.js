@@ -584,10 +584,10 @@ async function themeTabLoad() {
         preview.src = "https://raw.githubusercontent.com/Allucat1000/HuopaOS/main/HuopaDesktop/Themes/" + themeName + ".png";
         themeButton.append(preview);
         themeListDiv.append(themeButton);
-
+        const style = await fileResponse.text()
         themeButton.onclick = async () => {
             if (fileResponse.ok) {
-                await huopaAPI.writeFile("/system/env/systemStyles.css", "file", await fileResponse.text());
+                await huopaAPI.writeFile("/system/env/systemStyles.css", "file", style);
             } else {
                 const warning = document.createElement("h2");
                 warning.textContent = 'Failed to fetch theme!';
