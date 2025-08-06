@@ -1727,10 +1727,10 @@ window.huopadesktop = (() => {
             appToDock.onclick = async() => {
                 appZIndex = appZIndex + 10;
                 outerContainer.focus({ preventScroll: true });
-                if (outerContainer.style.display = "none") {
-                    outerContainer.style.display = "block";
-                } else {
+                if (outerContainer.style.display === "block") {
                     outerContainer.style.display = "none";
+                } else {
+                    outerContainer.style.display = "block";
                 }
                 
                 outerContainer.style.zIndex = appZIndex;
