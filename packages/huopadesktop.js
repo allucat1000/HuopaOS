@@ -47,7 +47,9 @@ window.huopadesktop = (() => {
     const processArrayList = []
     // Priv Sys Funcs
     const rebootSystem = async() => {
-        await new Promise(resolve => setTimeout(resolve, 2500));
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        document.getElementById("desktop").style.opacity = "0";
+        await new Promise(resolve => setTimeout(resolve, 1500));
         window.location.reload();
     }
     const svgToCorrectColor = (el, icon) => {
