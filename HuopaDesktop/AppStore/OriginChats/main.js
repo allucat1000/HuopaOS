@@ -716,7 +716,7 @@ async function loop() {
                         "textContent":msg.user
                     });
                     await setAttrs(text, {
-                        "style":"padding: 0em 0.5em 1em; text-align: left; text-wrap: wrap; user-select: text; white-space: pre;",
+                        "style":"padding: 0em 0.5em 1em; text-align: left; text-wrap: wrap; user-select: text; white-space: pre; text-wrap-mode: wrap;",
                         "textContent":msg.content
                     });
                     const urlRegex = /(?<!<)https?:\/\/[^\s>]+(?!>)/g;
@@ -867,7 +867,7 @@ async function loop() {
                     "textContent":msg.user
                 });
                 await setAttrs(text, {
-                    "style":"padding: 0em 0.5em 1em; text-align: left; text-wrap: wrap; user-select: text; white-space: pre;",
+                    "style":"padding: 0em 0.5em 1em; text-align: left; text-wrap: wrap; user-select: text; white-space: pre; text-wrap-mode: wrap;",
                     "textContent":msg.content
                 });
                 const urlRegex = /(?<!<)https?:\/\/[^\s>]+(?!>)/g;
