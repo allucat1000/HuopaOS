@@ -6,7 +6,7 @@ style.textContent = `
 `;
 const ContextMenu = await importModule("contextmenu");
 ContextMenu.disableDefault();
-document.body.append(style);
+document.head.append(style);
 async function loop() {
     let ws;
     let serverList;
@@ -61,10 +61,12 @@ async function loop() {
     let auth;
     let appState = "auth"
     let userList;
+    let throwawayData;
     let ratelimited = false;
     let userObj;
     let userData;
     let server;
+    let replyId;
     let messageLengthLimit;
     let userColors;
     let roles;
@@ -238,7 +240,6 @@ async function loop() {
                             "src":icon,
                             "style":"width: 32px; height: 32px; border-radius: 0.5em; margin: 0.5em; cursor: pointer;",
                             "onclick": async () => {
-                                console.log(serverI);
                                 await huopaAPI.applicationStorageWrite("currentServerOpen.txt", "file", serverI)
                                 if (serverCreatePopup) serverCreatePopup.remove()
                                 mainArea.remove();
@@ -378,7 +379,23 @@ async function loop() {
                                         chatBar.disabled = false;
                                     } else {
                                         chatBar.disabled = true;
-                                        chatBar.placeholder = `You cannot send messages in this channel`;
+                                        chatBar.placeholder = `You cannot send messages in this channel!`;
+                                    }
+                                } else if (replyId) {
+                                    messageToSend = `{"cmd":"message_new", "channel": "${openedChannel}", "content": ${JSON.stringify(message)}, "reply_to":"${replyId}"}`;
+                                    replyId = undefined;
+                                    let sendAllowed
+                                    for (const role of roles) {
+                                        if (currentChannelPerms.send.includes(role)) {
+                                            sendAllowed = true
+                                        }
+                                    }
+                                    if (sendAllowed === true) {
+                                        chatBar.placeholder = `Send a message in "#${openedChannel}" | Max message length: ${messageLengthLimit} characters`;
+                                        chatBar.disabled = false;
+                                    } else {
+                                        chatBar.disabled = true;
+                                        chatBar.placeholder = `You cannot send messages in this channel!`;
                                     }
                                 } else {
                                     messageToSend = `{"cmd":"message_new", "channel": "${openedChannel}", "content": ${JSON.stringify(message)}}`;
@@ -450,10 +467,16 @@ async function loop() {
 
             wsHandlers.set("message_delete", async(data) => {
                 if (data.channel !== openedChannel) return;
-                const msg = messageTable[data.id];
+                const msg = messageTable[data.id].el;
                 if (extraConfig.messageLogger) {
-                    const children = msg.children
-                    const textEl = children[1];
+                    const children = msg.children;
+                    let textEl;
+                    if (children[1].tagName.toLowerCase() === "p") {
+                        textEl = textEl[1]
+                    } else {
+                        textEl = textEl[3]
+                    }
+                    
                     textEl.style.color = "red";
                 } else {
                     (msg).remove();
@@ -463,9 +486,14 @@ async function loop() {
 
             wsHandlers.set("message_edit", async(data) => {
                 if (data.channel !== openedChannel) return;
-                const msg = messageTable[data.id];
+                const msg = messageTable[data.id].el;
                 const children = msg.children
-                const textEl = children[1];
+                let textEl;
+                if (children[1].tagName.toLowerCase() === "p") {
+                    textEl = children[1]
+                } else {
+                    textEl = children[3]
+                }
                 textEl.textContent = data.content;
             });
 
@@ -515,7 +543,6 @@ async function loop() {
                                     viewAllowed = true
                                 }
                             }
-                            console.log(viewAllowed, loading);
                             if (!viewAllowed || loading === true) return;
                             messageList.innerHTML = "";
                             if (channel.wallpaper) {
@@ -526,7 +553,6 @@ async function loop() {
                             
                             openedChannel = channelSave.name;
                             delAllowed = false;
-                            console.log(channelPerms)
                             for (const role of roles) {
                                 if (!channelPerms?.delete) continue;
                                 if (channelPerms.delete.includes(role)) {
@@ -545,7 +571,7 @@ async function loop() {
                                 chatBar.disabled = false;
                             } else {
                                 chatBar.disabled = true;
-                                chatBar.placeholder = `You cannot send messages in this channel`;
+                                chatBar.placeholder = `You cannot send messages in this channel!`;
                             }
                             channelMsgs = undefined;
                             await huopaAPI.setTitle(`OriginChats - #${channelSave.name} - ${server.name}`);
@@ -589,7 +615,9 @@ async function loop() {
                 chatBar.placeholder = `Send a message in "#${openedChannel}" | Max message length: ${messageLengthLimit} characters`;
                 ratelimited = false;
             });
-
+            wsHandlers.set("message_get", async(data) => {
+                throwawayData = data.message;
+            })
             wsHandlers.set("messages_get", async(data) => {
                 channelMsgs = data.messages;
                 channelMsgs = channelMsgs.reverse();
@@ -601,12 +629,43 @@ async function loop() {
                         "style":"width: calc(100% - 1em); padding: 0em; margin: 0.5em; position: relative; border-radius: 0.5em;",
                         "class":"primary"
                     });
-                    messageTable[msg.id] = msgDiv;
+                    messageTable[msg.id] = {el: msgDiv, msg: msg.content};
                     const user = document.createElement("p");
                     const text = document.createElement("p");
                     let changeButtons = false;
                     const deleteButton = document.createElement("button");
                     const editButton = document.createElement("button");
+                    const replyButton = document.createElement("button");
+                    const replyDiv = document.createElement("div");
+                    const replySeparator = document.createElement("div");
+                    await setAttrs(replyDiv, {
+                        "style":"padding: 0.5em 0;"
+                    });
+                    await setAttrs(replySeparator, {
+                        "style":"border-width: 1px;",
+                        "class":"primary"
+                    });
+                    let replyUser;
+                    let replyMsg
+                    if (msg.reply_to) {
+                        const replyData = msg.reply_to;
+                        replyUser = document.createElement("p");
+                        ws.send(`{"cmd":"message_get","channel":"${openedChannel}","id":"${replyData.id}"}`);
+                        while (!throwawayData) {
+                            await new Promise((res) => setTimeout(res, 10));
+                        }
+                        const replyMessageData = throwawayData.content;
+                        throwawayData = undefined;
+                        await setAttrs(replyUser, {
+                            "style":`padding: 0.5em; color: rgb(200, 200, 200); text-align: left; text-wrap: nowrap; display: inline; margin-right: 0; padding-right: 0.25em;`,
+                            "textContent":"> " + replyData.user
+                        });
+                        replyMsg = document.createElement("p");
+                        await setAttrs(replyMsg, {
+                            "style":`padding: 0.5em; color: gray; text-align: left; textwrap: nowrap; display: inline; padding-left: 0; margin-left: 0`,
+                            "textContent":truncate(replyMessageData, 20)
+                        })
+                    }
                     if (msg.user === userObj.username || delAllowed) {
                         changeButtons = true
                         await setAttrs(deleteButton, {
@@ -627,23 +686,34 @@ async function loop() {
                                 editedMessageId = msg.id;
                             }
                         });
+                        await setAttrs(replyButton, {
+                            "style":"position: absolute; top: -0.5em; right: 7.7em; padding: 0.5em 0.75em; display: none;",
+                            "textContent":"Reply",
+                            "onclick": async() => {
+                                chatBar.placeholder = `Replying to a message... | Max message length: ${messageLengthLimit} characters`;
+                                replyId = msg.id;
+                                chatBar.disabled = false;
+                            }
+                        });
                         msgDiv.addEventListener("mouseenter", async() => {
                             if (!ratelimited) {
+                                replyButton.style.display = "block";
                                 editButton.style.display = "block";
                                 deleteButton.style.display = "block";
                             }
                         });
                         msgDiv.addEventListener("mouseleave", async() => {
+                            replyButton.style.display = "none";
                             editButton.style.display = "none";
                             deleteButton.style.display = "none";
                         });
                     }
                     await setAttrs(user, {
-                        "style":`position: absolute; left: 0.5em; top: 0.5em; padding: 0em; color: ${userColors[msg.user]}; text-align: left; text-wrap: wrap;`,
+                        "style":`padding: 0.5em; color: ${userColors[msg.user]}; text-align: left; text-wrap: wrap;`,
                         "textContent":msg.user
                     });
                     await setAttrs(text, {
-                        "style":"padding: 2.5em 0.5em 1em; text-align: left; text-wrap: wrap; user-select: text;",
+                        "style":"padding: 0em 0.5em 1em; text-align: left; text-wrap: wrap; user-select: text;",
                         "textContent":msg.content
                     });
                     const urlRegex = /(?<!<)https?:\/\/[^\s>]+(?!>)/g;
@@ -675,9 +745,11 @@ async function loop() {
                             }
                             
                         }
-                        
-                        
-                        
+                    }
+                    if (msg.reply_to) {
+                        replyDiv.append(replyUser, replyMsg);
+                        msgDiv.append(replyDiv);
+                        msgDiv.append(replySeparator)
                     }
                     msgDiv.append(user);
                     if (msgContent.length > 0) {
@@ -687,6 +759,7 @@ async function loop() {
                     }
                     if (imgEl) msgDiv.append(imgEl);
                     if (changeButtons) {
+                        msgDiv.append(replyButton);
                         msgDiv.append(editButton);
                         msgDiv.append(deleteButton);
                     }
@@ -707,12 +780,43 @@ async function loop() {
                     "style":"width: calc(100% - 1em); padding: 0em; margin: 0.5em; position: relative; border-radius: 0.5em;",
                     "class":"primary"
                 });
-                messageTable[msg.id] = msgDiv;
+                messageTable[msg.id] = {el:msgDiv, msg: msg.content};
                 const user = document.createElement("p");
                 const text = document.createElement("p");
                 let changeButtons = false;
                 const deleteButton = document.createElement("button");
                 const editButton = document.createElement("button");
+                const replyButton = document.createElement("button");
+                const replyDiv = document.createElement("div");
+                const replySeparator = document.createElement("div");
+                await setAttrs(replyDiv, {
+                    "style":"padding: 0.5em 0;"
+                });
+                await setAttrs(replySeparator, {
+                    "style":"border-width: 1px;",
+                    "class":"primary"
+                });
+                let replyUser;
+                let replyMsg
+                if (msg.reply_to) {
+                    const replyData = msg.reply_to;
+                    replyUser = document.createElement("p");
+                    ws.send(`{"cmd":"message_get","channel":"${openedChannel}","id":"${replyData.id}"}`);
+                    while (!throwawayData) {
+                        await new Promise((res) => setTimeout(res, 10));
+                    }
+                    const replyMessageData = throwawayData.content;
+                    throwawayData = undefined;
+                    await setAttrs(replyUser, {
+                        "style":`padding: 0.5em; color: rgb(200, 200, 200); text-align: left; text-wrap: nowrap; display: inline; margin-right: 0; padding-right: 0.25em;`,
+                        "textContent":"> " + replyData.user
+                    });
+                    replyMsg = document.createElement("p");
+                    await setAttrs(replyMsg, {
+                        "style":`padding: 0.5em; color: gray; text-align: left; textwrap: nowrap; display: inline; padding-left: 0; margin-left: 0`,
+                        "textContent":truncate(replyMessageData, 20)
+                    })
+                }
                 if (msg.user === userObj.username || delAllowed) {
                     changeButtons = true
                     await setAttrs(deleteButton, {
@@ -733,23 +837,34 @@ async function loop() {
                             editedMessageId = msg.id;
                         }
                     });
+                    await setAttrs(replyButton, {
+                        "style":"position: absolute; top: -0.5em; right: 7.7em; padding: 0.5em 0.75em; display: none;",
+                        "textContent":"Reply",
+                        "onclick": async() => {
+                            chatBar.placeholder = `Replying to a message... | Max message length: ${messageLengthLimit} characters`;
+                            replyId = msg.id;
+                            chatBar.disabled = false;
+                        }
+                    });
                     msgDiv.addEventListener("mouseenter", async() => {
                         if (!ratelimited) {
+                            replyButton.style.display = "block";
                             editButton.style.display = "block";
                             deleteButton.style.display = "block";
                         }
                     });
                     msgDiv.addEventListener("mouseleave", async() => {
+                        replyButton.style.display = "none";
                         editButton.style.display = "none";
                         deleteButton.style.display = "none";
                     });
                 }
                 await setAttrs(user, {
-                    "style":`position: absolute; left: 0.5em; top: 0.5em; padding: 0em; color: ${userColors[msg.user]}; text-align: left; text-wrap: wrap;`,
+                    "style":`padding: 0.5em; color: ${userColors[msg.user]}; text-align: left; text-wrap: wrap;`,
                     "textContent":msg.user
                 });
                 await setAttrs(text, {
-                    "style":"padding: 2.5em 0.5em 1em; text-align: left; text-wrap: wrap; user-select: text;",
+                    "style":"padding: 0em 0.5em 1em; text-align: left; text-wrap: wrap; user-select: text;",
                     "textContent":msg.content
                 });
                 const urlRegex = /(?<!<)https?:\/\/[^\s>]+(?!>)/g;
@@ -781,9 +896,11 @@ async function loop() {
                         }
                         
                     }
-                    
-                    
-                    
+                }
+                if (msg.reply_to) {
+                    replyDiv.append(replyUser, replyMsg);
+                    msgDiv.append(replyDiv);
+                    msgDiv.append(replySeparator)
                 }
                 msgDiv.append(user);
                 if (msgContent.length > 0) {
@@ -793,6 +910,7 @@ async function loop() {
                 }
                 if (imgEl) msgDiv.append(imgEl);
                 if (changeButtons) {
+                    msgDiv.append(replyButton);
                     msgDiv.append(editButton);
                     msgDiv.append(deleteButton);
                 }
@@ -817,6 +935,7 @@ async function loop() {
 loop();
 
 async function crashError(error) {
+    console.error("OriginChats Client error!:", error)
     const errorText = document.createElement("h2");
     await setAttrs(errorText, {
         "textContent":`Whoopsies! Your client has crashed, error log: ${error}`,
@@ -825,33 +944,22 @@ async function crashError(error) {
     const retryButton = document.createElement("button");
     await setAttrs(retryButton, {
         "textContent":"Reload",
+        "style":"margin: 1em auto;",
         "onclick": async() => {
             (errorText).remove();
             (retryButton).remove();
             loop();
             return;
         }
-    })
+    });
+    document.body.innerHTML = "";
+    document.body.append(errorText, retryButton);
 }
 
-async function uploadFile(fileData) {
-    const file = fileData
-
-    const formData = new FormData();
-    formData.append("reqtype", "fileupload");
-    formData.append("userhash", "");
-    formData.append("time", "72h");
-    formData.append("fileToUpload", file, file.name);
-
-    const response = await fetch("https://corsproxy.io/?url=https://litterbox.catbox.moe/resources/internals/api.php", {
-    method: "POST",
-    body: formData
-    });
-
-    if (response.ok) {
-        const result = await response.text();
-        return result
+function truncate(text, maxlength) {
+    if (text.length >= maxlength) {
+        return text.slice(0, maxlength) + "..."
     } else {
-        return false;
+        return text;
     }
 }
