@@ -771,11 +771,11 @@ async function loop() {
                         }
                     }
                     if (sendAllowed) {
-                        if (changeButtons) {
-                            msgDiv.append(editButton);
-                            msgDiv.append(deleteButton);
-                        }
                         messageList.append(msgDiv);
+                    }
+                    if (changeButtons) {
+                        msgDiv.append(editButton);
+                        msgDiv.append(deleteButton);
                     }
                     
                 }
@@ -933,11 +933,11 @@ async function loop() {
                     }
                 }
                 if (sendAllowed) {
-                    if (changeButtons) {
-                        msgDiv.append(editButton);
-                        msgDiv.append(deleteButton);
-                    }
                     messageList.prepend(msgDiv);
+                }
+                if (changeButtons) {
+                    msgDiv.append(editButton);
+                    msgDiv.append(deleteButton);
                 }
                 
             });
