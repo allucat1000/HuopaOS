@@ -764,11 +764,20 @@ async function loop() {
                     }
                     if (imgEl) msgDiv.append(imgEl);
                     msgDiv.append(replyButton);
-                    if (changeButtons) {
-                        msgDiv.append(editButton);
-                        msgDiv.append(deleteButton);
+                    let sendAllowed
+                    for (const role of roles) {
+                        if (currentChannelPerms.send.includes(role)) {
+                            sendAllowed = true
+                        }
                     }
-                    messageList.append(msgDiv);
+                    if (sendAllowed) {
+                        if (changeButtons) {
+                            msgDiv.append(editButton);
+                            msgDiv.append(deleteButton);
+                        }
+                        messageList.append(msgDiv);
+                    }
+                    
                 }
                 loading = false;
             });
@@ -917,11 +926,20 @@ async function loop() {
                 }
                 if (imgEl) msgDiv.append(imgEl);
                 msgDiv.append(replyButton);
-                if (changeButtons) {
-                    msgDiv.append(editButton);
-                    msgDiv.append(deleteButton);
+                let sendAllowed
+                for (const role of roles) {
+                    if (currentChannelPerms.send.includes(role)) {
+                        sendAllowed = true
+                    }
                 }
-                messageList.prepend(msgDiv);
+                if (sendAllowed) {
+                    if (changeButtons) {
+                        msgDiv.append(editButton);
+                        msgDiv.append(deleteButton);
+                    }
+                    messageList.prepend(msgDiv);
+                }
+                
             });
 
         }
