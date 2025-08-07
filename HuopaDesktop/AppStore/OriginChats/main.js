@@ -669,7 +669,17 @@ async function loop() {
                             "textContent":truncate(replyMessageData, 20)
                         })
                     }
+                    await setAttrs(replyButton, {
+                        "style":"position: absolute; top: -0.5em; right: 0.5em; padding: 0.5em 0.75em; display: none;",
+                        "textContent":"Reply",
+                        "onclick": async() => {
+                            chatBar.placeholder = `Replying to a message... | Max message length: ${messageLengthLimit} characters`;
+                            replyId = msg.id;
+                            chatBar.disabled = false;
+                        }
+                    });
                     if (msg.user === userObj.username || delAllowed) {
+                        replyButton.style.right = "7.7em";
                         changeButtons = true
                         await setAttrs(deleteButton, {
                             "style":"position: absolute; top: -0.5em; color: red; right: 0.5em; padding: 0.5em 0.75em; display: none;",
@@ -689,28 +699,20 @@ async function loop() {
                                 editedMessageId = msg.id;
                             }
                         });
-                        await setAttrs(replyButton, {
-                            "style":"position: absolute; top: -0.5em; right: 7.7em; padding: 0.5em 0.75em; display: none;",
-                            "textContent":"Reply",
-                            "onclick": async() => {
-                                chatBar.placeholder = `Replying to a message... | Max message length: ${messageLengthLimit} characters`;
-                                replyId = msg.id;
-                                chatBar.disabled = false;
-                            }
-                        });
-                        msgDiv.addEventListener("mouseenter", async() => {
-                            if (!ratelimited) {
-                                replyButton.style.display = "block";
-                                editButton.style.display = "block";
-                                deleteButton.style.display = "block";
-                            }
-                        });
-                        msgDiv.addEventListener("mouseleave", async() => {
-                            replyButton.style.display = "none";
-                            editButton.style.display = "none";
-                            deleteButton.style.display = "none";
-                        });
+                        
                     }
+                    msgDiv.addEventListener("mouseenter", async() => {
+                        if (!ratelimited) {
+                            replyButton.style.display = "block";
+                            editButton.style.display = "block";
+                            deleteButton.style.display = "block";
+                        }
+                    });
+                    msgDiv.addEventListener("mouseleave", async() => {
+                        replyButton.style.display = "none";
+                        editButton.style.display = "none";
+                        deleteButton.style.display = "none";
+                    });
                     await setAttrs(user, {
                         "style":`padding: 0.5em; color: ${userColors[msg.user]}; text-align: left; text-wrap: wrap;`,
                         "textContent":msg.user
@@ -761,8 +763,8 @@ async function loop() {
                         imgEl.style.marginTop = "2.5em";
                     }
                     if (imgEl) msgDiv.append(imgEl);
+                    msgDiv.append(replyButton);
                     if (changeButtons) {
-                        msgDiv.append(replyButton);
                         msgDiv.append(editButton);
                         msgDiv.append(deleteButton);
                     }
@@ -820,7 +822,17 @@ async function loop() {
                         "textContent":truncate(replyMessageData, 20)
                     })
                 }
+                await setAttrs(replyButton, {
+                    "style":"position: absolute; top: -0.5em; right: 0.5em; padding: 0.5em 0.75em; display: none;",
+                    "textContent":"Reply",
+                    "onclick": async() => {
+                        chatBar.placeholder = `Replying to a message... | Max message length: ${messageLengthLimit} characters`;
+                        replyId = msg.id;
+                        chatBar.disabled = false;
+                    }
+                });
                 if (msg.user === userObj.username || delAllowed) {
+                    replyButton.style.right = "7.7em";
                     changeButtons = true
                     await setAttrs(deleteButton, {
                         "style":"position: absolute; top: -0.5em; color: red; right: 0.5em; padding: 0.5em 0.75em; display: none;",
@@ -840,28 +852,20 @@ async function loop() {
                             editedMessageId = msg.id;
                         }
                     });
-                    await setAttrs(replyButton, {
-                        "style":"position: absolute; top: -0.5em; right: 7.7em; padding: 0.5em 0.75em; display: none;",
-                        "textContent":"Reply",
-                        "onclick": async() => {
-                            chatBar.placeholder = `Replying to a message... | Max message length: ${messageLengthLimit} characters`;
-                            replyId = msg.id;
-                            chatBar.disabled = false;
-                        }
-                    });
-                    msgDiv.addEventListener("mouseenter", async() => {
-                        if (!ratelimited) {
-                            replyButton.style.display = "block";
-                            editButton.style.display = "block";
-                            deleteButton.style.display = "block";
-                        }
-                    });
-                    msgDiv.addEventListener("mouseleave", async() => {
-                        replyButton.style.display = "none";
-                        editButton.style.display = "none";
-                        deleteButton.style.display = "none";
-                    });
+                    
                 }
+                msgDiv.addEventListener("mouseenter", async() => {
+                    if (!ratelimited) {
+                        replyButton.style.display = "block";
+                        editButton.style.display = "block";
+                        deleteButton.style.display = "block";
+                    }
+                });
+                msgDiv.addEventListener("mouseleave", async() => {
+                    replyButton.style.display = "none";
+                    editButton.style.display = "none";
+                    deleteButton.style.display = "none";
+                });
                 await setAttrs(user, {
                     "style":`padding: 0.5em; color: ${userColors[msg.user]}; text-align: left; text-wrap: wrap;`,
                     "textContent":msg.user
@@ -912,8 +916,8 @@ async function loop() {
                     imgEl.style.marginTop = "2.5em";
                 }
                 if (imgEl) msgDiv.append(imgEl);
+                msgDiv.append(replyButton);
                 if (changeButtons) {
-                    msgDiv.append(replyButton);
                     msgDiv.append(editButton);
                     msgDiv.append(deleteButton);
                 }
