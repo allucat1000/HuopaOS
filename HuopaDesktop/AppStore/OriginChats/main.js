@@ -353,8 +353,11 @@ async function loop() {
                         if (openedChannel) {
                             const message = chatBar.value;
                             if (!message) {
+                                replyId = undefined;
                                 editingMessage = false;
                                 editedMessageId = undefined;
+                                chatBar.placeholder = `Send a message in "#${openedChannel}" | Max message length: ${messageLengthLimit} characters`;
+                                chatBar.value = "";
                                 return;
                             }
                             if (messageLengthLimit && message.length > messageLengthLimit) {
@@ -713,7 +716,7 @@ async function loop() {
                         "textContent":msg.user
                     });
                     await setAttrs(text, {
-                        "style":"padding: 0em 0.5em 1em; text-align: left; text-wrap: wrap; user-select: text;",
+                        "style":"padding: 0em 0.5em 1em; text-align: left; text-wrap: wrap; user-select: text; white-space: pre;",
                         "textContent":msg.content
                     });
                     const urlRegex = /(?<!<)https?:\/\/[^\s>]+(?!>)/g;
@@ -864,7 +867,7 @@ async function loop() {
                     "textContent":msg.user
                 });
                 await setAttrs(text, {
-                    "style":"padding: 0em 0.5em 1em; text-align: left; text-wrap: wrap; user-select: text;",
+                    "style":"padding: 0em 0.5em 1em; text-align: left; text-wrap: wrap; user-select: text; white-space: pre;",
                     "textContent":msg.content
                 });
                 const urlRegex = /(?<!<)https?:\/\/[^\s>]+(?!>)/g;

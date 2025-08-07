@@ -44,7 +44,7 @@
         "name":"OriginChats",
         "description":"A messaging client for OriginChat servers.",
         "author":"Allucat1000", 
-        "version":132,
+        "version":133,
         "extrafiles":[]
     },
 
