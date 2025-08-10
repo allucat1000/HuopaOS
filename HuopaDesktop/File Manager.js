@@ -188,7 +188,7 @@ async function renderFileList(path) {
                 }
             ])
             fileDiv.style = "width: calc(100% - 20px); margin: 0em auto; border-radius: 0.5em; margin: 0.25em; display: flex; cursor: pointer;";
-            if (fileI + 1 === fileList.length) {
+            if (Number(fileI) + 1 === fileList.length) {
                 fileDiv.style.marginBottom = "4em";
             }
             fileDiv.classList.add("primary")
