@@ -175,7 +175,8 @@ async function renderFileList(path) {
         let fileList = await huopaAPI.getFile(path);
         fileList = JSON.parse(fileList);
         
-        for (const file of fileList) {
+        for (const fileI in fileList) {
+            const file = fileList[fileI];
             const fileDiv = document.createElement("div");
             await ContextMenu.set(fileDiv, [
                 {
@@ -187,6 +188,9 @@ async function renderFileList(path) {
                 }
             ])
             fileDiv.style = "width: calc(100% - 20px); margin: 0em auto; border-radius: 0.5em; margin: 0.25em; display: flex; cursor: pointer;";
+            if (fileI + 1 === fileList.length) {
+                fileDiv.style.marginBottom = "4em";
+            }
             fileDiv.classList.add("primary")
             const fileName = document.createElement("label");
             const dynamicFilePath = file.replace(path + "/", "")
