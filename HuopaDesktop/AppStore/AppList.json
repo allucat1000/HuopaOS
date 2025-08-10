@@ -9,6 +9,14 @@
     }, 
 
     {
+        "name":"TypescriptTranspiler",
+        "description":"A tool to convert a Typescript file to Javascript.",
+        "author":"Allucat1000",
+        "version":100,
+        "extrafiles":[]
+    },
+
+    {
         "name":"TilingWinManager",
         "description":"A tiling window manager for HuopaOS with customizable settings!",
         "author":"Allucat1000",
@@ -36,7 +44,7 @@
         "name":"Code",
         "description":"A code editor for HuopaOS using Monaco.",
         "author":"Allucat1000",
-        "version":101,
+        "version":102,
         "extrafiles":[]
     },
 

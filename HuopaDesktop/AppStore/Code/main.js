@@ -16,6 +16,7 @@ editor.id = "editor";
 document.body.append(editor);
 const script = document.createElement("script");
 script.src = "https://unpkg.com/monaco-editor@latest/min/vs/loader.js";
+const huopaAPISpellcheck = await huopaAPI.applicationStorageRead("huopa.d.ts");
 script.onload = () => {
     require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@latest/min/vs' } });
     require(['vs/editor/editor.main'], function () {
@@ -49,6 +50,9 @@ script.onload = () => {
         });
 
         monaco.editor.setTheme('transparent-theme');
+
+        monaco.languages.typescript.javascriptDefaults.addExtraLib(huopaAPISpellcheck);
+        monaco.languages.typescript.typescriptDefaults.addExtraLib(huopaAPISpellcheck);
     });
 };
 document.body.appendChild(script);
