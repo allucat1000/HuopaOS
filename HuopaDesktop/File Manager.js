@@ -47,9 +47,7 @@ async function renderFileList(path) {
     sideBarList = document.createElement("div");
     sideBarList.append(favouriteTitle);
     sideBarList.style = "width: 9.5em; height: 100%; top: 0; left: 0; position: absolute; border-style: none;"
-    sideBarList.classList.add("secondary")
     topBarList.style = "display: flex; align-items: center; justify-content: start; padding: 0.25em; margin-top: 0.33em; position: fixed; top: -5px; border-style: none; width: calc(100% - 10em); right: 0; margin-bottom: 4em;";
-    topBarList.classList.add("secondary")
 
     for (const folder of favouriteFolders) {
         const fileDiv = document.createElement("div");
