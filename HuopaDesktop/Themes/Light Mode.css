@@ -164,6 +164,7 @@ input[type="checkbox"]:checked {
   padding: 0.5em;
   overflow-x: hidden;
   overflow-y: auto;
+  font-family: "Figtree", sans-serif
 
 }
 
@@ -238,7 +239,7 @@ html, body {
 
 html, body {
   color: black;
-  font-family: sans-serif;
+  font-family: "Figtree", sans-serif
 }
 
 body {

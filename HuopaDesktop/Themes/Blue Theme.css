@@ -70,6 +70,7 @@ button {
     color: white;
     padding: 1em;
     cursor: pointer;
+    border-width: 1px;
 }
 
 /* Default textarea style */
@@ -84,6 +85,7 @@ textarea {
     color: white;
     padding: 0.5em;
     resize: none;
+    border-width: 1px;
 }
 
 /* Default color input style */
@@ -164,6 +166,7 @@ input[type="checkbox"]:checked {
   padding: 0.5em;
   overflow-x: hidden;
   overflow-y: auto;
+  font-family: "Figtree", sans-serif;
 
 }
 
@@ -187,7 +190,7 @@ input[type="checkbox"]:checked {
 
 .primary {
   background-color: rgba(47, 145, 168, 0.4);
-  border: rgba(32, 125, 152, 0.65) 2px solid;
+  border: rgba(32, 125, 152, 0.65) 1px solid;
   color: white;
 }
 
@@ -237,7 +240,7 @@ html, body {
 
 html, body {
   color: white;
-  font-family: sans-serif;
+  font-family: "Figtree", sans-serif
 }
 
 body {
