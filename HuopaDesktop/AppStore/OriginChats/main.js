@@ -509,11 +509,7 @@ async function loop() {
                 if (loading2) return;
                 loading2 = true;
                 channelList = data.val;
-                const newChannelListEl = document.createElement("div");
-                (channelListEl).remove();
-                await setAttrs(newChannelListEl, {
-                    "style":"width: 250px; height: calc(100% - 5em); padding: 0; margin: 0; position: absolute; left: 0; top: 0; padding-right: 1.25em; overflow: scroll; overflow-x: hidden;"
-                });
+                (channelListEl).innerHTML = "";
                 const serverInfo = document.createElement("div");
                 await setAttrs(serverInfo, {
                     "style":"border-radius: 0.5em; margin-bottom: 0.5em; width: 100%; margin: 1em 0.5em; margin-top: 0.5em; display: flex; align-items: center;",
@@ -531,7 +527,7 @@ async function loop() {
                 });
                 serverInfo.append(serverIcon);
                 serverInfo.append(serverName);
-                newChannelListEl.append(serverInfo);
+                channelListEl.append(serverInfo);
 
                 for (channel of channelList) {
                     const channelDiv = document.createElement("div");
@@ -603,9 +599,7 @@ async function loop() {
                         channelDiv.style = `padding: ${channel.size / 100}em; width: 100%; margin: 0; background-color: transparent; border-style: none;`;         
                     }
                     
-                    newChannelListEl.append(channelDiv);
-                    bg.append(newChannelListEl);
-                    channelListEl = newChannelListEl
+                    channelListEl.append(channelDiv);
                     loading2 = false;
                 };
             });
