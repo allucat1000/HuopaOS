@@ -81,6 +81,7 @@ async function loop() {
     const wsHandlers = new Map();
     let channelMsgs;
     let channelListEl = document.createElement("div");
+    channelListEl.id = "channelListEl"
     let channelList;
     const bg = document.createElement("div");
     const messageArea = document.createElement("div");
@@ -509,7 +510,11 @@ async function loop() {
                 if (loading2) return;
                 loading2 = true;
                 channelList = data.val;
-                (channelListEl).innerHTML = "";
+                const newChannelListEl = document.createElement("div");
+                (channelListEl).remove();
+                await setAttrs(newChannelListEl, {
+                    "style":"width: 250px; height: calc(100% - 5em); padding: 0; margin: 0; position: absolute; left: 0; top: 0; padding-right: 1.25em; overflow: scroll; overflow-x: hidden;"
+                });
                 const serverInfo = document.createElement("div");
                 await setAttrs(serverInfo, {
                     "style":"border-radius: 0.5em; margin-bottom: 0.5em; width: 100%; margin: 1em 0.5em; margin-top: 0.5em; display: flex; align-items: center;",
@@ -527,7 +532,7 @@ async function loop() {
                 });
                 serverInfo.append(serverIcon);
                 serverInfo.append(serverName);
-                channelListEl.append(serverInfo);
+                newChannelListEl.append(serverInfo);
 
                 for (channel of channelList) {
                     const channelDiv = document.createElement("div");
@@ -599,7 +604,9 @@ async function loop() {
                         channelDiv.style = `padding: ${channel.size / 100}em; width: 100%; margin: 0; background-color: transparent; border-style: none;`;         
                     }
                     
-                    channelListEl.append(channelDiv);
+                    newChannelListEl.append(channelDiv);
+                    bg.append(newChannelListEl);
+                    channelListEl = newChannelListEl
                     loading2 = false;
                 };
             });
