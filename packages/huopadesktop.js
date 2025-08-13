@@ -42,7 +42,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "1.4.9";
+    const version = "1.5.0";
     const processDigitList = {};
     const processArrayList = []
     // Priv Sys Funcs
@@ -160,7 +160,7 @@ window.huopadesktop = (() => {
                 const wallpapers = ["Chilly Mountain.png", "Peaceful Landscape.png", "Chaotic Creek.png", "Forest Landscape.png", "Deep Space.jpg"]; // Credits to https://wallpaperaccess.com/real-space-hd-desktop (image #5)
                 for (const wallpaper of wallpapers) {
                     if (!await internalFS.getFile(`/system/env/wallpapers/${wallpaper}`)) {
-                        wallpaperSuccess = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/Wallpapers/${wallpaper}`, `/system/env/wallpapers/${wallpaper}`);
+                        await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/Wallpapers/${wallpaper}`, `/system/env/wallpapers/${wallpaper}`);
                     }
                 }
 
