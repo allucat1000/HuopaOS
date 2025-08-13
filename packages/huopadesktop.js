@@ -42,7 +42,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "1.4.8";
+    const version = "1.4.9";
     const processDigitList = {};
     const processArrayList = []
     // Priv Sys Funcs
@@ -94,44 +94,38 @@ window.huopadesktop = (() => {
                 await internalFS.createPath("/system/env/config.json", "file", JSON.stringify(bootConfig));
                 await sys.addLine("Boot config created!");
                 await sys.addLine("Installing system apps...");
-                await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/Settings.js`, "/home/applications/Settings.js");
+                const apps = ["Settings.js", "App Store.js", "Calculator.js", "File Manager.js", "Terminal.js", "Processes.js", "Preview.js"];
+                for (const app of apps) {
+                    await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/${app}`, `/home/applications/${app}`);
+                }
+                await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/Desktop.js`, "/system/coreapplications/.Desktop.js");
+
                 if (true) {
                     await internalFS.createPath("/home/applications/Settings.js.icon", "file", `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings-icon lucide-settings"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>`);
                 }
                 
-                await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/App%20Store.js`, "/home/applications/App Store.js");
                 if (true) {
                     await internalFS.createPath("/home/applications/App Store.js.icon", "file", `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-cart-icon lucide-shopping-cart"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>`);
                 }
-                await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/Desktop.js`, "/system/coreapplications/.Desktop.js");
                 if (true) {
                     await internalFS.createPath("/system/coreapplications/.Desktop.js.icon", "file", `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>`);
                 }
                 if (!await internalFS.getFile("/system/bootapps")) {
                     await internalFS.createPath("/system/bootapps", "dir", "[]");
                 }
-                await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/Calculator.js`, "/home/applications/Calculator.js");
                 if (true) {
                     await internalFS.createPath("/home/applications/Calculator.js.icon", "file", `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calculator-icon lucide-calculator"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>`);
                 }
-                await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/File%20Manager.js`, "/home/applications/File Manager.js");
                 if (true) {
                     await internalFS.createPath("/home/applications/File Manager.js.icon", "file", `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder-closed-icon lucide-folder-closed"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/><path d="M2 10h20"/></svg>`);
                 }
-                await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/Terminal.js`, "/home/applications/Terminal.js");
                 if (true) {
                     await internalFS.createPath("/home/applications/Terminal.js.icon", "file", `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square-terminal-icon lucide-square-terminal"><path d="m7 11 2-2-2-2"/><path d="M11 13h4"/><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/></svg>`);
                 }
-                await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/Processes.js`, "/home/applications/Processes.js");
-
-                await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/Preview.js`, "/home/applications/Preview.js");
                 if (true) {
                     await internalFS.createPath("/home/applications/Preview.js.icon", "file", `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-image-icon lucide-image"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>`);
                 }
-                if (await internalFS.getFile("/home/applications/Text Editor.js")) {
-                    await internalFS.delDir("/home/applications/Text Editor.js");
-                    await internalFS.delDir("/home/applications/Text Editor.js.icon");
-                }
+
                 await sys.addLine("Installing app modules...");
                 /* const response = await fetch(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/huopaAPIModules/rwl.js`);
                 if (response.ok) {
@@ -163,32 +157,15 @@ window.huopadesktop = (() => {
                     await internalFS.createPath("/system/env/modules/html.js", "file", data);
                 }
                 await sys.addLine("[line=blue]Downloading and installing wallpapers...[/line]")
-                let wallpaper1Success;
-                let wallpaper2Success;
-                let wallpaper3Success;
-                let wallpaper4Success;
-                let wallpaper5Success;
-                if (!await internalFS.getFile("/system/env/wallpapers/Chilly Mountain.png")) {
-                    wallpaper1Success = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/Wallpapers/Chilly%20Mountain.png`, "/system/env/wallpapers/Chilly Mountain.png");
+                const wallpapers = ["Chilly Mountain.png", "Peaceful Landscape.png", "Chaotic Creek.png", "Forest Landscape.png", "Deep Space.jpg"]; // Credits to https://wallpaperaccess.com/real-space-hd-desktop (image #5)
+                for (const wallpaper of wallpapers) {
+                    if (!await internalFS.getFile(`/system/env/wallpapers/${wallpaper}`)) {
+                        wallpaperSuccess = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/Wallpapers/${wallpaper}`, `/system/env/wallpapers/${wallpaper}`);
+                    }
                 }
-                if (!await internalFS.getFile("/system/env/wallpapers/Peaceful Landscape.png")) {
-                    wallpaper2Success = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/Wallpapers/Peaceful%20Landscape.png`, "/system/env/wallpapers/Peaceful Landscape.png");
-                }
-                if (!await internalFS.getFile("/system/env/wallpapers/Chaotic Creek.png")) {
-                    wallpaper3Success = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/Wallpapers/Chaotic%20Creek.png`, "/system/env/wallpapers/Chaotic Creek.png");
-                }
-                if (!await internalFS.getFile("/system/env/wallpapers/Forest Landscape.png")) {
-                    wallpaper4Success = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/Wallpapers/Forest%20Landscape.png`, "/system/env/wallpapers/Forest Landscape.png");
-                }
-                if (!await internalFS.getFile("/system/env/wallpapers/Deep Space.jpg")) {
-                    // Credits to https://wallpaperaccess.com/real-space-hd-desktop (image #4)
-                    wallpaper5Success = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/Wallpapers/Deep%20Space.jpg`, "/system/env/wallpapers/Deep Space.png");
-                }
-                
+
                 const logoSuccess = await fetchAndStoreImage(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaLogo.png`, "/system/env/assets/huopalogo.png");
-                if (wallpaper1Success && wallpaper2Success && wallpaper3Success && wallpaper4Success && logoSuccess) {
-                    await sys.addLine("Wallpapers and logo fetched and installed!");
-                }
+                await sys.addLine("Wallpapers and logo fetched and installed!");
                 sys.addLine("[line=blue]Installing styles...[/line]");
 
                 if (!await internalFS.getFile("/system/env/systemconfig/settings/customization/wallpaperchosen.txt")) {
@@ -218,7 +195,7 @@ window.huopadesktop = (() => {
                     await internalFS.createPath("/system/env/noStyleUpdate.txt", "file", "false");
                 }
                 let styleDownloadSuccess
-                if (!await internalFS.getFile("/system/env/systemStyles.css") && !skipStyles) {
+                if (!await internalFS.getFile("/system/env/systemStyles.css")) {
                     styleDownloadSuccess = await new Promise(async (resolve, reject) => {
                         try {
                             const response = await fetch(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/Themes/Dark%20Mode.css`);
