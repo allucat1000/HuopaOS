@@ -962,6 +962,12 @@ loop();
 
 async function crashError(error) {
     console.error("OriginChats Client error!:", error)
+    if (error === "TypeError: roles is not iterable") {
+        (errorText).remove();
+        (retryButton).remove();
+        loop();
+        return;
+    }
     const errorText = document.createElement("h2");
     await setAttrs(errorText, {
         "textContent":`Whoopsies! Your client has crashed, error log: ${error}`,
