@@ -464,6 +464,7 @@ async function loop() {
                 userColors = {};
                 for (const user of users) {
                     const name = user.username;
+                    if (user.color === "white" || user.color.startsWith("#fff")) continue;
                     userColors[name] = user.color;
                 }
             });
@@ -714,9 +715,12 @@ async function loop() {
                         deleteButton.style.display = "none";
                     });
                     await setAttrs(user, {
-                        "style":`padding: 0.5em; color: ${userColors[msg.user]}; text-align: left; text-wrap: wrap;`,
+                        "style":`padding: 0.5em; text-align: left; text-wrap: wrap;`,
                         "textContent":msg.user
                     });
+                    if (userColors[msg.user]) {
+                        user.style.color = userColors[msg.user];
+                    }
                     await setAttrs(text, {
                         "style":"padding: 0em 0.5em 1em; text-align: left; text-wrap: wrap; user-select: text; white-space: pre; text-wrap-mode: wrap;",
                         "textContent":msg.content
@@ -874,9 +878,12 @@ async function loop() {
                     deleteButton.style.display = "none";
                 });
                 await setAttrs(user, {
-                    "style":`padding: 0.5em; color: ${userColors[msg.user]}; text-align: left; text-wrap: wrap;`,
+                    "style":`padding: 0.5em; text-align: left; text-wrap: wrap;`,
                     "textContent":msg.user
                 });
+                if (userColors[msg.user]) {
+                    user.style.color = userColors[msg.user];
+                }
                 await setAttrs(text, {
                     "style":"padding: 0em 0.5em 1em; text-align: left; text-wrap: wrap; user-select: text; white-space: pre; text-wrap-mode: wrap;",
                     "textContent":msg.content
