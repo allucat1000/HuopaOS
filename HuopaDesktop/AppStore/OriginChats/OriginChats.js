@@ -920,8 +920,7 @@ async function loop() {
                 if (msgContent.length > 0) {
                     msgDiv.append(text);
                 }
-                
-                if (imgEl) {msgDiv.append(imgEl); text.style.paddingBottom = "0"; } ;
+                if (imgEl) {msgDiv.append(imgEl); text.style.paddingBottom = "0"; }
                 msgDiv.append(replyButton);
                 let sendAllowed
                 for (const role of roles) {
@@ -929,8 +928,7 @@ async function loop() {
                         sendAllowed = true
                     }
                 }
-                messageList.append(msgDiv);
-                
+                messageList.prepend(msgDiv)
                 if (changeButtons) {
                     msgDiv.append(editButton);
                     msgDiv.append(deleteButton);
