@@ -42,7 +42,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "1.4.7";
+    const version = "1.4.8";
     const processDigitList = {};
     const processArrayList = []
     // Priv Sys Funcs
@@ -260,17 +260,21 @@ window.huopadesktop = (() => {
                     sys.addLine("[line=red]Failed to fetch system styles![/line]")
                 }
     }
-    const createBugAlertWindow = async (app, errorInfo) => {
+    const createBugAlertWindow = async (app, errorInfo, src) => {
         const container = await createAppContainer(`${app}`);
         const titleText = quantum.document.createElement("h2");
         titleText.textContent = `${app} has crashed, more info below:`;
         const infoText = quantum.document.createElement("p");
+        const sourceText = quantum.document.createElement("p");
         infoText.textContent = `${errorInfo}`;
+        infoText.textContent = `${src}`;
         container.append(titleText);
         container.id = `app-${app}`;
         titleText.style = "text-align: center; margin: 1em;"
         infoText.style = "text-align: center; margin: 0.5em;"
+        sourceText.style = "text-align: center; margin: 0.5em;"
         container.append(infoText);
+        if (src) container.append(infoText);
     }
 
     const createRoturLoginWindow = async (app) => {
@@ -534,7 +538,9 @@ window.huopadesktop = (() => {
                 window.onerror = function (message, source, lineno, colno, error) {
                     window.parent.postMessage({
                         type: "iframeError",
-                        message, appName
+                        message,
+                        lineno, 
+                        appName,
                     }, "*");
                 };
 
@@ -637,8 +643,8 @@ window.huopadesktop = (() => {
 
             return iframe;
         } catch (error) {
-            console.error("[APP ERROR]: " + error.message);
-            createBugAlertWindow(appId, error.message);
+            console.error("[APP ERROR]: " + error.message, error.stack);
+            createBugAlertWindow(appId, error.message, error.stack);
         }
         
     };
@@ -675,7 +681,7 @@ window.huopadesktop = (() => {
                 if (id) {
                     event.source?.postMessage({ type: "apiResponse", id, error: err.message }, "*");
                 } else {
-                    createBugAlertWindow(appId, err.message);
+                    createBugAlertWindow(appId, err.message, err.stack);
                     console.error("[APP ERROR] " + err.message);
 
                 }
@@ -1403,7 +1409,7 @@ window.huopadesktop = (() => {
         const { type, data, id, appId} = event.data || {};
         if (event.data?.type === "iframeError") {
             console.error("[APP ERROR]:", event.data);
-            createBugAlertWindow(event.data.appName, event.data.message);
+            createBugAlertWindow(event.data.appName, event.data.message, event.data.stack);
             return;
         }
 
