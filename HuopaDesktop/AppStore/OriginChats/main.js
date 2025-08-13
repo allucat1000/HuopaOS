@@ -759,6 +759,7 @@ async function loop() {
                     msgDiv.append(user);
                     if (msgContent.length > 0) {
                         msgDiv.append(text);
+                        text.style.paddingBottom = "0";
                     }
                     if (imgEl) msgDiv.append(imgEl);
                     msgDiv.append(replyButton);
@@ -919,6 +920,7 @@ async function loop() {
                 msgDiv.append(user);
                 if (msgContent.length > 0) {
                     msgDiv.append(text);
+                    text.style.paddingBottom = "0";
                 }
                 if (imgEl) msgDiv.append(imgEl);
                 msgDiv.append(replyButton);
