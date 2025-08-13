@@ -759,9 +759,9 @@ async function loop() {
                     msgDiv.append(user);
                     if (msgContent.length > 0) {
                         msgDiv.append(text);
-                        text.style.paddingBottom = "0";
                     }
-                    if (imgEl) msgDiv.append(imgEl);
+                    
+                    if (imgEl) {msgDiv.append(imgEl); text.style.paddingBottom = "0"; } ;
                     msgDiv.append(replyButton);
                     let sendAllowed
                     for (const role of roles) {
@@ -769,9 +769,8 @@ async function loop() {
                             sendAllowed = true
                         }
                     }
-                    if (sendAllowed) {
-                        messageList.append(msgDiv);
-                    }
+                    messageList.append(msgDiv);
+                    
                     if (changeButtons) {
                         msgDiv.append(editButton);
                         msgDiv.append(deleteButton);
@@ -920,9 +919,9 @@ async function loop() {
                 msgDiv.append(user);
                 if (msgContent.length > 0) {
                     msgDiv.append(text);
-                    text.style.paddingBottom = "0";
                 }
-                if (imgEl) msgDiv.append(imgEl);
+                
+                if (imgEl) {msgDiv.append(imgEl); text.style.paddingBottom = "0"; } ;
                 msgDiv.append(replyButton);
                 let sendAllowed
                 for (const role of roles) {
@@ -930,9 +929,8 @@ async function loop() {
                         sendAllowed = true
                     }
                 }
-                if (sendAllowed) {
-                    messageList.prepend(msgDiv);
-                }
+                messageList.append(msgDiv);
+                
                 if (changeButtons) {
                     msgDiv.append(editButton);
                     msgDiv.append(deleteButton);
