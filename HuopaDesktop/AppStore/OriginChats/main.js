@@ -510,7 +510,7 @@ async function loop() {
                 loading2 = true;
                 channelList = data.val;
                 const newChannelListEl = document.createElement("div");
-                (channelListEl).remove;
+                (channelListEl).remove();
                 await setAttrs(newChannelListEl, {
                     "style":"width: 250px; height: calc(100% - 5em); padding: 0; margin: 0; position: absolute; left: 0; top: 0; padding-right: 1.25em; overflow: scroll; overflow-x: hidden;"
                 });
