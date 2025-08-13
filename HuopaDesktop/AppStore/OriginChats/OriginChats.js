@@ -464,7 +464,7 @@ async function loop() {
                 userColors = {};
                 for (const user of users) {
                     const name = user.username;
-                    if (user.color === "white" || user.color.startsWith("#fff") || user.color === "rgb(255, 255, 255)") continue;
+                    if (!user?.color || user.color === "white" || user.color.startsWith("#fff") || user.color === "rgb(255, 255, 255)") continue;
                     userColors[name] = user.color;
                 }
             });
