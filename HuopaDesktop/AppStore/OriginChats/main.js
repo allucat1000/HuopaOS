@@ -759,8 +759,6 @@ async function loop() {
                     msgDiv.append(user);
                     if (msgContent.length > 0) {
                         msgDiv.append(text);
-                    } else {
-                        imgEl.style.marginTop = "2.5em";
                     }
                     if (imgEl) msgDiv.append(imgEl);
                     msgDiv.append(replyButton);
@@ -921,8 +919,6 @@ async function loop() {
                 msgDiv.append(user);
                 if (msgContent.length > 0) {
                     msgDiv.append(text);
-                } else {
-                    imgEl.style.marginTop = "2.5em";
                 }
                 if (imgEl) msgDiv.append(imgEl);
                 msgDiv.append(replyButton);
