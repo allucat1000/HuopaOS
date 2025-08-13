@@ -849,7 +849,7 @@ window.huopadesktop = (() => {
 
                     if (mime.startsWith("text/") || /\.(txt|md|json|js|ts|html|css|csv|xml|yml|yaml)$/i.test(name)) {
                         return "text";
-                    } else if (mime.startsWith("image/") || mime.startsWith("video/") || mime.startsWith("audio/") || /\.(png|jpe?g|gif|svg|webp|mp4|mp3)$/i.test(name)) {
+                    } else if (mime.startsWith("image/") || mime.startsWith("font/") || mime.startsWith("video/") || mime.startsWith("audio/") || /\.(png|jpe?g|gif|svg|webp|mp4|mp3|ttf|woff|woff2)$/i.test(name)) {
                         return "dataURL";
                     } else {
                         return "binary";
