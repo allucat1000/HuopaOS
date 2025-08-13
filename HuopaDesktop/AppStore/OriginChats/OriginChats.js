@@ -5,9 +5,13 @@ style.textContent = `
     }
 `;
 const ContextMenu = await importModule("contextmenu");
+let errorText;
+let retryButton;
 ContextMenu.disableDefault();
 document.head.append(style);
 async function loop() {
+    if (errorText) errorText.remove();
+    if (retryButton) retryButton.remove();
     let ws;
     let serverList;
     serverList = await huopaAPI.applicationStorageRead("serverlist.json");
@@ -968,12 +972,12 @@ async function crashError(error) {
         loop();
         return;
     }
-    const errorText = document.createElement("h2");
+    errorText = document.createElement("h2");
     await setAttrs(errorText, {
         "textContent":`Whoopsies! Your client has crashed, error log: ${error}`,
         "style":"text-align: center; margin: 1em;"
     });
-    const retryButton = document.createElement("button");
+    cretryButton = document.createElement("button");
     await setAttrs(retryButton, {
         "textContent":"Reload",
         "style":"margin: 1em auto;",
