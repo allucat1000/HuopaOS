@@ -1056,7 +1056,6 @@ async function loop() {
             }
         }
 
-    
 
 }
 
@@ -1066,8 +1065,9 @@ async function crashError(error) {
     console.error("OriginChats Client error!:", error)
     if (error.message === "roles is not iterable") {
         console.error("Disconnect crash!")
-        if (errorText) errorText.remove();
-        if (retryButton) retryButton.remove();
+        document.body.innerHTML = "";
+        document.body.append(style)
+
         loop();
         return;
     }
@@ -1076,7 +1076,7 @@ async function crashError(error) {
         "textContent":`Whoopsies! Your client has crashed, error log: ${error}`,
         "style":"text-align: center; margin: 1em;"
     });
-    cretryButton = document.createElement("button");
+    retryButton = document.createElement("button");
     await setAttrs(retryButton, {
         "textContent":"Reload",
         "style":"margin: 1em auto;",
