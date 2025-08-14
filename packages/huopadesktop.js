@@ -1365,6 +1365,14 @@ window.huopadesktop = (() => {
                 });
             },
 
+            clipboardWrite: async(content) => {
+                await navigator.clipboard.writeText(content)
+            },
+
+            clipboardRead: async() => {
+                return await navigator.clipboard.readText()
+            },
+
             // Use these for config files and such. Don't use these for tokens and other secret things (use safeStorage)!
             applicationStorageWrite: (data, appId) => {
                 internalFS.createPath("/system/applicationStorage/" + appId.replace(".js", "") + "/" + data[0], data[1], data[2]);

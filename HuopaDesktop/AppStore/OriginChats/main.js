@@ -3,6 +3,34 @@ style.textContent = `
     p{
         margin: 0.25em;
     }
+    a{
+        text-decoration: none;
+        color: rgb(35 161 255)
+    }
+    h1{
+        margin: 0;
+        margin-left: 0.1em;
+    }
+    h2{
+        margin: 0;
+        margin-left: 0.1em;
+    }
+    h3{
+        margin: 0;
+        margin-left: 0.25em;
+    }
+    h4{
+        margin: 0;
+        margin-left: 0.33em;
+    }
+    h5{
+        margin: 0;
+        margin-left: 0.5em;
+    }
+    h6{
+        margin: 0;
+        margin-left: 0.5em;
+    }
 `;
 const ContextMenu = await importModule("contextmenu");
 let errorText;
@@ -480,10 +508,10 @@ async function loop() {
                 if (extraConfig.messageLogger) {
                     const children = msg.children;
                     let textEl;
-                    if (children[1].tagName.toLowerCase() === "p") {
-                        textEl = textEl[1]
+                    if (children[1].tagName.toLowerCase() === "div") {
+                        textEl = children[1]
                     } else {
-                        textEl = textEl[3]
+                        textEl = children[3]
                     }
                     
                     textEl.style.color = "red";
@@ -498,12 +526,13 @@ async function loop() {
                 const msg = messageTable[data.id].el;
                 const children = msg.children
                 let textEl;
-                if (children[1].tagName.toLowerCase() === "p") {
+                if (children[1].tagName.toLowerCase() === "div") {
                     textEl = children[1]
                 } else {
                     textEl = children[3]
                 }
-                textEl.textContent = data.content;
+                const html = await huopaAPI.parseMarkdown(escapeWithBackslashes(data.content));
+                textEl.innerHTML = html;
             });
 
             wsHandlers.set("channels_get", async(data) => {
@@ -640,7 +669,7 @@ async function loop() {
                     });
                     messageTable[msg.id] = {el: msgDiv, msg: msg.content};
                     const user = document.createElement("p");
-                    const text = document.createElement("p");
+                    const text = document.createElement("div");
                     let changeButtons = false;
                     const deleteButton = document.createElement("button");
                     const editButton = document.createElement("button");
@@ -726,10 +755,12 @@ async function loop() {
                     if (userColors[msg.user]) {
                         user.style.color = userColors[msg.user];
                     }
+                    const html = await huopaAPI.parseMarkdown(escapeWithBackslashes(msg.content));
                     await setAttrs(text, {
-                        "style":"padding: 0em 0.5em 1em; text-align: left; text-wrap: wrap; user-select: text; white-space: pre; text-wrap-mode: wrap;",
-                        "textContent":msg.content
+                        "style":"padding: 0em 0.5em 1em; text-align: left; text-wrap: wrap; user-select: text; white-space: pre; text-wrap-mode: wrap; padding-bottom: 0; margin-bottom: 0;",
+                        "innerHTML":html
                     });
+                    replaceLinks(text);
                     const urlRegex = /(?<!<)https?:\/\/[^\s>]+(?!>)/g;
                     const match = msg.content.match(urlRegex);
                     let msgContent = msg.content;
@@ -803,7 +834,7 @@ async function loop() {
                 });
                 messageTable[msg.id] = {el:msgDiv, msg: msg.content};
                 const user = document.createElement("p");
-                const text = document.createElement("p");
+                const text = document.createElement("div");
                 let changeButtons = false;
                 const deleteButton = document.createElement("button");
                 const editButton = document.createElement("button");
@@ -889,10 +920,12 @@ async function loop() {
                 if (userColors[msg.user]) {
                     user.style.color = userColors[msg.user];
                 }
+                const html = await huopaAPI.parseMarkdown(escapeWithBackslashes(msg.content));
                 await setAttrs(text, {
-                    "style":"padding: 0em 0.5em 1em; text-align: left; text-wrap: wrap; user-select: text; white-space: pre; text-wrap-mode: wrap;",
-                    "textContent":msg.content
+                    "style":"padding: 0em 0.5em 1em; text-align: left; text-wrap: wrap; user-select: text; white-space: pre; text-wrap-mode: wrap; padding-bottom: 0; margin-bottom: 0;",
+                    "innerHTML":html
                 });
+                replaceLinks(text);
                 const urlRegex = /(?<!<)https?:\/\/[^\s>]+(?!>)/g;
                 const match = msg.content.match(urlRegex);
                 let msgContent = msg.content;
@@ -999,4 +1032,28 @@ function truncate(text, maxlength) {
     } else {
         return text;
     }
+}
+
+function escapeWithBackslashes(str) {
+  return str.replace(/\\/g, "\\\\")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;")
+            .replace(/\n/g, "<br>");
+}
+
+function replaceLinks(el) {
+    const links = el.querySelectorAll("a[href]");
+    links.forEach(link => {
+        const url = link.href;
+        link.href = "javascript:void(0)";
+        link.addEventListener("click", (e) => {
+            e.preventDefault();
+            huopaAPI.clipboardWrite(url)
+            console.log(`[OriginChats]: Copied to clipboard: ${url}`);
+
+        });
+    });
 }

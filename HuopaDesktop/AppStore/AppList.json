@@ -44,7 +44,7 @@
         "name":"Code",
         "description":"A code editor for HuopaOS using Monaco.",
         "author":"Allucat1000",
-        "version":103,
+        "version":104,
         "extrafiles":[]
     },
 
@@ -52,7 +52,7 @@
         "name":"OriginChats",
         "description":"A messaging client for OriginChat servers.",
         "author":"Allucat1000", 
-        "version":135,
+        "version":136,
         "extrafiles":[]
     },
 

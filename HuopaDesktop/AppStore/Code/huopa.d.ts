@@ -101,6 +101,10 @@ declare interface HuopaAPI {
 
     requestSystemReboot(): Promise<boolean>;
 
+    clipboardWrite(): Promise<string>;
+
+    clipboardRead(): Promise<string>;
+
     applicationStorageWrite(data: any): Promise<void>;
 
     applicationStorageRead(): Promise<any>;
