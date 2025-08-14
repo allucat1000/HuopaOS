@@ -1,3 +1,4 @@
+const context = await importModule("contextmenu");
 const style = document.createElement("style");
 style.textContent = `
     p{
@@ -723,6 +724,32 @@ async function loop() {
                                 ws.send(`{"cmd":"message_delete", "id":"${msg.id}", "channel":"${openedChannel}"}`)
                             }
                         });
+                        if (msg.user === userObj.username) {
+                            context.set(msgDiv, [{"name":"Reply","function":() => {
+                                chatBar.placeholder = `Replying to a message... | Max message length: ${messageLengthLimit} characters`;
+                                replyId = msg.id;
+                                chatBar.disabled = false;
+                            }},{"name":"Edit","function":() => {
+                                chatBar.placeholder = `Editing a message... | Max message length: ${messageLengthLimit} characters`;
+                                chatBar.value = msg.content;
+                                editingMessage = true;
+                                chatBar.disabled = false;
+                                editedMessageId = msg.id;
+                            }},{"name":"Delete","function":() => {
+                                ws.send(`{"cmd":"message_delete", "id":"${msg.id}", "channel":"${openedChannel}"}`)
+                            }}]);
+                        } else {
+                            console.log(msg.user, userObj.username)
+                            context.set(msgDiv, [{"name":"Reply","function":() => {
+                                chatBar.placeholder = `Replying to a message... | Max message length: ${messageLengthLimit} characters`;
+                                replyId = msg.id;
+                                chatBar.disabled = false;
+                            }},{"name":"Delete","function":() => {
+                                ws.send(`{"cmd":"message_delete", "id":"${msg.id}", "channel":"${openedChannel}"}`)
+                            }}]);
+                        }
+                    }
+                    if (msg.user === userObj.username) {
                         await setAttrs(editButton, {
                             "style":"position: absolute; top: -0.5em; right: 3.5em; padding: 0.5em 0.75em; display: none;",
                             "textContent":"Edit",
@@ -735,6 +762,12 @@ async function loop() {
                             }
                         });
                         
+                    } else {
+                        context.set(msgDiv, [{"name":"Reply","function":() => {
+                            chatBar.placeholder = `Replying to a message... | Max message length: ${messageLengthLimit} characters`;
+                                replyId = msg.id;
+                            chatBar.disabled = false;
+                        }}]);
                     }
                     msgDiv.addEventListener("mouseenter", async() => {
                         if (!ratelimited) {
@@ -800,7 +833,6 @@ async function loop() {
                     if (msgContent.length > 0) {
                         msgDiv.append(text);
                     }
-                    
                     if (imgEl) {msgDiv.append(imgEl); text.style.paddingBottom = "0"; } ;
                     msgDiv.append(replyButton);
                     let sendAllowed
@@ -888,6 +920,32 @@ async function loop() {
                             ws.send(`{"cmd":"message_delete", "id":"${msg.id}", "channel":"${openedChannel}"}`)
                         }
                     });
+                    if (msg.user === userObj.username) {
+                        context.set(msgDiv, [{"name":"Reply","function":() => {
+                            chatBar.placeholder = `Replying to a message... | Max message length: ${messageLengthLimit} characters`;
+                            replyId = msg.id;
+                            chatBar.disabled = false;
+                        }},{"name":"Edit","function":() => {
+                            chatBar.placeholder = `Editing a message... | Max message length: ${messageLengthLimit} characters`;
+                            chatBar.value = msg.content;
+                            editingMessage = true;
+                            chatBar.disabled = false;
+                            editedMessageId = msg.id;
+                        }},{"name":"Delete","function":() => {
+                            ws.send(`{"cmd":"message_delete", "id":"${msg.id}", "channel":"${openedChannel}"}`)
+                        }}]);
+                    } else {
+                        console.log(msg.user, userObj.username)
+                        context.set(msgDiv, [{"name":"Reply","function":() => {
+                            chatBar.placeholder = `Replying to a message... | Max message length: ${messageLengthLimit} characters`;
+                            replyId = msg.id;
+                            chatBar.disabled = false;
+                        }},{"name":"Delete","function":() => {
+                            ws.send(`{"cmd":"message_delete", "id":"${msg.id}", "channel":"${openedChannel}"}`)
+                        }}]);
+                    }
+                }
+                if (msg.user === userObj.username) {
                     await setAttrs(editButton, {
                         "style":"position: absolute; top: -0.5em; right: 3.5em; padding: 0.5em 0.75em; display: none;",
                         "textContent":"Edit",
@@ -900,6 +958,12 @@ async function loop() {
                         }
                     });
                     
+                } else {
+                    context.set(msgDiv, [{"name":"Reply","function":() => {
+                        chatBar.placeholder = `Replying to a message... | Max message length: ${messageLengthLimit} characters`;
+                            replyId = msg.id;
+                        chatBar.disabled = false;
+                    }}]);
                 }
                 msgDiv.addEventListener("mouseenter", async() => {
                     if (!ratelimited) {
@@ -1000,9 +1064,10 @@ loop();
 
 async function crashError(error) {
     console.error("OriginChats Client error!:", error)
-    if (error.message.includes("roles is not iterable")) {
-        (errorText).remove();
-        (retryButton).remove();
+    if (error.message === "roles is not iterable") {
+        console.error("Disconnect crash!")
+        if (errorText) errorText.remove();
+        if (retryButton) retryButton.remove();
         loop();
         return;
     }
