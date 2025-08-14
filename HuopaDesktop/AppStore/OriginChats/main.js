@@ -1000,7 +1000,7 @@ loop();
 
 async function crashError(error) {
     console.error("OriginChats Client error!:", error)
-    if (error === "TypeError: roles is not iterable") {
+    if (error.message.includes("roles is not iterable")) {
         (errorText).remove();
         (retryButton).remove();
         loop();
