@@ -574,7 +574,7 @@ async function loop() {
                 const msg = messageTable[data.id].el;
                 const children = msg.children
                 let textEl;
-                if (children[1].tagName.toLowerCase() === "div") {
+                if (children[2].tagName.toLowerCase() === "button") {
                     textEl = children[1]
                 } else {
                     textEl = children[3]
