@@ -38,6 +38,7 @@ let errorText;
 let retryButton;
 ContextMenu.disableDefault();
 document.head.append(style);
+huopaAPI.setWindowSize("850px", "500px")
 async function loop() {
     if (errorText) errorText.remove();
     if (retryButton) retryButton.remove();
@@ -93,7 +94,9 @@ async function loop() {
     }
     let auth;
     let appState = "auth"
-    let userList;
+    let userList = [];
+    let usersOnline = [];
+    let usersOffline = [];
     let throwawayData;
     let ratelimited = false;
     let userObj;
@@ -116,7 +119,7 @@ async function loop() {
     const messageArea = document.createElement("div");
     messageArea.style = "position: absolute; right: 0; top: 0; width: calc(100% - 270px); height: 100%;";
     const messageList = document.createElement("div");
-    messageList.style = "position: absolute; right: 0; top: 0; width: 100%; height: calc(100% - 5em); display: flex; flex-direction: column-reverse; overflow: auto; overflow-x: hidden;";
+    messageList.style = "position: absolute; left: 0; top: 0; width: calc(100% - 10em); height: calc(100% - 5em); display: flex; flex-direction: column-reverse; overflow: auto; overflow-x: hidden;";
     const chatBar = document.createElement("input");
     
     let loading;
@@ -127,6 +130,9 @@ async function loop() {
     let messageTable = {};
     let delAllowed = false;
     let loading2 = false;
+    let userBar = document.createElement("div");
+    userBar.style = "position: absolute; right: 0; top: 0; width: 10em; height: calc(100% - 5em); overflow: auto; border-style: none; border-left-style: solid; display: none;";
+    userBar.classList.add("secondary");
 
     const sidebarEl = document.createElement("div");
    
@@ -243,6 +249,7 @@ async function loop() {
                 await huopaAPI.applicationStorageWrite("currentServerOpen.txt", "file", serverToOpen);
                 userObj = userData;
                 roles = userObj.roles;
+                ws.send('{"cmd":"users_online"}');
                 ws.send('{"cmd":"users_list"}');
                 while (!userColors) {
                     await new Promise((res) => setTimeout(res, 10));
@@ -381,6 +388,7 @@ async function loop() {
                 mainDiv.append(accountDiv);
                 mainDiv.append(messageArea);
                 messageArea.append(chatBar);
+                messageArea.append(userBar)
                 messageArea.append(messageList);
                 chatBar.onkeydown = async (e) => {
                     if (e.key === "Enter") {
@@ -474,12 +482,19 @@ async function loop() {
 
 
         async function registerFuncs() {
-            wsHandlers.set("user_connect", async() => {
-                // Test
+            wsHandlers.set("user_connect", async(data) => {
+                if (usersOnline.includes(data.user.username)) return;
+                userList.push(data);
+                usersOnline.push(data.user.username);
+                loadUserList()
             })
 
-            wsHandlers.set("user_disconnect", async() => {
-                // hmarbrugrer
+            wsHandlers.set("user_disconnect", async(data) => {
+                const i = usersOnline.indexOf(data.username);
+                if (i !== -1) usersOnline.splice(i, 1);
+                ws.send({"cmd":"users_list"});
+                await new Promise((res) => setTimeout(res, 1500));
+                loadUserList()
             })
             
             
@@ -494,14 +509,21 @@ async function loop() {
             }
 
             wsHandlers.set("users_list", async(data) => {
-                const users = data.users;
+                userList = data.users;
                 userColors = {};
-                for (const user of users) {
+                for (const user of userList) {
                     const name = user.username;
                     if (!user?.color || user.color === "white" || user.color.startsWith("#fff") || user.color === "rgb(255, 255, 255)") continue;
                     userColors[name] = user.color;
                 }
             });
+
+            wsHandlers.set("users_online", async(data) => {
+                usersOnline = [];
+                for (const x of data.users) {
+                    usersOnline.push(x.username)
+                }
+            })
 
             wsHandlers.set("message_delete", async(data) => {
                 if (data.channel !== openedChannel) return;
@@ -658,6 +680,9 @@ async function loop() {
                 throwawayData = data.message;
             })
             wsHandlers.set("messages_get", async(data) => {
+
+                loadUserList();
+
                 channelMsgs = data.messages;
                 channelMsgs = channelMsgs.reverse();
                 
@@ -669,7 +694,9 @@ async function loop() {
                         "class":"primary"
                     });
                     messageTable[msg.id] = {el: msgDiv, msg: msg.content};
-                    const user = document.createElement("p");
+                    const user = document.createElement("div");
+                    const username = document.createElement("p");
+                    const timeDisplay = document.createElement("p");
                     const text = document.createElement("div");
                     let changeButtons = false;
                     const deleteButton = document.createElement("button");
@@ -725,7 +752,7 @@ async function loop() {
                             }
                         });
                         if (msg.user === userObj.username) {
-                            context.set(msgDiv, [{"name":"Reply","function":() => {
+                            context.set(msgDiv, [{"name":convertDate(msg.timestamp, true)}, {"name":"Reply","function":() => {
                                 chatBar.placeholder = `Replying to a message... | Max message length: ${messageLengthLimit} characters`;
                                 replyId = msg.id;
                                 chatBar.disabled = false;
@@ -739,8 +766,7 @@ async function loop() {
                                 ws.send(`{"cmd":"message_delete", "id":"${msg.id}", "channel":"${openedChannel}"}`)
                             }}]);
                         } else {
-                            console.log(msg.user, userObj.username)
-                            context.set(msgDiv, [{"name":"Reply","function":() => {
+                            context.set(msgDiv, [{"name":convertDate(msg.timestamp, true)}, {"name":"Reply","function":() => {
                                 chatBar.placeholder = `Replying to a message... | Max message length: ${messageLengthLimit} characters`;
                                 replyId = msg.id;
                                 chatBar.disabled = false;
@@ -763,7 +789,7 @@ async function loop() {
                         });
                         
                     } else {
-                        context.set(msgDiv, [{"name":"Reply","function":() => {
+                        context.set(msgDiv, [{"name":convertDate(msg.timestamp, true)}, {"name":"Reply","function":() => {
                             chatBar.placeholder = `Replying to a message... | Max message length: ${messageLengthLimit} characters`;
                                 replyId = msg.id;
                             chatBar.disabled = false;
@@ -781,9 +807,16 @@ async function loop() {
                         editButton.style.display = "none";
                         deleteButton.style.display = "none";
                     });
-                    await setAttrs(user, {
-                        "style":`padding: 0.5em; text-align: left; text-wrap: wrap;`,
+                    await setAttrs(username, {
+                        "style":`padding: 0.5em; text-align: left; text-wrap: wrap; display: inline; margin-right: 0; padding-right: 0;`,
                         "textContent":msg.user
+                    });
+                    await setAttrs(timeDisplay, {
+                        "style":`padding: 0.5em; text-align: left; text-wrap: wrap; color: gray; display: inline; margin-left: 0;`,
+                        "textContent":`- ${convertDate(msg.timestamp, false)}`
+                    });
+                    await setAttrs(user, {
+                        "style":"padding: 0; margin: 1em 0;"
                     });
                     if (userColors[msg.user]) {
                         user.style.color = userColors[msg.user];
@@ -829,6 +862,7 @@ async function loop() {
                         msgDiv.append(replyDiv);
                         msgDiv.append(replySeparator)
                     }
+                    user.append(username, timeDisplay);
                     msgDiv.append(user);
                     if (msgContent.length > 0) {
                         msgDiv.append(text);
@@ -865,7 +899,9 @@ async function loop() {
                     "class":"primary"
                 });
                 messageTable[msg.id] = {el:msgDiv, msg: msg.content};
-                const user = document.createElement("p");
+                const user = document.createElement("div");
+                const username = document.createElement("p");
+                const timeDisplay = document.createElement("p");
                 const text = document.createElement("div");
                 let changeButtons = false;
                 const deleteButton = document.createElement("button");
@@ -935,7 +971,6 @@ async function loop() {
                             ws.send(`{"cmd":"message_delete", "id":"${msg.id}", "channel":"${openedChannel}"}`)
                         }}]);
                     } else {
-                        console.log(msg.user, userObj.username)
                         context.set(msgDiv, [{"name":"Reply","function":() => {
                             chatBar.placeholder = `Replying to a message... | Max message length: ${messageLengthLimit} characters`;
                             replyId = msg.id;
@@ -977,9 +1012,16 @@ async function loop() {
                     editButton.style.display = "none";
                     deleteButton.style.display = "none";
                 });
-                await setAttrs(user, {
-                    "style":`padding: 0.5em; text-align: left; text-wrap: wrap;`,
+                await setAttrs(username, {
+                    "style":`padding: 0.5em; text-align: left; text-wrap: wrap; display: inline; margin-right: 0; padding-right: 0;`,
                     "textContent":msg.user
+                });
+                await setAttrs(timeDisplay, {
+                    "style":`padding: 0.5em; text-align: left; text-wrap: wrap; color: gray; display: inline; margin-left: 0;`,
+                    "textContent":`- ${convertDate(msg.timestamp)}`
+                });
+                await setAttrs(user, {
+                    "style":"padding: 0; margin: 1em 0;"
                 });
                 if (userColors[msg.user]) {
                     user.style.color = userColors[msg.user];
@@ -1025,11 +1067,12 @@ async function loop() {
                     msgDiv.append(replyDiv);
                     msgDiv.append(replySeparator)
                 }
+                user.append(username, timeDisplay);
                 msgDiv.append(user);
                 if (msgContent.length > 0) {
                     msgDiv.append(text);
                 }
-                if (imgEl) {msgDiv.append(imgEl); text.style.paddingBottom = "0"; }
+                if (imgEl) {msgDiv.append(imgEl); text.style.paddingBottom = "0"; } ;
                 msgDiv.append(replyButton);
                 let sendAllowed
                 for (const role of roles) {
@@ -1056,6 +1099,45 @@ async function loop() {
             }
         }
 
+        async function loadUserList() {
+            userBar.style.display = "block";
+            userBar.innerHTML = "";
+            const onlineLabel = document.createElement("p");
+            await setAttrs(onlineLabel, {
+                "style":"text-align: left; margin: 0.5em;",
+                "textContent":`Online - ${usersOnline.length}`
+            })
+            userBar.append(onlineLabel);
+            usersOffline = userList;
+            for (const user of usersOnline) {
+                const div = document.createElement("div");
+                await setAttrs(div, {
+                    "style":"padding: 0.5em; text-align: left; border-radius: 0.5em; margin: 0.25em;",
+                    "class":"primary",
+                    "textContent":user
+                });
+                if (userColors[user]) div.style.color = userColors[user]
+                userBar.append(div);
+            }
+            const offlineLabel = document.createElement("p");
+            await setAttrs(offlineLabel, {
+                "style":"text-align: left; margin: 0.5em;",
+                "textContent":`Offline - ${usersOffline.length}`
+            })
+            userBar.append(offlineLabel);
+
+            for (const user of usersOffline) {
+                const div = document.createElement("div");
+                await setAttrs(div, {
+                    "style":"padding: 0.5em; text-align: left; border-radius: 0.5em; margin: 0.25em; opacity: 0.5;",
+                    "class":"primary",
+                    "textContent":user.username
+                });
+                if (usersOnline.includes(user.username)) continue;
+                if (user.color) div.style.color = user.color;
+                userBar.append(div);
+            }
+        }
 
 }
 
@@ -1121,4 +1203,27 @@ function replaceLinks(el) {
 
         });
     });
+}
+
+function convertDate(time, exact = false) {
+    const date = new Date(time * 1000);
+    let formatted;
+    if (exact) {
+        formatted = date.toLocaleString("en-GB", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: false
+        });
+    } else {
+        formatted = date.toLocaleTimeString("en-GB", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false
+        });
+    }
+    return formatted;
 }
