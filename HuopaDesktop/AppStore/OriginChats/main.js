@@ -37,6 +37,30 @@ const ContextMenu = await importModule("contextmenu");
 let errorText;
 let retryButton;
 ContextMenu.disableDefault();
+document.addEventListener("keydown", (e) => {
+    if (e.altKey || e.ctrlKey || e.metaKey) {
+        if (e.code === "Slash") {
+            e.preventDefault();
+            console.log(document.body.style.fontSize);
+            if (!document.body.style.fontSize) {
+                document.body.style.fontSize = "0.8em";
+            } else {
+                document.body.style.fontSize = Number(document.body.style.fontSize.replace("em", "")) / 1.25 + "em";
+                if (Number(document.body.style.fontSize.replace("em", "")) < 0.5) document.body.style.fontSize = "0.5em";
+            }
+        } else if (e.code === "Minus") {
+            e.preventDefault()
+            if (!document.body.style.fontSize) {
+                document.body.style.fontSize = "1.25em";
+            } else {
+                document.body.style.fontSize = Number(document.body.style.fontSize.replace("em", "")) * 1.25 + "em";
+                if (Number(document.body.style.fontSize.replace("em", "")) > 1.5) document.body.style.fontSize = "1.5em";
+            }
+        } else if (e.code === "Digit0") {
+            document.body.style.fontSize = "1em";
+        }
+    }
+})
 document.head.append(style);
 huopaAPI.setWindowSize("850px", "500px")
 async function loop() {
@@ -117,7 +141,7 @@ async function loop() {
     let channelList;
     const bg = document.createElement("div");
     const messageArea = document.createElement("div");
-    messageArea.style = "position: absolute; right: 0; top: 0; width: calc(100% - 270px); height: 100%;";
+    messageArea.style = "position: absolute; right: 0; top: 0; width: calc(100% - 16.875em); height: 100%;";
     const messageList = document.createElement("div");
     messageList.style = "position: absolute; left: 0; top: 0; width: calc(100% - 10em); height: calc(100% - 5em); display: flex; flex-direction: column-reverse; overflow: auto; overflow-x: hidden;";
     const chatBar = document.createElement("input");
@@ -144,7 +168,7 @@ async function loop() {
         await huopaAPI.applicationStorageWrite("currentServerOpen.txt", "file", "0");
         
         await setAttrs(sidebarEl, {
-            "style":"position: absolute; width: 50px; height: calc(100% - 5em); left: 0; top: 0; display: flex; flex-direction: column; align-items: center;"
+            "style":"position: absolute; width: 3.125em; height: calc(100% - 5em); left: 0; top: 0; display: flex; flex-direction: column; align-items: center;"
         });
         const userArea = document.createElement("div");
         await setAttrs(userArea, {
@@ -152,7 +176,7 @@ async function loop() {
         }) 
         const mainArea = document.createElement("div");
         await setAttrs(mainArea, {
-            "style":"position: absolute; right: 0; top: 0; width: calc(100% - 34px - 1em); height: 100%;"
+            "style":"position: absolute; right: 0; top: 0; width: calc(100% - 2.125em - 1em); height: 100%;"
         });
 
         ws.onmessage = async (msg) => {
@@ -208,7 +232,7 @@ async function loop() {
                     loginDiv.remove();
                     ws.send(`{"cmd":"auth","validator":"${auth}"}`);
                     await setAttrs(loadingEl, {
-                        "style":"text-align: center; position: absolute; left: 50%; top: calc(50% - 25px); transform: translate(-50%, -50%);",
+                        "style":"text-align: center; position: absolute; left: 50%; top: calc(50% - 1.5625em); transform: translate(-50%, -50%);",
                         "textContent":"Loading..."
                     });
                     document.body.append(loadingEl);
@@ -279,7 +303,7 @@ async function loop() {
                     if (icon) {
                         await setAttrs(serverIcon, {
                             "src":icon,
-                            "style":"width: 32px; height: 32px; border-radius: 0.5em; margin: 0.5em; cursor: pointer;",
+                            "style":"width: 2em; height: 2em; border-radius: 0.5em; margin: 0.5em; cursor: pointer;",
                             "onclick": async () => {
                                 await huopaAPI.applicationStorageWrite("currentServerOpen.txt", "file", serverI)
                                 if (serverCreatePopup) serverCreatePopup.remove()
@@ -296,7 +320,7 @@ async function loop() {
                 const addServerButton = document.createElement("button");
                 
                 await setAttrs(addServerButton, {
-                    "style":"width: 36px; height: 36px; border-radius: 0.5em; padding: 0;",
+                    "style":"width: 2.25em; height: 2.25em; border-radius: 0.5em; padding: 0;",
                     "class":"primary",
                     "textContent":"+",
                     "onclick": async() => {
@@ -306,7 +330,7 @@ async function loop() {
                             style:"position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.65); z-index: 999;"
                         })
                         await setAttrs(serverUrlInput, {
-                            style:"width: 400px; height: 45px; position: absolute; left: 50%; padding: 0.5em; top: 50%; transform: translate(-50%, -50%); z-index: 9999;",
+                            style:"width: 25em; height: 2.8125em; position: absolute; left: 50%; padding: 0.5em; top: 50%; transform: translate(-50%, -50%); z-index: 9999;",
                             placeholder:"Enter a server URL here (example: 'myserver.myusername.com'):"
                         });
                         serverUrlInput.onkeydown = async (e) => {
@@ -348,14 +372,14 @@ async function loop() {
                 });
 
                 await setAttrs(chatBar, {
-                    "style":"position: absolute; left: 50%; transform: translateX(-50%); bottom: 1.2em; width: calc(100% - 50px); padding: 1em; border-radius: 0.5em;  font-size: 1em;",
+                    "style":"position: absolute; left: 50%; transform: translateX(-50%); bottom: 1.2em; width: calc(100% - 3.125em); padding: 1em; border-radius: 0.5em; font-size: 1em;",
                     "class":"primary",
                     "placeholder":`Click on a channel to view and send messages!`,
                     "disabled":true
                 });
                 loading = false;
                 const accountDiv = document.createElement("div");
-                accountDiv.style = "bottom: 1em; left: -2.75em; height: 3.5em; width: 310px; border-radius: 0.5em; position: absolute; display: flex; align-items: center;"
+                accountDiv.style = "bottom: 1em; left: -2.75em; height: 3.5em; width: 19.375em; border-radius: 0.5em; position: absolute; display: flex; align-items: center;"
                 accountDiv.classList.add("primary")
                 const usernameEl = document.createElement("p");
                 await setAttrs(usernameEl, {
@@ -365,7 +389,7 @@ async function loop() {
                 const iconEl = document.createElement("img");
                 await setAttrs(iconEl, {
                     "src":`https://avatars.rotur.dev/${userData.username}`,
-                    "style":"width: 32px; height: 32px; margin: 0.75em; border-radius: 50%;"
+                    "style":"width: 2em; height: 2em; margin: 0.75em; border-radius: 50%;"
                 })
                 const signoutButton = document.createElement("img");
                 await setAttrs(signoutButton, {
@@ -483,8 +507,8 @@ async function loop() {
 
         async function registerFuncs() {
             wsHandlers.set("user_connect", async(data) => {
+                userList.push(data.user);
                 if (usersOnline.includes(data.user.username)) return;
-                userList.push(data);
                 usersOnline.push(data.user.username);
                 loadUserList()
             })
@@ -521,6 +545,7 @@ async function loop() {
             wsHandlers.set("users_online", async(data) => {
                 usersOnline = [];
                 for (const x of data.users) {
+                    if (usersOnline.includes(x.username)) continue;
                     usersOnline.push(x.username)
                 }
             })
@@ -565,7 +590,7 @@ async function loop() {
                 const newChannelListEl = document.createElement("div");
                 (channelListEl).remove();
                 await setAttrs(newChannelListEl, {
-                    "style":"width: 250px; height: calc(100% - 5em); padding: 0; margin: 0; position: absolute; left: 0; top: 0; padding-right: 1.25em; overflow: scroll; overflow-x: hidden;"
+                    "style":"width: 15.625em; height: calc(100% - 5em); padding: 0; margin: 0; position: absolute; left: 0; top: 0; padding-right: 1.25em; overflow: scroll; overflow-x: hidden;"
                 });
                 const serverInfo = document.createElement("div");
                 await setAttrs(serverInfo, {
@@ -580,7 +605,7 @@ async function loop() {
                 const serverIcon = document.createElement("img");
                 await setAttrs(serverIcon, {
                     "src":server.icon,
-                    "style":"display: inline; border-radius: 0.5em; width: 32px; height: 32px; margin-left: 0.66em;"
+                    "style":"display: inline; border-radius: 0.5em; width: 2em; height: 2em; margin-left: 0.66em;"
                 });
                 serverInfo.append(serverIcon);
                 serverInfo.append(serverName);
@@ -1122,10 +1147,10 @@ async function loop() {
             const offlineLabel = document.createElement("p");
             await setAttrs(offlineLabel, {
                 "style":"text-align: left; margin: 0.5em;",
-                "textContent":`Offline - ${usersOffline.length}`
+                "textContent":`Offline`
             })
+            let appendedNames = []
             userBar.append(offlineLabel);
-
             for (const user of usersOffline) {
                 const div = document.createElement("div");
                 await setAttrs(div, {
@@ -1133,10 +1158,12 @@ async function loop() {
                     "class":"primary",
                     "textContent":user.username
                 });
-                if (usersOnline.includes(user.username)) continue;
+                if (usersOnline.includes(user.username) || appendedNames.includes(user.username)) continue;
                 if (user.color) div.style.color = user.color;
+                appendedNames.push(user.username);
                 userBar.append(div);
             }
+            offlineLabel.textContent = `Offline - ${appendedNames.length}`;
         }
 
 }
@@ -1183,12 +1210,6 @@ function truncate(text, maxlength) {
 
 function escapeWithBackslashes(str) {
   return str.replace(/\\/g, "\\\\")
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#39;")
-            .replace(/\n/g, "<br>");
 }
 
 function replaceLinks(el) {
