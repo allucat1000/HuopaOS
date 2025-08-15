@@ -270,19 +270,21 @@ window.huopadesktop = (() => {
                                 clearInterval(interval);
                                 reject("Fail");
                             }
-                            try {
-                                if (win.location.origin === window.location.origin) {
-                                    const token = win.location.search.replace("?token=", "")
-                                    if (token) {
-                                        clearInterval(interval)
-                                        win.close();
-                                        resolve(token);
-                                    } else {
-                                        reject("Fail")
-                                    }
-                                }
-                            } catch {}
                         }, 200)
+                        const listener = ev => {
+                            if (ev.origin !== "https://rotur.dev") return;
+
+                            if (ev.data.type === "rotur-auth-token") {
+                                quantum.document.removeEventListener("message", listener);
+                                clearInterval(interval);
+                                const token = ev.data.token;
+
+                                win.close();
+                                resolve(token);
+                            }
+                        };
+                        window.addEventListener("message", listener)
+                        
                     });
                     if (result === "Fail") {
                         reject("Fail");
