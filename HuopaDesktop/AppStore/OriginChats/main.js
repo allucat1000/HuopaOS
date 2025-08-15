@@ -777,7 +777,7 @@ async function loop() {
                             }
                         });
                         if (msg.user === userObj.username) {
-                            context.set(msgDiv, [{"name":convertDate(msg.timestamp, true)}, {"name":"Reply","function":() => {
+                            context.set(msgDiv, [{"name":convertDate(msg.timestamp, true),"function":() => {}}, {"name":"Reply","function":() => {
                                 chatBar.placeholder = `Replying to a message... | Max message length: ${messageLengthLimit} characters`;
                                 replyId = msg.id;
                                 chatBar.disabled = false;
@@ -791,7 +791,7 @@ async function loop() {
                                 ws.send(`{"cmd":"message_delete", "id":"${msg.id}", "channel":"${openedChannel}"}`)
                             }}]);
                         } else {
-                            context.set(msgDiv, [{"name":convertDate(msg.timestamp, true)}, {"name":"Reply","function":() => {
+                            context.set(msgDiv, [{"name":convertDate(msg.timestamp, true),"function":() => {}}, {"name":"Reply","function":() => {
                                 chatBar.placeholder = `Replying to a message... | Max message length: ${messageLengthLimit} characters`;
                                 replyId = msg.id;
                                 chatBar.disabled = false;
@@ -814,7 +814,7 @@ async function loop() {
                         });
                         
                     } else {
-                        context.set(msgDiv, [{"name":convertDate(msg.timestamp, true)}, {"name":"Reply","function":() => {
+                        context.set(msgDiv, [{"name":convertDate(msg.timestamp, true),"function":() => {}}, {"name":"Reply","function":() => {
                             chatBar.placeholder = `Replying to a message... | Max message length: ${messageLengthLimit} characters`;
                                 replyId = msg.id;
                             chatBar.disabled = false;
@@ -982,7 +982,7 @@ async function loop() {
                         }
                     });
                     if (msg.user === userObj.username) {
-                        context.set(msgDiv, [{"name":"Reply","function":() => {
+                        context.set(msgDiv, [{"name":convertDate(msg.timestamp, true),"function":() => {}}, {"name":"Reply","function":() => {
                             chatBar.placeholder = `Replying to a message... | Max message length: ${messageLengthLimit} characters`;
                             replyId = msg.id;
                             chatBar.disabled = false;
@@ -996,7 +996,7 @@ async function loop() {
                             ws.send(`{"cmd":"message_delete", "id":"${msg.id}", "channel":"${openedChannel}"}`)
                         }}]);
                     } else {
-                        context.set(msgDiv, [{"name":"Reply","function":() => {
+                        context.set(msgDiv, [{"name":convertDate(msg.timestamp, true),"function":() => {}}, {"name":"Reply","function":() => {
                             chatBar.placeholder = `Replying to a message... | Max message length: ${messageLengthLimit} characters`;
                             replyId = msg.id;
                             chatBar.disabled = false;
@@ -1019,7 +1019,7 @@ async function loop() {
                     });
                     
                 } else {
-                    context.set(msgDiv, [{"name":"Reply","function":() => {
+                    context.set(msgDiv, [{"name":convertDate(msg.timestamp, true),"function":() => {}}, {"name":"Reply","function":() => {
                         chatBar.placeholder = `Replying to a message... | Max message length: ${messageLengthLimit} characters`;
                             replyId = msg.id;
                         chatBar.disabled = false;
