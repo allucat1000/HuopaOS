@@ -1,7 +1,7 @@
 const elevated = await huopaAPI.requestElevation();
 if (!elevated) {
-    await huopaAPI.createNotification("TilingWinManager", "You have to run as elevated!");
-    huopaAPI.closeApp();
+    huopaAPI.createNotification("TilingWinManager", "You have to run as elevated!");
+    await huopaAPI.closeApp();
 }
 huopaAPI.hideWindow();
 let config = await huopaAPI.applicationStorageRead("config.json");

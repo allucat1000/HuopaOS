@@ -5,6 +5,7 @@ let oldProcList;
 const createProcessButton = document.createElement("button"); 
 setAttrs(createProcessButton, {
     "textContent":"Create a process",
+    "style":"margin: 0.5em;",
     "onclick":async() => {
         let newProcElev = false;
         const popup = document.createElement("div");
@@ -60,7 +61,7 @@ async function loadProcs() {
             const procId = procIds[procI];
             const proc = procInfo[procId];
             const procDiv = document.createElement("div");
-            procDiv.style = "width: calc(100% - 0.5em); border-radius: 0.5em; position: relative; margin: 0.5em auto;";
+            procDiv.style = "width: calc(100% - 1em); border-radius: 0.5em; position: relative; margin: 0.5em auto;";
             procDiv.classList.add("primary");
             const procName = document.createElement("p");
             const quitProcButton = document.createElement("button");
