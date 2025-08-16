@@ -17,6 +17,14 @@
     },
 
     {
+        "name":"FlappyBird",
+        "description":"Flappy Bird for HuopaOS!",
+        "author":"Allucat1000",
+        "version":100,
+        "extrafiles":[]
+    },
+
+    {
         "name":"TilingWinManager",
         "description":"A tiling window manager for HuopaOS with customizable settings!",
         "author":"Allucat1000",
