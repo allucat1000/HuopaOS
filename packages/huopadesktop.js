@@ -42,7 +42,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "1.5.0";
+    const version = "1.5.1";
     const processDigitList = {};
     const processArrayList = []
     // Priv Sys Funcs
@@ -94,7 +94,7 @@ window.huopadesktop = (() => {
                 await internalFS.createPath("/system/env/config.json", "file", JSON.stringify(bootConfig));
                 await sys.addLine("Boot config created!");
                 await sys.addLine("Installing system apps...");
-                const apps = ["Settings.js", "App Store.js", "Calculator.js", "File Manager.js", "Terminal.js", "Processes.js", "Preview.js"];
+                const apps = ["Settings.js", "App Store.js", "Calculator.js", "File Manager.js", "Terminal.js", "Processes.js", "Preview.js", "Logs.js"];
                 for (const app of apps) {
                     await downloadApp(`https://raw.githubusercontent.com/allucat1000/HuopaOS/main/HuopaDesktop/${app}`, `/home/applications/${app}`);
                 }
@@ -566,8 +566,21 @@ window.huopadesktop = (() => {
                 })();
 
 
+
                 (async () => {
                     try {
+                        console.log = (...args) => {
+                            huopaAPI.log(args)
+                        }
+
+                        console.warn = (...args) => {
+                            huopaAPI.warn(args)
+                        }
+
+                        console.error = (...args) => {
+                            huopaAPI.error(args)
+                        }
+
                         async function setAttrs(element, attrs) {
                             for (const [key, value] of Object.entries(attrs)) {
                                 if (key === "class") {
@@ -598,6 +611,8 @@ window.huopadesktop = (() => {
                         });
                         document.head.append(systemStyles);
                         document.body.style.height = "100vh";
+                        document.body.style.position = "absolute";
+                        document.body.style.width = "100%";
                         await eval("(async () => {" + ${JSON.stringify(appCode)} + "})()");
                     } catch (e) {
                         try {
@@ -733,23 +748,33 @@ window.huopadesktop = (() => {
         
         return {
 
-            log: function(msg) {
-                console.log(`[APP LOG]: ${msg}`);
+            log: async function(...msg) {
+                let logs = await internalFS.getFile("/system/env/logs.txt");
+                if (!logs) {
+                    logs = `[LOG: ${new Date}]: \n${msg}`;
+                } else logs += `\n\n[LOG: ${new Date}]: \n${msg}`;
+                
+                await internalFS.createPath("/system/env/logs.txt","file", logs)
+                console.log(`[LOG: ${Date.now()}]: "${msg}"`);
             },
 
-            error: function(msg) {
-                console.error(`[APP ERROR]: ${msg}`);
+            error: async function(...msg) {
+                let logs = await internalFS.getFile("/system/env/logs.txt");
+                if (!logs) {
+                    logs = `[ERROR: ${new Date}: \n${msg}`;
+                } else logs += `\n\n[ERROR: ${new Date}]: \n${msg}`;
+                await internalFS.createPath("/system/env/logs.txt","file", logs)
+                console.error(`[ERROR: ${Date.now()}]: "${msg}"`);
             },
 
-            warn: function(msg) {
-                console.warn(`[APP WARN]: ${msg}`);
+            warn: async function(...msg) {
+                let logs = await internalFS.getFile("/system/env/logs.txt");
+                if (!logs) {
+                    logs = `[WARN: ${new Date}]: \n${msg}`;
+                } else logs += `\n\n[WARN: ${new Date}]: \n${msg}`;
+                await internalFS.createPath("/system/env/logs.txt","file", logs)
+                console.warn(`[WARN: ${Date.now()}]: "${msg}"`);
             },
-
-            container: appContainer,
-
-            Math,
-
-            Date,
 
             setTimeout,
 
@@ -766,6 +791,12 @@ window.huopadesktop = (() => {
                 if (path.startsWith("/system/env/appconfig")) {
                     console.warn("[huopaAPI SAFETY]: App tried reading in safeStorage using default read command!");
                     return "[HuopaDesktop FS Security]: No permissions";
+                } else if (path === "/system/env/logs.txt") {
+                    const digitId = appContainer.parentElement.id;
+                    if (!processDigitList[digitId].elevated) {
+                        console.error("[huopaAPI SAFETY]: App tried reading in blocked storage!");
+                        return "[HuopaDesktop FS Security]: No permissions";
+                    }
                 }
                 return internalFS.getFile(path, permissions);
             },
@@ -774,6 +805,12 @@ window.huopadesktop = (() => {
                 if (path.startsWith("/system/env/appconfig")) {
                     console.warn("[huopaAPI SAFETY]: App tried deleting file in safeStorage using default delete command!");
                     return "[HuopaDesktop FS Security]: No permissions";
+                }  else if (path === "/system/env/logs.txt") {
+                    const digitId = appContainer.parentElement.id;
+                    if (!processDigitList[digitId].elevated) {
+                        console.error("[huopaAPI SAFETY]: App tried deleting file in blocked storage!");
+                        return "[HuopaDesktop FS Security]: No permissions";
+                    }
                 }
                 return internalFS.delDir(path, permissions, recursive);
             },
@@ -784,7 +821,7 @@ window.huopadesktop = (() => {
                 "modify":"",
             }) {
                 const digitId = appContainer.parentElement.id;
-                const blockList = ["/system/packages/huopadesktop.js"]
+                const blockList = ["/system/packages/huopadesktop.js", "/system/env/logs.txt"]
                 for (const blockPath of blockList) {
                     if (blockPath.includes(path) && !processDigitList[digitId].elevated) {
                         console.error("[huopaAPI SAFETY]: App tried writing in blocked storage!");
