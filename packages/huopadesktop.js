@@ -1736,7 +1736,7 @@ window.huopadesktop = (() => {
         if (extra === "elevated") {
             elevated = true;
         }
-        processDigitList[digits] = {elevated:elevated, name:appId, id:digits, title:appId, extra:extra, hidden:false, minWidth:375, minHeight:42, maxWidth:10000 ,maxHeight:10000};
+        processDigitList[digits] = {elevated:elevated, name:appId, id:digits, title:appId, extra:extra, hidden:false, minWidth:375, minHeight:42, maxWidth:10000, maxHeight:10000,config:[]};
         await createSysDaemon("appContBordUpdater", () => {
             const loop = async () => {
                 const override = quantum.document.querySelector(`[data-border-override="${digits}"]`);
@@ -1758,8 +1758,10 @@ window.huopadesktop = (() => {
                 appZIndex = appZIndex + 10;
                 outerContainer.focus({ preventScroll: true });
                 if (outerContainer.style.display === "block") {
+                    processDigitList[digits].hidden = true;
                     outerContainer.style.display = "none";
                 } else {
+                    processDigitList[digits].hidden = false;
                     outerContainer.style.display = "block";
                 }
                 
