@@ -136,6 +136,7 @@ async function loop() {
     const mainDiv = document.createElement("div");
     const wsHandlers = new Map();
     let channelMsgs;
+    let imageCache = {};
     let channelListEl = document.createElement("div");
     channelListEl.id = "channelListEl"
     let channelList;
@@ -833,15 +834,20 @@ async function loop() {
                         deleteButton.style.display = "none";
                     });
                     await setAttrs(username, {
-                        "style":`padding: 0.5em; text-align: left; text-wrap: wrap; display: inline; margin-right: 0; padding-right: 0;`,
+                        "style":`padding: 0.5em; text-align: left; text-wrap: wrap; display: inline; margin-right: 0; padding-right: 0; margin-left: 2.15em;`,
                         "textContent":msg.user
                     });
                     await setAttrs(timeDisplay, {
                         "style":`padding: 0.5em; text-align: left; text-wrap: wrap; color: gray; display: inline; margin-left: 0;`,
                         "textContent":`- ${convertDate(msg.timestamp, false)}`
                     });
+                    const userIcon = document.createElement("img");
+                    await setAttrs(userIcon, {
+                        "style":"width: 1.5em; height: 1.5em; position: absolute; left: 0.66em; top: 50%; transform: translateY(-50%);"
+                    })
+                    if (imageCache[msg.user]) userIcon.src = imageCache[msg.user]; else userIcon.src = await addPfpToImgCache(msg.user);
                     await setAttrs(user, {
-                        "style":"padding: 0; margin: 1em 0;"
+                        "style":"padding: 0; margin: 1em 0; position: relative;"
                     });
                     if (userColors[msg.user]) {
                         user.style.color = userColors[msg.user];
@@ -887,7 +893,7 @@ async function loop() {
                         msgDiv.append(replyDiv);
                         msgDiv.append(replySeparator)
                     }
-                    user.append(username, timeDisplay);
+                    user.append(userIcon, username, timeDisplay);
                     msgDiv.append(user);
                     if (msgContent.length > 0) {
                         msgDiv.append(text);
@@ -1038,15 +1044,20 @@ async function loop() {
                     deleteButton.style.display = "none";
                 });
                 await setAttrs(username, {
-                    "style":`padding: 0.5em; text-align: left; text-wrap: wrap; display: inline; margin-right: 0; padding-right: 0;`,
+                    "style":`padding: 0.5em; text-align: left; text-wrap: wrap; display: inline; margin-right: 0; padding-right: 0; margin-left: 2.15em;`,
                     "textContent":msg.user
                 });
                 await setAttrs(timeDisplay, {
                     "style":`padding: 0.5em; text-align: left; text-wrap: wrap; color: gray; display: inline; margin-left: 0;`,
-                    "textContent":`- ${convertDate(msg.timestamp)}`
+                    "textContent":`- ${convertDate(msg.timestamp, false)}`
                 });
+                const userIcon = document.createElement("img");
+                await setAttrs(userIcon, {
+                    "style":"width: 1.5em; height: 1.5em; position: absolute; left: 0.66em; top: 50%; transform: translateY(-50%);"
+                })
+                if (imageCache[msg.user]) userIcon.src = imageCache[msg.user]; else userIcon.src = await addPfpToImgCache(msg.user);
                 await setAttrs(user, {
-                    "style":"padding: 0; margin: 1em 0;"
+                    "style":"padding: 0; margin: 1em 0; position: relative;"
                 });
                 if (userColors[msg.user]) {
                     user.style.color = userColors[msg.user];
@@ -1092,7 +1103,7 @@ async function loop() {
                     msgDiv.append(replyDiv);
                     msgDiv.append(replySeparator)
                 }
-                user.append(username, timeDisplay);
+                user.append(userIcon, username, timeDisplay);
                 msgDiv.append(user);
                 if (msgContent.length > 0) {
                     msgDiv.append(text);
@@ -1165,7 +1176,23 @@ async function loop() {
             }
             offlineLabel.textContent = `Offline - ${appendedNames.length}`;
         }
+    async function fetchBase64(url) {
+        const response = await fetch(url);
+        const blob = await response.blob();
+            
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+        });
+    }
 
+
+    async function addPfpToImgCache(user) {
+        imageCache[user] = await fetchBase64("https://avatars.rotur.dev/" + user + "?radius=1000");
+        return imageCache[user];
+    }
 }
 
 loop();
@@ -1175,7 +1202,7 @@ async function crashError(error) {
     if (error.message === "roles is not iterable") {
         console.error("Disconnect crash!")
         document.body.innerHTML = "";
-        document.body.append(style)
+        if (style) document.body.append(style);
 
         loop();
         return;
