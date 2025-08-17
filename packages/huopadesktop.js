@@ -1971,7 +1971,7 @@ window.huopadesktop = (() => {
                     const cleanedAppName = appList[i].replace("/home/applications/", "");
                     const appTitle = quantum.document.createElement("p");
                     appTitle.textContent = cleanedAppName.replace(/\.js$/, "");
-                    appButton.style = "background-color: transparent; border-color: rgba(105, 105, 105, 0.6); border-style: solid; border-radius: 0.5em; padding: 0.5em; width: 35em; height: 3em; margin: 0.2em 0.5em; text-align: left; cursor: pointer; display: flex; flex-wrap: wrap; align-content: flex-start;"
+                    appButton.style = "background-color: transparent; border-color: rgba(105, 105, 105, 0.6); border-style: solid; border-radius: 0.5em; padding: 0.5em; width: 466px; height: 3em; margin: 0.2em 0.5em; text-align: left; cursor: pointer; display: flex; flex-wrap: wrap; align-content: flex-start;"
                     const appIcon = quantum.document.createElement("img");
                     appIcon.draggable = "false";
                     appIcon.style = "display: inline; padding-right: 0.2em; user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;"
