@@ -22,9 +22,9 @@ if (code === "[HuopaDesktop FS Security]: No permissions") {
     })
     document.body.append(alert);
 } else {
-    if (path.endsWith(".png") || path.endsWith(".jpg") || path.endsWith(".jpeg") || path.endsWith(".webp") || path.endsWith(".mp4") || path.endsWith(".gif")) {
+    if (path.endsWith(".png") || path.endsWith(".jpg") || path.endsWith(".jpeg") || path.endsWith(".webp") || path.endsWith(".mp4") || path.endsWith(".webm") || path.endsWith(".gif")) {
         let imgPreview
-        if (path.endsWith(".mp4")) {
+        if (path.endsWith(".mp4") || path.endsWith(".webm")) {
             imgPreview = document.createElement("video");
             imgPreview.controls = true;
         } else {
