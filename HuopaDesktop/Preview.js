@@ -12,6 +12,8 @@ if (loadParams) {
     chooseTitle.remove()
 }
 
+const lpath = path.toLowerCase();
+
 const textEditorField = document.createElement("textarea");
 const code = await huopaAPI.getFile(path) || ""
 if (code === "[HuopaDesktop FS Security]: No permissions") {
@@ -22,9 +24,9 @@ if (code === "[HuopaDesktop FS Security]: No permissions") {
     })
     document.body.append(alert);
 } else {
-    if (path.endsWith(".png") || path.endsWith(".jpg") || path.endsWith(".jpeg") || path.endsWith(".webp") || path.endsWith(".mp4") || path.endsWith(".gif")) {
+    if (lpath.endsWith(".png") || lpath.endsWith(".jpg") || lpath.endsWith(".jpeg") || lpath.endsWith(".webp") || lpath.endsWith(".mp4") || lpath.endsWith(".webm") || lpath.endsWith(".gif")) {
         let imgPreview
-        if (path.endsWith(".mp4")) {
+        if (lpath.endsWith(".mp4") || lpath.endsWith(".webm")) {
             imgPreview = document.createElement("video");
             imgPreview.controls = true;
         } else {
@@ -40,7 +42,7 @@ if (code === "[HuopaDesktop FS Security]: No permissions") {
         imgPreview.style.objectFit = "contain";
         document.body.append(imgPreview);
         return;
-    } else if (path.endsWith(".mp3")) {
+    } else if (lpath.endsWith(".mp3")) {
         const soundPreview = document.createElement("audio");
         soundPreview.controls = true;
         soundPreview.src = code;
