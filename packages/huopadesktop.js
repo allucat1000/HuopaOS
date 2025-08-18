@@ -251,7 +251,7 @@ window.huopadesktop = (() => {
         infoText.style = "text-align: center; margin: 0.5em;"
         sourceText.style = "text-align: center; margin: 0.5em;"
         container.append(infoText);
-        if (src) container.append(infoText);
+        if (src) container.append(sourceText);
     }
 
     const createRoturLoginWindow = async (app) => {
