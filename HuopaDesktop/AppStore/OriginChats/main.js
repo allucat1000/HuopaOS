@@ -485,7 +485,7 @@ async function loop() {
                 document.body.append(mainArea);
                 console.log("[OriginChats Plugin Manager]: Activating plugins...");
                 console.log("[OriginChats Plugin Manager]: Beware of malicious plugins!");
-                let pluginList = await huopaAPI.getFile("/home/applications/OriginChats/plugins");
+                let pluginList = await applicationStorageRead("plugins");
                 if (pluginList) {
                     pluginList = JSON.parse(pluginList);
                     for (const pluginPath of pluginList) {
