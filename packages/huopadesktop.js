@@ -42,7 +42,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "1.5.1";
+    const version = "1.5.2";
     const processDigitList = {};
     const processArrayList = []
     // Priv Sys Funcs
@@ -244,7 +244,7 @@ window.huopadesktop = (() => {
         const infoText = quantum.document.createElement("p");
         const sourceText = quantum.document.createElement("p");
         infoText.textContent = `${errorInfo}`;
-        infoText.textContent = `${src}`;
+        sourceText.textContent = `Source/Line: ${src}`;
         container.append(titleText);
         container.id = `app-${app}`;
         titleText.style = "text-align: center; margin: 1em;"
@@ -1433,7 +1433,9 @@ window.huopadesktop = (() => {
         const { type, data, id, appId} = event.data || {};
         if (event.data?.type === "iframeError") {
             console.error("[APP ERROR]:", event.data);
-            createBugAlertWindow(event.data.appName, event.data.message, event.data.stack);
+            console.log(event.data);
+            const src = event.data.stack || event.data.lineno
+            createBugAlertWindow(event.data.appName, event.data.message, src);
             return;
         }
 
