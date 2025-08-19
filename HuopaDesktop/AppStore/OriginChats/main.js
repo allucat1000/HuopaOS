@@ -33,6 +33,7 @@ style.textContent = `
         margin-left: 0.5em;
     }
 `;
+
 const ContextMenu = await importModule("contextmenu");
 let errorText;
 let retryButton;
@@ -62,6 +63,40 @@ document.addEventListener("keydown", (e) => {
     }
 })
 document.head.append(style);
+try {
+    const script = `
+        (async () => {
+            const [emojiData, shortcodes] = await Promise.all([
+                fetch("https://cdn.jsdelivr.net/npm/emojibase-data/en/data.json").then(r => r.json()),
+                fetch("https://cdn.jsdelivr.net/npm/emojibase-data/en/shortcodes/joypixels.json").then(r => r.json())
+            ]);
+
+            const shortcodeToEmoji = {};
+            const emojiToShortcode = {};
+
+            for (const emoji of emojiData) {
+                const codes = shortcodes[emoji.hexcode];
+                if (codes) {
+                    (Array.isArray(codes) ? codes : [codes]).forEach(sc => {
+                        shortcodeToEmoji[\`:\${sc}:\`] = emoji.emoji;
+                    });
+                    emojiToShortcode[emoji.emoji] = \`:\${Array.isArray(codes) ? codes[0] : codes}:\`;
+                }
+            }
+
+            window.shortcodeToEmoji = shortcodeToEmoji;
+            window.emojiToShortcode = emojiToShortcode;
+        })();
+    `;
+
+    const scriptEl = document.createElement("script");
+    scriptEl.type = "module";
+    scriptEl.src = "data:text/javascript;charset=utf-8," + encodeURIComponent(script);
+    document.head.append(scriptEl);
+} catch (error) {
+    console.error("Failed to load emoji shortcodes!", error.message)
+}
+
 huopaAPI.setWindowSize("850px", "500px")
 async function loop() {
     if (errorText) errorText.remove();
@@ -415,10 +450,11 @@ async function loop() {
                 messageArea.append(chatBar);
                 messageArea.append(userBar)
                 messageArea.append(messageList);
+                replaceChatbarValues()
                 chatBar.onkeydown = async (e) => {
                     if (e.key === "Enter") {
                         if (openedChannel) {
-                            const message = chatBar.value;
+                            const message = chatBar.value
                             if (!message) {
                                 replyId = undefined;
                                 editingMessage = false;
@@ -1192,6 +1228,15 @@ async function loop() {
         imageCache[user] = await fetchBase64("https://avatars.rotur.dev/" + user + "?radius=1000");
         return imageCache[user];
     }
+
+    async function replaceChatbarValues() {
+        while (true) {
+            if (chatBar?.value) {
+                chatBar.value = replaceShortcodes(chatBar.value)
+            }
+            await new Promise((res) => setTimeout(res, 100));
+        }
+    }
 }
 
 loop();
@@ -1273,4 +1318,15 @@ function convertDate(time, exact = false) {
         });
     }
     return formatted;
+}
+
+function replaceShortcodes(input) {
+    if (!window.shortcodeToEmoji) {
+        console.warn("Emoji mappings not loaded yet!");
+        return input;
+    }
+
+    return input.replace(/:[a-zA-Z0-9_+-]+:/g, (match) => {
+        return window.shortcodeToEmoji[match] || match;
+    });
 }
