@@ -42,7 +42,7 @@ window.huopadesktop = (() => {
     let sysTempInfo = {
         "startMenuOpen":false
     }
-    const version = "1.5.2";
+    const version = "1.5.3";
     const processDigitList = {};
     const processArrayList = []
     // Priv Sys Funcs
@@ -240,7 +240,7 @@ window.huopadesktop = (() => {
     const createBugAlertWindow = async (app, errorInfo, src) => {
         const container = await createAppContainer(`${app}`);
         const titleText = quantum.document.createElement("h2");
-        titleText.textContent = `${app} has crashed, more info below:`;
+        titleText.textContent = `${app} has errored, more info below:`;
         const infoText = quantum.document.createElement("p");
         const sourceText = quantum.document.createElement("p");
         infoText.textContent = `${errorInfo}`;
