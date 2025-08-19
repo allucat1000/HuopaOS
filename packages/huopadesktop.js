@@ -194,7 +194,7 @@ window.huopadesktop = (() => {
                 if (!skipStyles) {
                     await internalFS.createPath("/system/env/noStyleUpdate.txt", "file", "false");
                 }
-                let styleDownloadSuccess
+                let styleDownloadSuccess = true;
                 if (!await internalFS.getFile("/system/env/systemStyles.css")) {
                     styleDownloadSuccess = await new Promise(async (resolve, reject) => {
                         try {
@@ -234,7 +234,8 @@ window.huopadesktop = (() => {
                     await new Promise(resolve => setTimeout(resolve, 100));
                     createMainGUI();
                 } else {
-                    sys.addLine("[line=red]Failed to fetch system styles![/line]")
+                    
+                    if (skipStyles === "true") createMainGUI(); else sys.addLine("[line=red]Failed to fetch system styles![/line]");
                 }
     }
     const createBugAlertWindow = async (app, errorInfo, src) => {
@@ -789,12 +790,12 @@ window.huopadesktop = (() => {
 
             getFile: function(path, permissions) {
                 if (path.startsWith("/system/env/appconfig")) {
-                    console.warn("[huopaAPI SAFETY]: App tried reading in safeStorage using default read command!");
+                    this.warn("[huopaAPI SAFETY]: App tried reading in safeStorage using default read command!");
                     return "[HuopaDesktop FS Security]: No permissions";
                 } else if (path === "/system/env/logs.txt") {
                     const digitId = appContainer.parentElement.id;
                     if (!processDigitList[digitId].elevated) {
-                        console.error("[huopaAPI SAFETY]: App tried reading in blocked storage!");
+                        this.error("[huopaAPI SAFETY]: App tried reading in blocked storage!");
                         return "[HuopaDesktop FS Security]: No permissions";
                     }
                 }
@@ -803,12 +804,12 @@ window.huopadesktop = (() => {
 
             deleteFile: function(path, recursive = true, permissions) {
                 if (path.startsWith("/system/env/appconfig")) {
-                    console.warn("[huopaAPI SAFETY]: App tried deleting file in safeStorage using default delete command!");
+                    this.warn("[huopaAPI SAFETY]: App tried deleting file in safeStorage using default delete command!");
                     return "[HuopaDesktop FS Security]: No permissions";
                 }  else if (path === "/system/env/logs.txt") {
                     const digitId = appContainer.parentElement.id;
                     if (!processDigitList[digitId].elevated) {
-                        console.error("[huopaAPI SAFETY]: App tried deleting file in blocked storage!");
+                        this.error("[huopaAPI SAFETY]: App tried deleting file in blocked storage!");
                         return "[HuopaDesktop FS Security]: No permissions";
                     }
                 }
@@ -824,12 +825,12 @@ window.huopadesktop = (() => {
                 const blockList = ["/system/packages/huopadesktop.js", "/system/env/logs.txt"]
                 for (const blockPath of blockList) {
                     if (blockPath.includes(path) && !processDigitList[digitId].elevated) {
-                        console.error("[huopaAPI SAFETY]: App tried writing in blocked storage!");
+                        this.error("[huopaAPI SAFETY]: App tried writing in blocked storage!");
                         return "[HuopaDesktop FS Security]: No permissions";
                     }
                 }
                 if (path.startsWith("/system/env/appconfig")) {
-                    console.warn("[huopaAPI SAFETY]: App tried writing in safeStorage using default write command!");
+                    this.warn("[huopaAPI SAFETY]: App tried writing in safeStorage using default write command!");
                     return "[HuopaDesktop FS Security]: No permissions";
                 }
                 return internalFS.createPath(path, type, content, permissions);
@@ -940,22 +941,22 @@ window.huopadesktop = (() => {
             },
 
             safeStorageWrite: async(data, appId) => {
-                if (!appId) { console.warn("No app ID inputted for SafeStorageWrite. Call cancelled."); return;}
+                if (!appId) { this.warn("No app ID inputted for SafeStorageWrite. Call cancelled."); return;}
                 await internalFS.createPath("/system/env/appconfig/"+ appId.replace(".js", "") + "/" + data[0], data[1], data[2], `"${appId}"`);
             },
 
             safeStorageRead: async(path, appId) => {
-                if (!appId) { console.warn("No app ID inputted for SafeStorageRead. Call cancelled."); return;}
+                if (!appId) { this.warn("No app ID inputted for SafeStorageRead. Call cancelled."); return;}
                 return await internalFS.getFile("/system/env/appconfig/"+ appId.replace(".js", "") + "/" + path);
             },
 
             runApp: async(path, startParams, elevated = false) => {
                 if (!path || !path.endsWith(".js")) {
                     if (!path) {
-                        console.warn("No path given for app execution. Request cancelled.");
+                        this.warn("No path given for app execution. Request cancelled.");
                         return;
                     } else {
-                        console.warn("File not correct type or is directory. Request cancelled.");
+                        this.warn("File not correct type or is directory. Request cancelled.");
                         return;
                     }
                 }
@@ -1017,7 +1018,7 @@ window.huopadesktop = (() => {
             getRenderedSize: (id, type) => {
                 const el = elementRegistry[id];
                 if (!el) {
-                    console.warn(`getRenderedSize: Element with ID: '${id}' not found.`);
+                    this.warn(`getRenderedSize: Element with ID: '${id}' not found.`);
                     return;
                 }
                 if (type === "height" || type === "width" || type === "top") {
@@ -1028,7 +1029,7 @@ window.huopadesktop = (() => {
                         });
                     });
                 } else {
-                    console.warn(`getRenderedSize: Invalid type '${type}'`);
+                    this.warn(`getRenderedSize: Invalid type '${type}'`);
                     return;
                 }
                             
@@ -1077,7 +1078,7 @@ window.huopadesktop = (() => {
                     const result = math.evaluate(expression, scope);
                     return result;
                 } catch (error) {
-                    console.error(`calculate: '${error}'`);
+                    this.error(`calculate: '${error}'`);
                     return;
                 }
                 
@@ -1088,7 +1089,7 @@ window.huopadesktop = (() => {
                     const returned = marked.parse(html);
                     return returned;
                 } catch (error) {
-                    console.error(`parseMarkdown: Failed to parse markdown: '${error}'`);
+                    this.error(`parseMarkdown: Failed to parse markdown: '${error}'`);
                     return;
                 }
             },
@@ -1244,7 +1245,7 @@ window.huopadesktop = (() => {
                     }
                     if (win) win.remove();
                 } else {
-                    console.error("closeProcess: The process requires administrator rights for this function!")
+                    this.error("closeProcess: The process requires administrator rights for this function!")
                     return;
                 }
             },
@@ -1256,7 +1257,7 @@ window.huopadesktop = (() => {
                     if (width) win.style.width = width;
                     if (height) win.style.height = height;
                 } else {
-                    console.error("setProcessWindowSize: The process requires administrator rights for this function!")
+                    this.error("setProcessWindowSize: The process requires administrator rights for this function!")
                     return;
                 }
             },
@@ -1268,7 +1269,7 @@ window.huopadesktop = (() => {
                     if (left) win.style.left = left;
                     if (left) win.style.top = top;
                 } else {
-                    console.error("setProcessWindowPosition: The process requires administrator rights for this function!")
+                    this.error("setProcessWindowPosition: The process requires administrator rights for this function!")
                     return;
                 }
             },
@@ -1279,7 +1280,7 @@ window.huopadesktop = (() => {
                     const win = quantum.document.getElementById(id);
                     if (data) win.style.transition = data;
                 } else {
-                    console.error("setProcessWindowAnimation: The process requires administrator rights for this function!")
+                    this.error("setProcessWindowAnimation: The process requires administrator rights for this function!")
                     return;
                 }
             },
@@ -1290,7 +1291,7 @@ window.huopadesktop = (() => {
                     const win = quantum.document.getElementById(id);
                     return `["${win.style.left}", "${win.style.top}"]`
                 } else {
-                    console.error("getProcessWindowPosition: The process requires administrator rights for this function!")
+                    this.error("getProcessWindowPosition: The process requires administrator rights for this function!")
                     return;
                 }
             },
@@ -1301,7 +1302,7 @@ window.huopadesktop = (() => {
                     const win = quantum.document.getElementById(id);
                     return `["${win.style.width}", "${win.style.height}"]`
                 } else {
-                    console.error("getProcessWindowSize: The process requires administrator rights for this function!")
+                    this.error("getProcessWindowSize: The process requires administrator rights for this function!")
                     return;
                 }
             },

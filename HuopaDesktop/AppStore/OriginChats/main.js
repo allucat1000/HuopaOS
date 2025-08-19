@@ -470,7 +470,7 @@ async function loop() {
                                 } else {
                                     messageToSend = `{"cmd":"message_new", "channel": "${openedChannel}", "content": ${JSON.stringify(message)}}`;
                                 }
-                                
+
                                 ws.send(messageToSend);
                                 chatBar.value = "";
                             }
@@ -484,7 +484,6 @@ async function loop() {
                 document.body.append(sidebarEl);
                 document.body.append(mainArea);
                 console.log("[OriginChats Plugin Manager]: Activating plugins...");
-                console.log("[OriginChats Plugin Manager]: Beware of malicious plugins!");
                 let pluginList = await huopaAPI.applicationStorageRead("plugins");
                 if (pluginList) {
                     pluginList = JSON.parse(pluginList);
