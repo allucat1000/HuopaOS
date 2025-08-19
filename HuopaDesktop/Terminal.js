@@ -334,6 +334,7 @@ ${await huopaAPI.getFile(fullPath)}`);
                             }
                             return
                         } else {
+                            addLine(`App "${values[2].replace("-","")}" doesn't exist, using Preview`)
                             if (values[2] === "-e" && elevated) {
                                 await huopaAPI.runApp("/home/applications/Preview.js", fullPath, true);
                             } else {
