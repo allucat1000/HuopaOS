@@ -1300,6 +1300,7 @@ function replaceLinks(el) {
 function convertDate(time, exact = false) {
     const date = new Date(time * 1000);
     let formatted;
+
     if (exact) {
         formatted = date.toLocaleString("en-GB", {
             day: "2-digit",
@@ -1311,12 +1312,30 @@ function convertDate(time, exact = false) {
             hour12: false
         });
     } else {
-        formatted = date.toLocaleTimeString("en-GB", {
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: false
-        });
+        const now = new Date();
+        const isToday =
+            date.getDate() === now.getDate() &&
+            date.getMonth() === now.getMonth() &&
+            date.getFullYear() === now.getFullYear();
+
+        if (isToday) {
+            formatted = date.toLocaleTimeString("en-GB", {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false
+            });
+        } else {
+            formatted = date.toLocaleString("en-GB", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false
+            });
+        }
     }
+
     return formatted;
 }
 
