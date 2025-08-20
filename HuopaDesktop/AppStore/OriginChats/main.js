@@ -1294,7 +1294,11 @@ function truncate(text, maxlength) {
 
 function escapeWithBackslashes(str) {
   return str.replace(/\\/g, "\\\\")
-    .replace(/^>/gm, '&gt;');
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }
 
 function replaceLinks(el) {
