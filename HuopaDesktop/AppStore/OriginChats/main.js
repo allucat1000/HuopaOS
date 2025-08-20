@@ -591,7 +591,7 @@ async function loop() {
 
             wsHandlers.set("message_delete", async(data) => {
                 if (data.channel !== openedChannel) return;
-                const msg = messageTable[data.id].el;
+                const msg = messageTable[data.id]?.el;
                 if (extraConfig.messageLogger) {
                     const children = msg.children;
                     let textEl;
@@ -610,12 +610,13 @@ async function loop() {
 
             wsHandlers.set("message_edit", async(data) => {
                 if (data.channel !== openedChannel) return;
-                const msg = messageTable[data.id].el;
-                const children = msg.children
+                const msg = messageTable[data.id]?.el;
+                const children = msg?.children
                 let textEl;
-                if (children[2].tagName.toLowerCase() === "button") {
+                if (children[2]?.tagName.toLowerCase() === "button") {
                     textEl = children[1]
                 } else {
+                    if (!msg) return;
                     textEl = children[3]
                 }
                 const html = await huopaAPI.parseMarkdown(escapeWithBackslashes(data.content));
