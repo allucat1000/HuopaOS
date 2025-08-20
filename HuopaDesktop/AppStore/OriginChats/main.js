@@ -32,6 +32,10 @@ style.textContent = `
         margin: 0;
         margin-left: 0.5em;
     }
+    blockquote{
+        margin-top: 0;
+        margin-bottom: 0;
+    }
 `;
 
 const ContextMenu = await importModule("contextmenu");
