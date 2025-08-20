@@ -897,31 +897,36 @@ async function loop() {
                     const match = msg.content.match(urlRegex);
                     let msgContent = msg.content;
                     let imgEl;
-                    if (match) {
-                        let url = match[0];
-                        if (!url) return
-                        const extRegex = /\.(png|jpe?g|gif|bmp|webp|tiff)$/i;
-                        const extMatch = url.match(extRegex);
-                        if (!extMatch) url = url + ".gif";
-                        url = "https://proxy.mistium.com/?url=" + url;
-                        const response = await fetch(url);
-                        if (response.ok) {
-                            const contentType = response.headers.get('Content-Type');
-                            if (contentType.startsWith("video/") || contentType.startsWith("image/")) {
-                                if (contentType.startsWith("video/")) {
-                                    imgEl = document.createElement("video");
-                                } else {
-                                    imgEl = document.createElement("img");
+                    try {
+                        if (match) {
+                            let url = match[0];
+                            if (!url) return
+                            const extRegex = /\.(png|jpe?g|gif|bmp|webp|tiff)$/i;
+                            const extMatch = url.match(extRegex);
+                            if (!extMatch && !url.includes("media.discordapp")) url = url + ".gif";
+                            url = "https://apps.mistium.com/cors?url=" + encodeURIComponent(url)
+                            url = url.replace("cdn.discordapp.com","media.discordapp.net");
+                            const response = await fetch(url);
+                            if (response.ok) {
+                                const contentType = response.headers.get('Content-Type');
+                                if (contentType.startsWith("video/") || contentType.startsWith("image/")) {
+                                    if (contentType.startsWith("video/")) {
+                                        imgEl = document.createElement("video");
+                                    } else {
+                                        imgEl = document.createElement("img");
+                                    }
+                                    await setAttrs(imgEl, {
+                                        "style":"border-radius: 0.5em; margin: 0.5em; max-height: 20em; max-width: calc(100% - 1em);",
+                                        "src":url
+                                    });
+                                    msgContent = msgContent.replace(/(https?:\/\/[^\s]+)/, "");
+                                    text.textContent = msgContent
                                 }
-                                await setAttrs(imgEl, {
-                                    "style":"border-radius: 0.5em; margin: 0.5em; max-height: 20em; max-width: calc(100% - 1em);",
-                                    "src":url
-                                });
-                                msgContent = msgContent.replace(/(https?:\/\/[^\s]+)/, "");
-                                text.textContent = msgContent
+                                
                             }
-                            
                         }
+                    } catch (error) {
+                        console.error("Failed to add attachment!");
                     }
                     if (msg.reply_to) {
                         replyDiv.append(replyUser, replyMsg);
@@ -1107,31 +1112,36 @@ async function loop() {
                 const match = msg.content.match(urlRegex);
                 let msgContent = msg.content;
                 let imgEl;
-                if (match) {
-                    let url = match[0];
-                    if (!url) return
-                    const extRegex = /\.(png|jpe?g|gif|bmp|webp|tiff)$/i;
-                    const extMatch = url.match(extRegex);
-                    if (!extMatch) url = url + ".gif";
-                    url = "https://proxy.mistium.com/?url=" + url;
-                    const response = await fetch(url);
-                    if (response.ok) {
-                        const contentType = response.headers.get('Content-Type');
-                        if (contentType.startsWith("video/") || contentType.startsWith("image/")) {
-                            if (contentType.startsWith("video/")) {
-                                imgEl = document.createElement("video");
-                            } else {
-                                imgEl = document.createElement("img");
+                try {
+                    if (match) {
+                        let url = match[0];
+                        if (!url) return
+                        const extRegex = /\.(png|jpe?g|gif|bmp|webp|tiff)$/i;
+                        const extMatch = url.match(extRegex);
+                        if (!extMatch && !url.includes("media.discordapp")) url = url + ".gif";
+                        url = "https://apps.mistium.com/cors?url=" + encodeURIComponent(url)
+                        url = url.replace("cdn.discordapp.com","media.discordapp.net");
+                        const response = await fetch(url);
+                        if (response.ok) {
+                            const contentType = response.headers.get('Content-Type');
+                            if (contentType.startsWith("video/") || contentType.startsWith("image/")) {
+                                if (contentType.startsWith("video/")) {
+                                    imgEl = document.createElement("video");
+                                } else {
+                                    imgEl = document.createElement("img");
+                                }
+                                await setAttrs(imgEl, {
+                                    "style":"border-radius: 0.5em; margin: 0.5em; max-height: 20em; max-width: calc(100% - 1em);",
+                                    "src":url
+                                });
+                                msgContent = msgContent.replace(/(https?:\/\/[^\s]+)/, "");
+                                text.textContent = msgContent
                             }
-                            await setAttrs(imgEl, {
-                                "style":"border-radius: 0.5em; margin: 0.5em; max-height: 20em; max-width: calc(100% - 1em);",
-                                "src":url
-                            });
-                            msgContent = msgContent.replace(/(https?:\/\/[^\s]+)/, "");
-                            text.textContent = msgContent
+                            
                         }
-                        
                     }
+                } catch (error) {
+                    console.error("Failed to add attachment!");
                 }
                 if (msg.reply_to) {
                     replyDiv.append(replyUser, replyMsg);
