@@ -555,7 +555,7 @@ async function loop() {
             wsHandlers.set("user_disconnect", async(data) => {
                 const i = usersOnline.indexOf(data.username);
                 if (i !== -1) usersOnline.splice(i, 1);
-                ws.send({"cmd":"users_list"});
+                ws.send(JSON.stringify({"cmd":"users_list"}));
                 await new Promise((res) => setTimeout(res, 1500));
                 loadUserList()
             })
