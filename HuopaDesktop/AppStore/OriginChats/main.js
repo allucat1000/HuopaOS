@@ -65,7 +65,6 @@ document.addEventListener("keydown", (e) => {
         }
     }
 })
-document.head.append(style);
 try {
     const script = `
         (async () => {
@@ -102,6 +101,7 @@ try {
 
 huopaAPI.setWindowSize("850px", "500px")
 async function loop() {
+    document.body.append(style);
     if (errorText) errorText.remove();
     if (retryButton) retryButton.remove();
     let ws;
