@@ -39,10 +39,9 @@ let errorText;
 let retryButton;
 ContextMenu.disableDefault();
 document.addEventListener("keydown", (e) => {
-    if (e.altKey || e.ctrlKey || e.metaKey) {
+    if (e.ctrlKey || e.metaKey) {
         if (e.code === "Slash") {
             e.preventDefault();
-            console.log(document.body.style.fontSize);
             if (!document.body.style.fontSize) {
                 document.body.style.fontSize = "0.8em";
             } else {
