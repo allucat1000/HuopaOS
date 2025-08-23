@@ -35,7 +35,7 @@ const customColors = {
 
 const textInput = document.getElementById("textInput");
 
-await navigator.storage.persist();
+navigator.storage.persist();
 
 window.sys = {
   async import(name) {
