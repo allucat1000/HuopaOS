@@ -75,7 +75,7 @@ async function createPostSendDiv() {
         postButton.textContent = "Send post";
         postCreateDiv.append(postButton);
         const postSendInfoText = document.createElement("p");
-        postSendInfoText.style = "color: white; margin: 0.5em; text-align: center;";
+        postSendInfoText.style = "margin: 0.5em; text-align: center;";
         postCreateDiv.id = "postCreateDiv";
         postCreateDiv.append(postSendInfoText);
         postCreateDiv.style.outline = "none"
@@ -124,7 +124,8 @@ async function createPostSendDiv() {
                     postList.prepend(postDiv);
                 }
             } else {
-                postSendInfoText.textContent = "Failed to send post! Error: " + response.body.error;
+                const err = await response.json();
+                postSendInfoText.textContent = "Failed to send post! Error: " + err.error;
                 await new Promise(resolve => setTimeout(resolve, 10000));
                 postSendInfoText.textContent = "";
             }

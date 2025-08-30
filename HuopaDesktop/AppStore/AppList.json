@@ -78,7 +78,7 @@
         "name":"Claw",
         "description":"A client for the Claw social media platform. Uses the inbuilt Rotur Login portal for HuopaDesktop.", 
         "author":"Allucat1000",
-        "version":115,
+        "version":116,
         "extrafiles":[]
     },
 
