@@ -110,7 +110,7 @@ declare interface HuopaAPI {
     applicationStorageRead(): Promise<any>;
 }
 
-var huopaAPI: HuopaAPI;
-function setAttrs(element: HTMLElement, attrs: Record<string, any>): Promise<void>;
-function importModule(moduleName: string): Promise<any>;
-var systemStyles: HTMLStyleElement;
+declare var huopaAPI: HuopaAPI;
+declare function setAttrs(element: HTMLElement, attrs: Record<string, any>): Promise<void>;
+declare function importModule(moduleName: string): Promise<any>;
+declare var systemStyles: HTMLStyleElement;
