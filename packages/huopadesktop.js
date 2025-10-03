@@ -1,5 +1,7 @@
 // Icons from https://lucide.dev and https://fluenticons.co/outlined
 
+const { defaultMaxListeners } = require("events");
+
 /* Lucide License:
 
 ISC License
@@ -1420,6 +1422,72 @@ window.huopadesktop = (() => {
 
             clipboardRead: async() => {
                 return await navigator.clipboard.readText()
+            },
+
+            requestPermission: (perm) => {
+                const popup = quantum.document.createElement("div");
+                popup.style = "position: absolute; left: 0; top: 0; width: 100%; height: 100%;";
+                popup.classList.add("popup")
+                const accept = quantum.document.createElement("button");
+                const decline = quantum.document.createElement("button");
+                const title = quantum.document.createElement("h2");
+                const subtitle = quantum.document.createElement("h3");
+                subtitle.textContent = "The app requested to reboot the system, approve?";
+                title.style = "margin: 1em auto; display: block; text-align: center;";
+                subtitle.style = "margin: 1em auto; display: block; text-align: center;";
+                accept.style = "margin: 0.5em auto; display: block; width: 50%";
+                accept.textContent = "Approve";
+                decline.style = "margin: 0.5em auto; display: block; width: 50%";
+                decline.textContent = "Reject";
+                popup.append(title, subtitle, accept, decline);
+                switch (perm) {
+                    case "unsandboxed":{
+                        title.textContent = "UNSANDBOXED WINDOW REQUEST";
+                        subtitle.textContent = "THE APP REQUESTED REMOVE THE APP SANDBOX FOR THIS PROCESS. THIS IS AN EXTREMELY DANGEROUS PERMISSION TO GRANT AND CAN CAUSE YOUR DATA IN OTHER APPS TO BE STOLEN AND FOR THE APP TO HIJACK HUOPAOS!!!";
+                        accept.textContent = "Approve (may have disastrous consequences)";
+                        decline.textContent = "Reject and go back to safety";
+                        decline.onclick = () => {
+                            popup.remove();
+                            return;
+                        }
+                        accept.onclick = () => {
+                            popup.remove();
+                            appContainer.removeAttribute("sandbox") // VERY DANGEROUS !!!!
+                            return;
+                        }
+                    }
+                    case "modals":{
+                        title.textContent = "Modal permisssions";
+                        subtitle.textContent = "This app requests access to browser modals (popups).";
+                        decline.onclick = () => {
+                            popup.remove();
+                            return;
+                        }
+                        accept.onclick = () => {
+                            popup.remove();
+                            appContainer.sandbox = appContainer.sandbox + " allow-modals"
+                            return;
+                        }
+                    }
+                    case "forms":{
+                        title.textContent = "Form permisssions";
+                        subtitle.textContent = "This app requests access to forms, certain forms may redirect you from HuopaOS to another website.";
+                        decline.onclick = () => {
+                            popup.remove();
+                            return;
+                        }
+                        accept.onclick = () => {
+                            popup.remove();
+                            appContainer.sandbox = appContainer.sandbox + " allow-forms"
+                            return;
+                        }
+                    }
+                    default:{
+                        popup.remove();
+                        return;
+                    }
+                }
+                appContainer.append(popup);
             },
 
             // Use these for config files and such. Don't use these for tokens and other secret things (use safeStorage)!
