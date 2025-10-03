@@ -1442,6 +1442,7 @@ window.huopadesktop = (() => {
                 switch (perm) {
                     case "unsandboxed":{
                         title.textContent = "UNSANDBOXED WINDOW REQUEST";
+                        subtitle.style.maxWidth = "90%";
                         subtitle.textContent = "THE APP REQUESTED REMOVE THE APP SANDBOX FOR THIS PROCESS. THIS IS AN EXTREMELY DANGEROUS PERMISSION TO GRANT AND CAN CAUSE YOUR DATA IN OTHER APPS TO BE STOLEN AND FOR THE APP TO HIJACK HUOPAOS!!!";
                         accept.textContent = "Approve (may have disastrous consequences)";
                         decline.textContent = "Reject and go back to safety";
@@ -1451,7 +1452,7 @@ window.huopadesktop = (() => {
                         }
                         accept.onclick = () => {
                             popup.remove();
-                            appContainer.removeAttribute("sandbox") // VERY DANGEROUS !!!!
+                            appContainer.children[1].removeAttribute("sandbox") // VERY DANGEROUS !!!!
                             resolve(true);
                         }
                         break;
@@ -1465,7 +1466,7 @@ window.huopadesktop = (() => {
                         }
                         accept.onclick = () => {
                             popup.remove();
-                            appContainer.sandbox = appContainer.sandbox + " allow-modals"
+                            appContainer.children[1].sandbox = appContainer.sandbox + " allow-modals"
                             resolve(true);
                         }
                         break;
@@ -1479,7 +1480,7 @@ window.huopadesktop = (() => {
                         }
                         accept.onclick = () => {
                             popup.remove();
-                            appContainer.sandbox = appContainer.sandbox + " allow-forms"
+                            appContainer.children[1].sandbox = appContainer.sandbox + " allow-forms"
                             resolve(true);
                         }
                         break;
