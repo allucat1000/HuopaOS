@@ -417,7 +417,7 @@ async function loop() {
                 });
                 loading = false;
                 const accountDiv = document.createElement("div");
-                accountDiv.style = "bottom: 1em; left: -2.75em; height: 3.5em; width: 19.375em; border-radius: 0.5em; position: absolute; display: flex; align-items: center;"
+                accountDiv.style = "bottom: 1.2em; left: -2.75em; height: 3.15em; width: 19.375em; border-radius: 0.5em; position: absolute; display: flex; align-items: center;"
                 accountDiv.classList.add("primary")
                 const usernameEl = document.createElement("p");
                 await setAttrs(usernameEl, {
