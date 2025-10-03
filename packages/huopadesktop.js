@@ -1431,7 +1431,6 @@ window.huopadesktop = (() => {
                 const decline = quantum.document.createElement("button");
                 const title = quantum.document.createElement("h2");
                 const subtitle = quantum.document.createElement("h3");
-                subtitle.textContent = "The app requested to reboot the system, approve?";
                 title.style = "margin: 1em auto; display: block; text-align: center;";
                 subtitle.style = "margin: 1em auto; display: block; text-align: center;";
                 accept.style = "margin: 0.5em auto; display: block; width: 50%";
@@ -1455,6 +1454,7 @@ window.huopadesktop = (() => {
                             appContainer.removeAttribute("sandbox") // VERY DANGEROUS !!!!
                             resolve(true);
                         }
+                        break;
                     }
                     case "modals":{
                         title.textContent = "Modal permisssions";
@@ -1468,6 +1468,7 @@ window.huopadesktop = (() => {
                             appContainer.sandbox = appContainer.sandbox + " allow-modals"
                             resolve(true);
                         }
+                        break;
                     }
                     case "forms":{
                         title.textContent = "Form permisssions";
@@ -1481,10 +1482,12 @@ window.huopadesktop = (() => {
                             appContainer.sandbox = appContainer.sandbox + " allow-forms"
                             resolve(true);
                         }
+                        break;
                     }
                     default:{
                         popup.remove();
                         resolve(false);
+                        break;
                     }
                 }
                 });
