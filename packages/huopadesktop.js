@@ -1,7 +1,5 @@
 // Icons from https://lucide.dev and https://fluenticons.co/outlined
 
-const { defaultMaxListeners } = require("events");
-
 /* Lucide License:
 
 ISC License
