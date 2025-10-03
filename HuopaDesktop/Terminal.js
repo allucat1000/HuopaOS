@@ -573,7 +573,7 @@ async function pathExists(path) {
         children = await huopaAPI.getFile(parentPath.join("/"));
     }
     children = JSON.parse(children);
-    if (children.includes(path)) {
+    if (children?.includes(path)) {
         return true;
     } else {
         return false;
