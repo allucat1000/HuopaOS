@@ -30,7 +30,7 @@ async function addLine(text) {
     termContentDiv.style.margin = "0";
     termContentDiv.style.padding = "0";
     const childEl = termContentDiv.children[0]
-    if (childEl) childEl.style = "margin: 0.25em 0;";
+    if (childEl) childEl.style = "margin: 0.25em 0; white-space: pre-wrap;";
     termDiv.append(termContentDiv)
     termDiv.scrollTop = termDiv.scrollHeight;
     
@@ -121,6 +121,38 @@ async function runCmd(value) {
     const values = rawArgs.slice(1).map(arg => arg.replace(/^["']|["']$/g, ""));
 
     switch (cmd) {
+        case "tree":{
+            let path = values[0] || currentPath;
+            path = resolvePath(path);
+            const exists = await pathExists(path);
+            const dir = await isDir(path);
+            if (!exists) {
+                await addLine(`[line=red]tree: Given path doesn't exist![/line]`);
+                return;
+            }
+            if (!dir) {
+                await addLine(`[line=red]tree: Given path is supposed to be a directory![/line]`)
+            }
+            let depth = 0;
+            drawChildren(path, true);
+            async function drawChildren(path, root = false) {
+                const dir = await isDir(path);
+                if (dir) {
+                    const dir = path.split("/").pop()
+                    if (root) await addLine("` Tree for: " + (dir ? dir : "/") + "`"); else
+                    await addLine("`" + " ".repeat(depth) + dir + "`");
+                    depth += 2
+                    const children = JSON.parse(await huopaAPI.getFile(path));
+                    for (const child of children) {
+                        await drawChildren(child);
+                    }
+                    depth -= 2
+                } else {
+                    await addLine("`" + " ".repeat(depth) + path.split("/").pop() + "`")
+                }
+            }
+            break;
+        }
         case "copy":{
             let copypath = values[0];
             let savepath = values[1];
@@ -303,50 +335,59 @@ ${await huopaAPI.getFile(fullPath)}`);
         case "git":
             addLine(`Git isn't supported, but Github is. Run "github login <access token> <username>" and input your personal access token.`);
             break
-        case "open":
-            if (values) {
-                const path = values[0];
-                const fullPath = resolvePath(values[0]);
-                const exists = await pathExists(fullPath);
-                if (!exists) {
-                    await addLine(`[line=red]open: Given path doesn't exist![/line]`);
-                    return;
-                }
-                const dir = await isDir(fullPath);
-                if (dir) {
-                    await addLine(`[line=red]open: Given path is not supposed to be a directory![/line]`)
-                } else {
-                    if (path.endsWith(".js") && values[1]?.toLowerCase() !== "-v") {
-                        if (values[1] === "-e" && elevated) {
-                            await huopaAPI.runApp(fullPath, undefined, true);
-                        } else {
-                            await huopaAPI.runApp(fullPath);
-                        }
-                        await addLine(`open: Executed app at path "${fullPath}"`);
-                    } else {
-                        let exists;
-                        if (values[2]) exists = await huopaAPI.getFile(`/home/applications/${values[2].replace("-","")}.js`);
-                        if (exists) {
-                            if (values[3] === "-e" && elevated) {
-                                await huopaAPI.runApp(`/home/applications/${values[2].replace("-","")}.js`, fullPath, true);
-                            } else {
-                                await huopaAPI.runApp(`/home/applications/${values[2].replace("-","")}.js`, fullPath);
-                            }
-                            return
-                        } else {
-                            addLine(`App "${values[2].replace("-","")}" doesn't exist, using Preview`)
-                            if (values[2] === "-e" && elevated) {
-                                await huopaAPI.runApp("/home/applications/Preview.js", fullPath, true);
-                            } else {
-                                await huopaAPI.runApp("/home/applications/Preview.js", fullPath);
-                            }
-                            
-                        }
-                    }
-                }
-                
+        case "open": {
+            if (!values || values.length === 0) {
+                await addLine(`[line=red]open: No path provided![/line]`);
+                break;
             }
+
+            const path = values[0];
+            const fullPath = resolvePath(path);
+            const exists = await pathExists(fullPath);
+
+            if (!exists) {
+                await addLine(`[line=red]open: Given path doesn't exist![/line]`);
+                break;
+            }
+
+            const dir = await isDir(fullPath);
+            if (dir) {
+                await addLine(`[line=red]open: Given path is not supposed to be a directory![/line]`);
+                break;
+            }
+
+            const flag = values[1]?.toLowerCase();
+            if (path.endsWith(".js") && flag !== "-v") {
+                if (flag === "-e" && elevated) {
+                    await huopaAPI.runApp(fullPath, undefined, true);
+                } else {
+                    await huopaAPI.runApp(fullPath);
+                }
+                await addLine(`open: Executed app at path "${fullPath}"`);
+                break;
+            }
+
+            const appName = values[2]?.replace("-", "");
+            if (appName) {
+                const appPath = `/home/applications/${appName}.js`;
+                const appExists = await huopaAPI.getFile(appPath);
+
+                if (appExists) {
+                    const runElevated = values[3] === "-e" && elevated;
+                    await huopaAPI.runApp(appPath, fullPath, runElevated);
+                    break;
+                } else {
+                    await addLine(`App "${appName}" doesn't exist, using Preview`);
+                    const runElevated = values[2] === "-e" && elevated;
+                    await huopaAPI.runApp("/home/applications/Preview.js", fullPath, runElevated);
+                    break;
+                }
+            }
+
+            await huopaAPI.runApp("/home/applications/Preview.js", fullPath);
             break;
+        }
+
         case "touch":
             if (values) {
                 let fullPath = resolvePath(values[0]);
