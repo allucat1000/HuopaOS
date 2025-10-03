@@ -6,7 +6,7 @@ style.textContent = `
     }
     a{
         text-decoration: none;
-        color: rgb(35 161 255)
+        color: rgb(35 161 255);
     }
     h1{
         margin: 0;
@@ -194,8 +194,7 @@ async function loop() {
     let delAllowed = false;
     let loading2 = false;
     let userBar = document.createElement("div");
-    userBar.style = "position: absolute; right: 0; top: 0; width: 10em; height: calc(100% - 5em); overflow: auto; border-style: none; border-left-style: solid; display: none;";
-    userBar.classList.add("secondary");
+    userBar.style = "position: absolute; right: 0; top: 0; width: 10em; height: calc(100% - 5em); overflow: auto; border-style: none; display: none; padding-left: 0.5em; padding-right: 0.25em;";
 
     const sidebarEl = document.createElement("div");
    
@@ -755,7 +754,7 @@ async function loop() {
                     const msgDiv = document.createElement("div");
                                     
                     await setAttrs(msgDiv, {
-                        "style":"width: calc(100% - 1em); padding: 0em; margin: 0.5em; position: relative; border-radius: 0.5em;",
+                        "style":"width: calc(100% - 1.75em); padding: 0em; margin: 0.5em; position: relative; border-radius: 0.5em;",
                         "class":"primary"
                     });
                     messageTable[msg.id] = {el: msgDiv, msg: msg.content};
@@ -970,7 +969,7 @@ async function loop() {
                 messageList.scrollTop = messageList.scrollHeight;
                 const msgDiv = document.createElement("div");
                 await setAttrs(msgDiv, {
-                    "style":"width: calc(100% - 1em); padding: 0em; margin: 0.5em; position: relative; border-radius: 0.5em;",
+                    "style":"width: calc(100% - 1.75em); padding: 0em; margin: 0.5em; position: relative; border-radius: 0.5em;",
                     "class":"primary"
                 });
                 messageTable[msg.id] = {el:msgDiv, msg: msg.content};
