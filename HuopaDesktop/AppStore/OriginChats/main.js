@@ -907,7 +907,7 @@ async function loop() {
                             const extRegex = /\.(png|jpe?g|gif|bmp|webp|tiff)$/i;
                             const extMatch = url.match(extRegex);
                             if (!extMatch && !url.includes("media.discordapp")) url = url + ".gif";
-                            url = "https://apps.mistium.com/cors?url=" + encodeURIComponent(url)
+                            url = "https://allucat1000-huopaproxy-29.deno.dev/proxy?url=" + encodeURIComponent(url)
                             url = url.replace("cdn.discordapp.com","media.discordapp.net");
                             const response = await fetch(url);
                             if (response.ok) {
@@ -1122,7 +1122,7 @@ async function loop() {
                         const extRegex = /\.(png|jpe?g|gif|bmp|webp|tiff)$/i;
                         const extMatch = url.match(extRegex);
                         if (!extMatch && !url.includes("media.discordapp")) url = url + ".gif";
-                        url = "https://apps.mistium.com/cors?url=" + encodeURIComponent(url)
+                        url = "https://allucat1000-huopaproxy-29.deno.dev/proxy?url=" + encodeURIComponent(url)
                         url = url.replace("cdn.discordapp.com","media.discordapp.net");
                         const response = await fetch(url);
                         if (response.ok) {
