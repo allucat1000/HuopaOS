@@ -1423,6 +1423,7 @@ window.huopadesktop = (() => {
             },
 
             requestPermission: (perm) => {
+                return new Promise((resolve) => {
                 const popup = quantum.document.createElement("div");
                 popup.style = "position: absolute; left: 0; top: 0; width: 100%; height: 100%;";
                 popup.classList.add("popup")
@@ -1438,6 +1439,7 @@ window.huopadesktop = (() => {
                 decline.style = "margin: 0.5em auto; display: block; width: 50%";
                 decline.textContent = "Reject";
                 popup.append(title, subtitle, accept, decline);
+                appContainer.append(popup);
                 switch (perm) {
                     case "unsandboxed":{
                         title.textContent = "UNSANDBOXED WINDOW REQUEST";
@@ -1446,12 +1448,12 @@ window.huopadesktop = (() => {
                         decline.textContent = "Reject and go back to safety";
                         decline.onclick = () => {
                             popup.remove();
-                            return;
+                            resolve(false);
                         }
                         accept.onclick = () => {
                             popup.remove();
                             appContainer.removeAttribute("sandbox") // VERY DANGEROUS !!!!
-                            return;
+                            resolve(true);
                         }
                     }
                     case "modals":{
@@ -1459,12 +1461,12 @@ window.huopadesktop = (() => {
                         subtitle.textContent = "This app requests access to browser modals (popups).";
                         decline.onclick = () => {
                             popup.remove();
-                            return;
+                            resolve(false);
                         }
                         accept.onclick = () => {
                             popup.remove();
                             appContainer.sandbox = appContainer.sandbox + " allow-modals"
-                            return;
+                            resolve(true);
                         }
                     }
                     case "forms":{
@@ -1472,20 +1474,20 @@ window.huopadesktop = (() => {
                         subtitle.textContent = "This app requests access to forms, certain forms may redirect you from HuopaOS to another website.";
                         decline.onclick = () => {
                             popup.remove();
-                            return;
+                            resolve(false);
                         }
                         accept.onclick = () => {
                             popup.remove();
                             appContainer.sandbox = appContainer.sandbox + " allow-forms"
-                            return;
+                            resolve(true);
                         }
                     }
                     default:{
                         popup.remove();
-                        return;
+                        resolve(false);
                     }
                 }
-                appContainer.append(popup);
+                });
             },
 
             // Use these for config files and such. Don't use these for tokens and other secret things (use safeStorage)!
