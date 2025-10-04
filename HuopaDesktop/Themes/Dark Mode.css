@@ -199,6 +199,10 @@ input[type="checkbox"]:checked {
   color: white;
 }
 
+.text {
+  color: white;
+}
+
 .popup {
   background-color: rgba(0, 0, 0, 0.6);
 }

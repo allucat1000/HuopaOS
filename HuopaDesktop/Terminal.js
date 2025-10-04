@@ -131,7 +131,8 @@ async function runCmd(value) {
                 return;
             }
             if (!dir) {
-                await addLine(`[line=red]tree: Given path is supposed to be a directory![/line]`)
+                await addLine(`[line=red]tree: Given path is supposed to be a directory![/line]`);
+                return;
             }
             let depth = 0;
             drawChildren(path, true);
@@ -398,7 +399,7 @@ ${await huopaAPI.getFile(fullPath)}`);
             break;
         case "echo":
             if (values[0]) {
-                await addLine(values[0]);
+                await addLine(values.join(" "));
             } else {
                 await addLine(`[line=red]echo: A parameter is required[/line]`);
             }

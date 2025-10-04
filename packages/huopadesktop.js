@@ -2026,7 +2026,8 @@ window.huopadesktop = (() => {
             shutdownButton.style = "background-color: transparent; border-color: rgba(105, 105, 105, 0.6); border-style: solid; border-radius: 0.5em; position: absolute; cursor: pointer; right: 0.5em; bottom: 0.5em; padding: 0.5em;"
             shutdownButton.textContent = "Shutdown";
             shutdownButton.onclick = async () => {
-                window.close()
+                const newWin = open(location, '_self');
+                newWin.close();
             }
             startMenuDiv.append(shutdownButton);
             let appList = JSON.parse(await internalFS.getFile("/home/applications") || "[]");
