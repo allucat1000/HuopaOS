@@ -1,9 +1,14 @@
 const elevated = await huopaAPI.requestElevation();
 if (!elevated) {
-    huopaAPI.createNotification("TilingWinManager", "You have to run as elevated!");
+    await huopaAPI.createNotification("TilingWinManager", "You have to run as elevated!");
     await huopaAPI.closeApp();
 }
-huopaAPI.hideWindow();
+huopaAPI.setWindowSize("0px", "0px")
+huopaAPI.removeTitlebar();
+huopaAPI.setWindowBlur("0");
+huopaAPI.setWindowColor("rgba(0,0,0,0)", "rgba(0,0,0,0)");
+huopaAPI.setWindowPosition("1px", "1px");
+console.log("hi")
 let config = await huopaAPI.applicationStorageRead("config.json");
 if (!config) {
     config = `{"transition":"0.1s", "padding":"10", "reservedHeight":"7em", "dockPos":"bottom"}`;
@@ -28,10 +33,12 @@ async function setWindowPositions() {
         const winArrList = rawWinArrList.filter(win => {
             const extra = winDigitList[win]?.extra;
             const config = winDigitList[win]?.config;
+            const name = winDigitList[win]?.name;
             const hidden = winDigitList[win]?.hidden;
             if (hidden) return false;
             if (extra === "core") return false;
             if (config && config.includes("ignoreTile")) return false;
+            if (name === "TilingWinManager.js") return false;
             if (!extra || extra === "elevated") return true;
         });
 
@@ -86,7 +93,6 @@ async function setWindowPositions() {
                 }
                 const width = `calc(${widthPercent}% - ${borderTotalPx}px)`;
                 const height = `calc(${winHeight} - ${borderTotalPx}px)`;
-
                 huopaAPI.setProcessWindowPosition(win, left, top);
                 huopaAPI.setProcessWindowSize(win, width, height);
                 huopaAPI.setProcessWindowAnimation(win, `opacity 0.15s ease, transform 0.15s ease, width ${config.transition} ease, height ${config.transition} ease, left ${config.transition} ease, top ${config.transition} ease`);
