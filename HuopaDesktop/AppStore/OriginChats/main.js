@@ -467,7 +467,7 @@ async function loop() {
                             }
                             if (messageLengthLimit && message.length > messageLengthLimit) {
                                 chatBar.value = "";
-                                chatBar.placeholder = `You can only post messages up to '' characters!`;
+                                chatBar.placeholder = `You can only post messages up to '${messageLengthLimit}' characters!`;
                                 await new Promise((res) => setTimeout(res, 1000));
                                 chatBar.placeholder = `Send a message in "#${openedChannel}" | Max message length: ${messageLengthLimit} characters`;
                             } else {
