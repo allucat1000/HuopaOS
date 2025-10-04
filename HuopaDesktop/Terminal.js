@@ -415,6 +415,8 @@ ${await huopaAPI.getFile(fullPath)}`);
             const hours = Math.floor(diffInSeconds / 3600);
             const minutes = Math.floor((diffInSeconds % 3600) / 60);
             const seconds = diffInSeconds % 60;
+            const themeFile = await huopaAPI.getFile("/system/env/systemStyles.css");
+            const match = themeFile.match(/^\/\*\s*NAME\s+(.*?)\s*\*\/$/m);
             await addLine(`
 ⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣤⣴⣶⡿⠿⠿⠿⠿⢿⣶⣦⣤⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀OS: HuopaOS v${sysInfo.version}
 ⠀⠀⠀⠀⠀⠀⣠⣾⡿⠟⠉⠁⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠻⢿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀Uptime: ${hours}h ${minutes}m ${seconds}s
@@ -424,9 +426,9 @@ ${await huopaAPI.getFile(fullPath)}`);
 ⢀⣿⠇⠀⠀⠀⢸⣿⣿⣿⣿⣿⣿⣿⣿⠀⠀⠀⣿⣿⣿⣿⣿⣿⣿⣿⡇⠀⠀⠸⣿⡀⠀⠀⠀⠀WM: HuopaWM
 ⣼⡿⠀⠀⠀⠀⠈⢿⣿⣿⣿⣿⣿⣿⠃⠀⠀⠀⠙⣿⣿⣿⣿⣿⣿⡟⠀⠀⠀⠀⢿⣧⠀⠀⠀⠀Browser: ${sysInfo.browser}
 ⣿⡇⠀⠀⠀⠀⠀⠀⠉⠙⠛⠛⠉⠀⠀⠀⠀⠀⠀⠀⠉⠛⠛⠉⠁⠀⠀⠀⠀⠀⢸⣿⠀⠀⠀⠀Icons: Lucide
-⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⠀⠀⠀⠀Terminal: HuopaTerm
-⢻⣷⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣾⡟⠀⠀⠀⠀Battery: ${Math.floor(sysInfo.battery * 100)}%
-⠈⣿⡆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢰⣿⠁
+⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⠀⠀⠀⠀Theme: ${(match[0]) || "Unknown"}
+⢻⣷⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣾⡟⠀⠀⠀⠀Terminal: HuopaTerm
+⠈⣿⡆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢰⣿⠁⠀⠀⠀⠀Battery: ${Math.floor(sysInfo.battery * 100)}%
 ⠀⠸⣿⣆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣰⣿⠇⠀
 ⠀⠀⠙⢿⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣴⡿⠋⠀⠀
 ⠀⠀⠀⠀⠻⣿⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣴⣿⠟⠀⠀⠀⠀
