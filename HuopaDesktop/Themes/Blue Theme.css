@@ -60,6 +60,11 @@ input[type="range"]::-moz-range-thumb {
     margin-top: calc((var(--slider-track-height) / 2) - (var(--slider-thumb-size) / 2));
 }
 
+input::placeholder {
+  color: #ffffff;
+  opacity: 1;
+}
+
 /* Default button style */
 button {
     display: block;
