@@ -792,8 +792,9 @@ async function loop() {
                         });
                         replyMsg = document.createElement("p");
                         await setAttrs(replyMsg, {
-                            "style":`padding: 0.5em; color: gray; text-align: left; textwrap: nowrap; display: inline; padding-left: 0; margin-left: 0`,
-                            "textContent":truncate(replyMessageData, 20)
+                            "style":`padding: 0.5em; text-align: left; textwrap: nowrap; display: inline; padding-left: 0; margin-left: 0`,
+                            "textContent":truncate(replyMessageData, 20),
+                            "class":"secondaryText"
                         })
                     }
                     await setAttrs(replyButton, {
@@ -876,8 +877,9 @@ async function loop() {
                         "textContent":msg.user
                     });
                     await setAttrs(timeDisplay, {
-                        "style":`padding: 0.5em; text-align: left; text-wrap: wrap; color: gray; display: inline; margin-left: 0;`,
-                        "textContent":`- ${convertDate(msg.timestamp, false)}`
+                        "style":`padding: 0.5em; text-align: left; text-wrap: wrap; display: inline; margin-left: 0;`,
+                        "textContent":`- ${convertDate(msg.timestamp, false)}`,
+                        "class":"secondaryText"
                     });
                     const userIcon = document.createElement("img");
                     await setAttrs(userIcon, {
@@ -1007,8 +1009,9 @@ async function loop() {
                     });
                     replyMsg = document.createElement("p");
                     await setAttrs(replyMsg, {
-                        "style":`padding: 0.5em; color: gray; text-align: left; textwrap: nowrap; display: inline; padding-left: 0; margin-left: 0`,
-                        "textContent":truncate(replyMessageData, 20)
+                        "style":`padding: 0.5em; text-align: left; textwrap: nowrap; display: inline; padding-left: 0; margin-left: 0`,
+                        "textContent":truncate(replyMessageData, 20),
+                        "class":"secondaryText"
                     })
                 }
                 await setAttrs(replyButton, {
@@ -1091,8 +1094,9 @@ async function loop() {
                     "textContent":msg.user
                 });
                 await setAttrs(timeDisplay, {
-                    "style":`padding: 0.5em; text-align: left; text-wrap: wrap; color: gray; display: inline; margin-left: 0;`,
-                    "textContent":`- ${convertDate(msg.timestamp, false)}`
+                    "style":`padding: 0.5em; text-align: left; text-wrap: wrap; display: inline; margin-left: 0;`,
+                    "textContent":`- ${convertDate(msg.timestamp, false)}`,
+                    "class":"secondaryText"
                 });
                 const userIcon = document.createElement("img");
                 await setAttrs(userIcon, {
